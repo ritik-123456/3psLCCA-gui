@@ -414,30 +414,46 @@ class MaterialDialog(QDialog):
             QMessageBox.critical(self, "Validation Error", "Material Name is required.")
             return
         try:
-            float(self.qty_in.text() or 0)
-            float(self.rate_in.text() or 0)
+            qty = float(self.qty_in.text() or 0)
+            rate = float(self.rate_in.text() or 0)
+
+            if qty <= 0:
+                QMessageBox.critical(
+                    self, "Validation Error", "Quantity cannot be zero."
+                )
+                return
+            if rate <= 0:
+                QMessageBox.critical(self, "Validation Error", "Rate cannot be zero.")
+                return
+
+            # Carbon section
             if self.carbon_chk.isChecked():
-                float(self.carbon_em_in.text() or 0)
+                ef = float(self.carbon_em_in.text() or 0)
                 cf = float(self.conv_factor_in.text() or 0)
+                if ef <= 0 or cf <= 0:
+                    self.carbon_chk.setChecked(False)
+                elif ef > 0:
+                    mat_unit = self.unit_in.currentData() or ""
+                    denom = self.carbon_denom_cb.currentData() or ""
+                    if mat_unit.lower() != denom.lower() and abs(cf - 1.0) < 1e-6:
+                        res = QMessageBox.warning(
+                            self,
+                            "Check Conversion Factor",
+                            f"Material unit '{mat_unit}' and carbon unit '{denom}' are different.\n"
+                            f"Conversion factor is 1.0 — this is likely incorrect.\n\n"
+                            f"Continue anyway?",
+                            QMessageBox.Yes | QMessageBox.No,
+                        )
+                        if res == QMessageBox.No:
+                            return
 
-                # Warn if CF=1 and units differ
-                mat_unit = self.unit_in.currentText().strip().lower()
-                denom = self.carbon_denom_cb.currentText().strip().lower()
-                if mat_unit != denom and abs(cf - 1.0) < 1e-6:
-                    res = QMessageBox.warning(
-                        self,
-                        "Check Conversion Factor",
-                        f"Material unit is '{mat_unit.split("-")[1]}' but carbon unit denominator is '{denom}'.\n"
-                        f"Conversion factor is 1.0 — this may be incorrect.\n\n"
-                        f"Continue anyway?",
-                        QMessageBox.Yes | QMessageBox.No,
-                    )
-                    if res == QMessageBox.No:
-                        return
-
+            # Recyclability section
             if self.recycle_chk.isChecked():
-                float(self.scrap_in.text() or 0)
-                float(self.recycling_perc_in.text() or 0)
+                scrap = float(self.scrap_in.text() or 0)
+                recycle = float(self.recycling_perc_in.text() or 0)
+                if scrap <= 0 and recycle <= 0:
+                    self.recycle_chk.setChecked(False)
+
             self.accept()
         except ValueError:
             QMessageBox.critical(

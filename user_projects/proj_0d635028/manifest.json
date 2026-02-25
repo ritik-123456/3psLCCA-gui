@@ -1,0 +1,23 @@
+{
+    "chunks": {
+        "str_foundation": {
+            "hash": "05e3de87c5a17849b5670ad7b362adcae97acf65d0256590bbbe67c6b817e7ec",
+            "saved_at": "2026-02-25 22:44:38"
+        },
+        "str_misc": {
+            "hash": "0999db98391b076794b88050d0d15dfd2483f84b41830bbf622ee3412fe1bbaa",
+            "saved_at": "2026-02-25 22:44:38"
+        },
+        "str_sub_structure": {
+            "hash": "12e0c48e2bcf4ed7f6e7732c1386493578b84166267299fe3312d47a0f91cbd1",
+            "saved_at": "2026-02-25 22:44:38"
+        },
+        "str_super_structure": {
+            "hash": "eb6751f3fd6ad248b1e17d8041b3136f573b9d3d80b72e7586b7ec0bc56fc4f1",
+            "saved_at": "2026-02-25 22:44:38"
+        }
+    },
+    "project_id": "proj_0d635028",
+    "engine_version": "3.0.0",
+    "hashes_updated": "2026-02-25 22:44:38"
+}

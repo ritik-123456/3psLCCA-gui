@@ -1,0 +1,38 @@
+{
+    "Abutment": [
+        {
+            "id": "36c026aa-5047-4016-9f3f-f6d47c6143e2",
+            "values": {
+                "material_name": "jafhkahkhk",
+                "quantity": 44456.0,
+                "unit": "m3",
+                "rate": 5656.0,
+                "rate_source": "Standard",
+                "carbon_emission": 5656.0,
+                "carbon_unit": "kgCO2e/kg",
+                "conversion_factor": 1.0,
+                "scrap_rate": 0.0,
+                "recyclability_percentage": 0.0,
+                "is_recyclable": false,
+                "grade": "",
+                "type": ""
+            },
+            "meta": {
+                "created_on": "2026-02-25T22:44:28.331400",
+                "modified_on": "2026-02-25T22:44:28.331400",
+                "is_user_defined": true,
+                "is_from_db": false,
+                "source_version": "1.0"
+            },
+            "state": {
+                "in_trash": false,
+                "included_in_carbon_emission": true,
+                "included_in_recyclability": false
+            }
+        }
+    ],
+    "Pier": [],
+    "Pier Cap": [],
+    "Pedestal": [],
+    "Bearing": []
+}

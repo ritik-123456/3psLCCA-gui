@@ -1,0 +1,66 @@
+{
+    "Excavation": [
+        {
+            "id": "b264ff07-1ca0-49cb-ad7e-fa9e1e755f91",
+            "values": {
+                "material_name": "hi",
+                "quantity": 50.0,
+                "unit": "m3",
+                "rate": 50.0,
+                "rate_source": "Standard",
+                "carbon_emission": 0.0,
+                "carbon_unit": "kgCO2e/kg",
+                "conversion_factor": 1.0,
+                "scrap_rate": 0.0,
+                "recyclability_percentage": 0.0,
+                "is_recyclable": false,
+                "grade": "",
+                "type": ""
+            },
+            "meta": {
+                "created_on": "2026-02-25T22:48:11.175719",
+                "modified_on": "2026-02-25T22:48:11.175719",
+                "is_user_defined": true,
+                "is_from_db": false,
+                "source_version": "1.0"
+            },
+            "state": {
+                "in_trash": false,
+                "included_in_carbon_emission": false,
+                "included_in_recyclability": false
+            }
+        },
+        {
+            "id": "2cf0d8cc-3464-40bb-86c2-6805b9c2064d",
+            "values": {
+                "material_name": "mat2",
+                "quantity": 50.0,
+                "unit": "m3",
+                "rate": 50.0,
+                "rate_source": "Standard",
+                "carbon_emission": 0.0,
+                "carbon_unit": "kgCO2e/kg",
+                "conversion_factor": 1.0,
+                "scrap_rate": 0.0,
+                "recyclability_percentage": 0.0,
+                "is_recyclable": false,
+                "grade": "",
+                "type": ""
+            },
+            "meta": {
+                "created_on": "2026-02-25T22:55:21.399263",
+                "modified_on": "2026-02-25T22:55:21.399263",
+                "is_user_defined": true,
+                "is_from_db": false,
+                "source_version": "1.0"
+            },
+            "state": {
+                "in_trash": false,
+                "included_in_carbon_emission": false,
+                "included_in_recyclability": false
+            }
+        }
+    ],
+    "Pile": [],
+    "Pile Cap": []
+}

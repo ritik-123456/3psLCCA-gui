@@ -1,4 +1,3 @@
-# /gui/projet_window.py
 import os
 
 from PySide6.QtCore import Qt
@@ -16,8 +15,6 @@ from PySide6.QtWidgets import (
     QTreeWidget,
     QTreeWidgetItem,
     QMessageBox,
-    QListWidget,
-    QListWidgetItem,
     QSplitter,
 )
 from PySide6.QtGui import QAction
@@ -44,9 +41,9 @@ class ProjectWindow(QMainWindow):
         if controller is not None:
             self.controller = controller
         else:
-            from gui.project_controller import controller as default_controller
+            from gui.project_controller import ProjectController
 
-            self.controller = default_controller
+            self.controller = ProjectController()
 
         self.project_id = None
 
@@ -59,55 +56,32 @@ class ProjectWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
 
-        self._setup_home_ui()  # index 0 — must be first
+        self._setup_home_ui()  # index 0
         self._setup_project_ui()  # index 1
 
         # Wire controller signals
         self.controller.fault_occurred.connect(self._on_fault)
         self.controller.project_loaded.connect(self._on_project_loaded)
         self.controller.sync_completed.connect(
-            lambda: self.status_bar.showMessage("All changes saved", 3000)
+            lambda: self.status_bar.showMessage("All changes saved.", 3000)
         )
         self.controller.dirty_changed.connect(
             lambda d: self.status_bar.showMessage("Unsaved changes...") if d else None
         )
-        self.controller.health_checked.connect(self._on_health_checked)
-        self.controller.recovery_suggested.connect(self._on_recovery_suggested)
+
         self.show_home()
 
-    def _on_health_checked(self, report: dict):
-        """Background health check completed — update status bar."""
-        cleaned = report.get("orphans_cleaned", 0)
-        if report.get("needs_recovery"):
-            self.status_bar.showMessage(
-                "⚠ Health check found issues — consider running recovery.", 8000
-            )
-        elif cleaned:
-            self.status_bar.showMessage(
-                f"Health check passed. {cleaned} orphaned objects cleaned.", 5000
-            )
-        else:
-            self.status_bar.showMessage("Health check passed.", 3000)
-
-    def _on_recovery_suggested(self, report: dict):
-        """Background check found issues not caught on open — show dialog."""
-        from gui.components.recovery_dialog import RecoveryDialog
-
-        issues = "\n".join(f"• {i}" for i in report.get("issues", []))
-        QMessageBox.warning(
-            self,
-            "Project Health Warning",
-            f"The background health check found issues:\n\n{issues}\n\n"
-            "Consider saving a checkpoint and running recovery from the File menu.",
-        )
-
-    # ── HOME SCREEN ───────────────────────────────────────────────────────────
+    # --------------------------------------------------------------------------
+    # HOME SCREEN
+    # --------------------------------------------------------------------------
 
     def _setup_home_ui(self):
         self.home_widget = HomePage(manager=self.manager)
         self.main_stack.addWidget(self.home_widget)  # index 0
 
-    # ── PROJECT VIEW ──────────────────────────────────────────────────────────
+    # --------------------------------------------------------------------------
+    # PROJECT VIEW
+    # --------------------------------------------------------------------------
 
     def _setup_project_ui(self):
         self.project_widget = QWidget()
@@ -115,7 +89,7 @@ class ProjectWindow(QMainWindow):
         master_layout.setContentsMargins(0, 0, 0, 0)
         master_layout.setSpacing(0)
 
-        # ── Top bar: menubar left, SaveStatusBar + buttons right ──────────────
+        # ── Top bar ───────────────────────────────────────────────────────────
         top_bar = QWidget()
         top_bar_layout = QHBoxLayout(top_bar)
         top_bar_layout.setContentsMargins(4, 2, 4, 2)
@@ -141,12 +115,6 @@ class ProjectWindow(QMainWindow):
 
         for label in ["Rename", "Export", "Version History", "Info"]:
             self.menuFile.addAction(QAction(label, self))
-
-        self.menuFile.addSeparator()
-
-        self.actionVerify = QAction("Verify Integrity", self)
-        self.actionVerify.triggered.connect(self._show_integrity_dialog)
-        self.menuFile.addAction(self.actionVerify)
 
         # Help menu
         self.menuHelp = QMenu("&Help", self.menubar)
@@ -177,11 +145,10 @@ class ProjectWindow(QMainWindow):
 
         master_layout.setMenuBar(top_bar)
 
-        # ── Workspace: resizable splitter with tree sidebar + content stack ───
+        # ── Sidebar + content stack ───────────────────────────────────────────
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setChildrenCollapsible(False)
 
-        # Tree sidebar
         self.sidebar = QTreeWidget()
         self.sidebar.setHeaderHidden(True)
         self.sidebar.setMinimumWidth(80)
@@ -224,7 +191,6 @@ class ProjectWindow(QMainWindow):
 
         self.sidebar.expandAll()
 
-        # Content stack
         self.content_stack = QStackedWidget()
 
         self.metadata_page = QLabel()
@@ -281,7 +247,9 @@ class ProjectWindow(QMainWindow):
                 )
                 self.widget_map["Carbon Emission Data"].select_tab(header)
 
-    # ── VIEW SWITCHING ────────────────────────────────────────────────────────
+    # --------------------------------------------------------------------------
+    # VIEW SWITCHING
+    # --------------------------------------------------------------------------
 
     def show_home(self):
         self.setWindowTitle("LCCA - Home")
@@ -305,7 +273,9 @@ class ProjectWindow(QMainWindow):
     def has_project_loaded(self):
         return self.project_id is not None
 
-    # ── CONTROLLER SIGNALS ────────────────────────────────────────────────────
+    # --------------------------------------------------------------------------
+    # CONTROLLER SIGNALS
+    # --------------------------------------------------------------------------
 
     def _on_project_loaded(self):
         if self.controller.active_project_id:
@@ -318,15 +288,6 @@ class ProjectWindow(QMainWindow):
             self.status_bar.showMessage(f"Project: {display}")
             self.show_project_view()
 
-            # Show tamper warning if tamper log has entries
-            if self.controller.engine:
-                log = self.controller.engine.read_tamper_log()
-                if log:
-                    most_recent = log[-1]
-                    self.status_bar.showMessage(
-                        f"⚠ Tamper events detected — see File → Verify Integrity", 10000
-                    )
-
     def _on_fault(self, error_message: str):
         QMessageBox.critical(
             self,
@@ -335,7 +296,10 @@ class ProjectWindow(QMainWindow):
             "Save a checkpoint immediately if possible, then restart.",
         )
 
-    # ── CLOSE ─────────────────────────────────────────────────────────────────
+    # --------------------------------------------------------------------------
+    # CLOSE
+    # --------------------------------------------------------------------------
+
     def closeEvent(self, event):
         if self.controller.engine:
             self.controller.close_project()
@@ -343,11 +307,3 @@ class ProjectWindow(QMainWindow):
         self.manager.remove_window(self)
         self.manager.refresh_all_home_screens()
         event.accept()
-
-    def _show_integrity_dialog(self):
-        if not self.controller.engine:
-            return
-        from gui.components.tamper_dialog import TamperDialog
-
-        dlg = TamperDialog(engine=self.controller.engine, parent=self)
-        dlg.exec()

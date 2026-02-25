@@ -12,42 +12,39 @@ class ProjectController(QObject):
     fault_occurred = Signal(str)
     dirty_changed = Signal(bool)
     project_loaded = Signal()
-    health_checked = Signal(dict)
-    recovery_suggested = Signal(dict)
 
     def __init__(self):
         super().__init__()
         self.engine = None
         self.active_project_id = None
         self.active_display_name = None
-        self.recovery_needed = False
-        self.recovery_health = None
 
-    def get_chunk(self, chunk_name: str) -> dict:
-        """Helper for widgets to retrieve their specific data."""
-        if self.engine and self.engine.is_active():
-            # Use fetch_chunk or read_chunk depending on your Engine implementation
-            return self.engine.read_chunk(chunk_name)
-        return {}
+    # --------------------------------------------------------------------------
+    # PROJECT LIFECYCLE
+    # --------------------------------------------------------------------------
 
     def init_project(
-        self, project_id: str, is_new: bool = False, display_name: str = None
+        self,
+        project_id: str,
+        is_new: bool = False,
+        display_name: str = None,
+        readable: bool = True,
     ) -> bool:
         if self.engine:
             self.close_project()
 
         if is_new:
             self.engine, status = SafeChunkEngine.new(
-                project_id, display_name=display_name
+                project_id,
+                display_name=display_name,
+                readable=readable,
             )
         else:
             self.engine, status = SafeChunkEngine.open(project_id)
 
         if self.engine and self.engine.is_active():
-            self.active_project_id = project_id
+            self.active_project_id = self.engine.project_id
             self.active_display_name = self.engine.display_name
-            self.recovery_needed = self.engine._recovery_needed
-            self.recovery_health = self.engine._recovery_health
 
             self.engine.on_sync = lambda: self.sync_completed.emit()
             self.engine.on_status = lambda msg: self.status_message.emit(msg)
@@ -55,37 +52,15 @@ class ProjectController(QObject):
             self.engine.on_dirty = lambda dirty: self.dirty_changed.emit(dirty)
 
             if is_new:
+                # Initial manual checkpoint so the project has at least one
                 self.engine.create_checkpoint(
-                    label="initial", notes="Auto-checkpoint on creation."
+                    label="initial",
+                    notes="Project created.",
                 )
 
             QTimer.singleShot(0, self.project_loaded.emit)
-
-            # ── Start background health check after UI is shown ───────────────
-            if not is_new:
-                QTimer.singleShot(2000, self.run_background_health_check)
-
             return True
 
-        return False
-
-    def save_chunk_data(self, chunk_name: str, data: dict):
-        """Passes data to the engine's staging area (debounced write)."""
-        if self.engine and self.engine.is_active():
-            self.engine.stage_update(data, chunk_name)
-
-    def load_checkpoint(self, zip_name: str) -> bool:
-        """Restores the project from a checkpoint ZIP."""
-        if self.engine and self.engine.is_active():
-            # SAFETY: Ensure we don't have pending writes before restoring
-            self.engine.force_sync()
-
-            success = self.engine.restore_checkpoint(zip_name)
-            if success:
-                # Tell widgets to discard their current memory state and reload
-                self.sync_completed.emit()
-                self.project_loaded.emit()
-            return success
         return False
 
     def close_project(self):
@@ -101,67 +76,71 @@ class ProjectController(QObject):
                 self.active_project_id = None
                 self.active_display_name = None
                 self.dirty_changed.emit(False)
-                self.recovery_needed = False
-                self.recovery_health = None
 
-    # --- Pass-through Checkpoint API ---
-    def save_checkpoint(self, label: str = "manual", notes: str = "") -> str | None:
+    # --------------------------------------------------------------------------
+    # DATA
+    # --------------------------------------------------------------------------
+
+    def save_chunk_data(self, chunk_name: str, data: dict):
+        """Passes data to the engine's staging area (debounced write)."""
         if self.engine and self.engine.is_active():
-            return self.engine.create_checkpoint(label=label, notes=notes)
-        return None
+            self.engine.stage_update(data, chunk_name)
 
-    def list_checkpoints(self) -> list:
-        return self.engine.list_checkpoints() if self.engine else []
-
-    def delete_checkpoint(self, zip_name: str) -> bool:
-        return self.engine.delete_checkpoint(zip_name) if self.engine else False
+    def get_chunk(self, chunk_name: str) -> dict:
+        """Returns chunk data for a widget."""
+        if self.engine and self.engine.is_active():
+            return self.engine.fetch_chunk(chunk_name)
+        return {}
 
     def is_dirty(self) -> bool:
         return self.engine.is_dirty() if self.engine else False
 
-    def get_engine_logs(self) -> list:
-        """Returns the engine's rolling log history for display in the Logs panel."""
-        if self.engine:
-            return list(self.engine.log_history)
+    # --------------------------------------------------------------------------
+    # CHECKPOINTS
+    # --------------------------------------------------------------------------
+
+    def save_checkpoint(self, label: str = "manual", notes: str = "") -> str | None:
+        """Creates a manual checkpoint."""
+        if self.engine and self.engine.is_active():
+            return self.engine.create_checkpoint(label=label, notes=notes)
+        return None
+
+    def load_checkpoint(self, zip_name: str) -> bool:
+        """Restores project from a checkpoint ZIP."""
+        if self.engine and self.engine.is_active():
+            self.engine.force_sync()
+            success = self.engine.restore_checkpoint(zip_name)
+            if success:
+                self.sync_completed.emit()
+                self.project_loaded.emit()
+            return success
+        return False
+
+    def list_checkpoints(self) -> list:
+        return self.engine.list_checkpoints() if self.engine else []
+
+    # --------------------------------------------------------------------------
+    # ROLLBACK
+    # --------------------------------------------------------------------------
+
+    def get_rollback_options(self, chunk_name: str) -> list:
+        """Returns available rollback copies for a chunk."""
+        if self.engine and self.engine.is_active():
+            return self.engine.get_rollback_options(chunk_name)
         return []
 
+    def rollback_chunk(self, chunk_name: str, source_path: str) -> bool:
+        """Rolls back a chunk to a specific copy."""
+        if self.engine and self.engine.is_active():
+            return self.engine.rollback_chunk(chunk_name, source_path)
+        return False
+
+    # --------------------------------------------------------------------------
+    # DIAGNOSTICS
+    # --------------------------------------------------------------------------
+
+    def get_engine_logs(self) -> list:
+        return list(self.engine.log_history) if self.engine else []
+
     def get_health_report(self) -> dict:
-        """Returns engine diagnostics for technical support/debugging."""
-        if self.engine:
-            return self.engine.get_health_report()
-        return {}
-
-    def run_background_health_check(self):
-        """
-        Starts a background thread to run full health check + orphan cleanup.
-        Never blocks the UI. Emits health_checked when done.
-        """
-        import threading
-
-        def _check():
-            if not self.engine or not self.engine.is_active():
-                return
-            try:
-                # Full health check
-                report = self.engine.assess_health()
-
-                # Orphan cleanup
-                cleaned = self.engine.cleanup_orphans()
-                report["orphans_cleaned"] = cleaned
-
-                # Emit result
-                self.health_checked.emit(report)
-
-                # If issues found that weren't caught on open, suggest recovery
-                if report["needs_recovery"]:
-                    self.recovery_suggested.emit(report)
-
-            except Exception as e:
-                print(f"[DEBUG] Background health check failed: {e}")
-
-        thread = threading.Thread(target=_check, daemon=True)
-        thread.start()
-
-
-# Single instance
-controller = ProjectController()
+        return self.engine.get_health_report() if self.engine else {}
