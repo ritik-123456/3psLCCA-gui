@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QFormLayout,
     QScrollArea,
+    QSizePolicy,
     QVBoxLayout,
 )
 from PySide6.QtCore import Signal, Qt, QTimer
@@ -39,10 +40,14 @@ class BaseDataWidget(QWidget):
         self._field_map = {}  # key -> widget
         self._loading = False
 
-        # UI Layout setup (Simplified for brevity)
+        # UI Layout setup.
+        # NOTE: self.form is intentionally NOT created here.
+        # Subclasses (e.g. ScrollableForm) are responsible for creating self.form
+        # on the correct parent widget. Creating it here would produce an orphaned
+        # QFormLayout that gets added to the outer VBoxLayout alongside (and hidden
+        # behind) the scroll area that ScrollableForm later inserts.
         self.layout = QVBoxLayout(self)
-        self.form = QFormLayout()
-        self.layout.addLayout(self.form)
+        self.form = None  # set by subclass
 
         if self.controller:
             # 1. Connect for future project opens
@@ -216,24 +221,32 @@ class ScrollableForm(BaseDataWidget):
     def __init__(self, controller=None, chunk_name: str = None):
         super().__init__(controller=controller, chunk_name=chunk_name)
 
-        # Inner widget holds the form
+        # Inner widget holds the form — Fixed vertical policy so it never
+        # expands to fill the scroll area (which would stretch the last row down).
         self._content = QWidget()
+        self._content.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         self.form = QFormLayout(self._content)
         self.form.setContentsMargins(24, 20, 24, 20)
         self.form.setSpacing(12)
         self.form.setLabelAlignment(Qt.AlignRight)
 
-        # Wrap in scroll area
+        # Wrap in scroll area.
+        # No QSS — use palette propagation instead.
+        # Setting WA_TranslucentBackground + autoFillBackground=False on both
+        # the content widget and the scroll viewport tells Qt to skip painting
+        # any background of their own and let the parent's Window colour show
+        # through uniformly in both light and dark themes.
         scroll = QScrollArea()
         scroll.setWidget(self._content)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.NoFrame)
 
-        # The superclass already created a layout in __init__
-        # We replace it or add to it
-        if self.layout:
-            self.layout.addWidget(scroll)
-        else:
-            outer = QVBoxLayout(self)
-            outer.setContentsMargins(0, 0, 0, 0)
-            outer.addWidget(scroll)
+        for w in (scroll, scroll.viewport(), self._content):
+            w.setAutoFillBackground(False)
+            w.setAttribute(Qt.WA_TranslucentBackground)
+
+        # self.layout is always created by BaseDataWidget.__init__.
+        # We simply add the scroll area to it — no orphan QFormLayout exists
+        # anymore because BaseDataWidget no longer creates one.
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(scroll)

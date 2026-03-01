@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QRect, QSize
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -10,14 +10,18 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSplitter,
+    QSplitterHandle,
     QStackedWidget,
     QStatusBar,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtGui import QAction, QColor
+from PySide6.QtGui import QAction, QColor, QPainter, QPalette
 
 from gui.components.save_status_bar import SaveStatusBar
 from gui.components.logs import Logs
@@ -61,6 +65,190 @@ SIDEBAR_TREE = {
     },
     "Outputs": {},
 }
+
+
+# ── Sidebar tree ──────────────────────────────────────────────────────────────
+
+_ACCENT = QColor("#2ecc71")
+_HOVER_ALPHA = 30
+_V_PAD  = 3   # vertical padding per side (increases row height)
+_H_PAD  = 6   # left text indent (pushes text away from accent bar)
+_ACCENT_W = 3 # width of the green left bar in px
+_SEL_ALPHA = 55  # not padding but affects how "heavy" selection feels
+
+
+class _SidebarDelegate(QStyledItemDelegate):
+    """Owns text-column painting: padding, text color. Background is handled
+    by _SidebarTree.drawRow so we only need to paint text here."""
+
+    def sizeHint(self, option, index):
+        base = super().sizeHint(option, index)
+        return QSize(base.width(), base.height() + _V_PAD * 2)
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
+        # Strip ALL native state so Qt draws zero background/highlight
+        option.state &= ~(
+            QStyle.State_Selected | QStyle.State_MouseOver | QStyle.State_HasFocus
+        )
+        # Text only
+        text = index.data(Qt.DisplayRole)
+        if not text:
+            return
+        painter.save()
+        is_sel = bool(option.state & QStyle.State_Selected)
+        text_rect = option.rect.adjusted(
+            _H_PAD + (_ACCENT_W if is_sel else 0), _V_PAD, -4, -_V_PAD
+        )
+        painter.setPen(option.palette.windowText().color())
+        painter.setFont(option.font)
+        painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, text)
+        painter.restore()
+
+
+class _SidebarTree(QTreeWidget):
+    """
+    QTreeWidget subclass that overrides drawRow() and drawBranches() —
+    the only two methods that own the full row width including the
+    indentation/branch zone. The delegate only handles text after we've
+    painted the correct background across the entire row.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setHeaderHidden(True)
+        self.setMouseTracking(True)
+        self.viewport().setMouseTracking(True)
+        self.setItemDelegate(_SidebarDelegate(self))
+
+        # Sync Base/AlternateBase → Window so the viewport background matches
+        p = self.palette()
+        p.setColor(QPalette.Base, p.color(QPalette.Window))
+        p.setColor(QPalette.AlternateBase, p.color(QPalette.Window))
+        # Keep Highlight neutral — we paint selection ourselves
+        p.setColor(QPalette.Highlight, p.color(QPalette.Window))
+        p.setColor(QPalette.HighlightedText, p.color(QPalette.WindowText))
+        self.setPalette(p)
+
+    def _row_state(self, index):
+        """Return (is_selected, is_hovered) for a model index."""
+        item = self.itemFromIndex(index)
+        is_sel = item in self.selectedItems()
+        is_hovered = index == self.indexAt(
+            self.viewport().mapFromGlobal(self.cursor().pos())
+        )
+        return is_sel, is_hovered
+
+    def drawRow(self, painter: QPainter, option, index):
+        """Paint the full-width row background before the delegate runs."""
+        is_sel, is_hovered = self._row_state(index)
+        full = option.rect  # spans full widget width
+
+        painter.save()
+        painter.setPen(Qt.NoPen)
+
+        # Base fill — always paint Window color first to erase everything
+        painter.setBrush(self.palette().window())
+        painter.drawRect(full)
+
+        if is_hovered and not is_sel:
+            tint = QColor(_ACCENT)
+            tint.setAlpha(_HOVER_ALPHA)
+            painter.setBrush(tint)
+            painter.drawRect(full)
+
+        if is_sel:
+            fill = QColor(_ACCENT)
+            fill.setAlpha(_SEL_ALPHA)
+            painter.setBrush(fill)
+            painter.drawRect(full)
+            # Left accent bar — flush to viewport left edge
+            painter.setBrush(_ACCENT)
+            painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
+
+        painter.restore()
+
+        # Now let Qt draw the branch arrows + delegate text on top
+        super().drawRow(painter, option, index)
+
+    def drawBranches(self, painter: QPainter, rect: QRect, index):
+        """Fill the branch/indentation zone with the same background as drawRow
+        so there is never a differently-colored strip on the left."""
+        is_sel, is_hovered = self._row_state(index)
+
+        painter.save()
+        painter.setPen(Qt.NoPen)
+
+        painter.setBrush(self.palette().window())
+        painter.drawRect(rect)
+
+        if is_hovered and not is_sel:
+            tint = QColor(_ACCENT)
+            tint.setAlpha(_HOVER_ALPHA)
+            painter.setBrush(tint)
+            painter.drawRect(rect)
+
+        if is_sel:
+            fill = QColor(_ACCENT)
+            fill.setAlpha(_SEL_ALPHA)
+            painter.setBrush(fill)
+            painter.drawRect(rect)
+
+        painter.restore()
+
+        # Let Qt draw the expand/collapse arrows on top
+        super().drawBranches(painter, rect, index)
+
+
+# ── Hover-highlight splitter ──────────────────────────────────────────────────
+
+
+class _HoverHandle(QSplitterHandle):
+    """
+    Splitter handle that draws a 2px green accent line on hover/drag —
+    identical visual language to VS Code's panel resize handles.
+    No QSS used; painting is done entirely via QPainter + QPalette.
+    """
+
+    _ACCENT = QColor("#2ecc71")
+
+    def __init__(self, orientation, parent):
+        super().__init__(orientation, parent)
+        self.setMouseTracking(True)
+        self._hovered = False
+
+    def enterEvent(self, event):
+        self._hovered = True
+        self.update()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._hovered = False
+        self.update()
+        super().leaveEvent(event)
+
+    def paintEvent(self, event):
+        # Always let Qt draw the base handle first
+        super().paintEvent(event)
+        if not self._hovered:
+            return
+        painter = QPainter(self)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(self._ACCENT)
+        r = self.rect()
+        if self.orientation() == Qt.Horizontal:
+            x = (r.width() - 3) // 2
+            painter.drawRect(x, 0, 3, r.height())
+        else:
+            y = (r.height() - 3) // 2
+            painter.drawRect(0, y, r.width(), 3)
+        painter.end()
+
+
+class _HoverSplitter(QSplitter):
+    """QSplitter that uses _HoverHandle for all its handles."""
+
+    def createHandle(self):
+        return _HoverHandle(self.orientation(), self)
 
 
 # ── Main window ───────────────────────────────────────────────────────────────
@@ -169,11 +357,8 @@ class ProjectWindow(QMainWindow):
         master_layout.setMenuBar(top_bar)
 
         # ── Sidebar ───────────────────────────────────────────────────────
-        self.sidebar = QTreeWidget()
-        self.sidebar.setHeaderHidden(True)
+        self.sidebar = _SidebarTree()
         self.sidebar.setMinimumWidth(80)
-        self.sidebar.setContentsMargins(4, 4, 4, 4)
-        self.sidebar.setStyleSheet("QTreeWidget { padding: 4px; }")
 
         for header, subheaders in SIDEBAR_TREE.items():
             top_item = QTreeWidgetItem(self.sidebar)
@@ -222,9 +407,10 @@ class ProjectWindow(QMainWindow):
         )
 
         # ── Splitter ──────────────────────────────────────────────────────
-        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter = _HoverSplitter(Qt.Horizontal)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.sidebar)
+        self.splitter.setHandleWidth(8)
         self.splitter.addWidget(self.content_stack)
         self.splitter.setSizes([220, 880])
 

@@ -35,10 +35,10 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 
-from gui.components.base_widget import ScrollableForm
-from gui.components.utils.form_builder.form_definitions import FieldDef, Section
-from gui.components.utils.form_builder.form_builder import build_form
-from gui.components.utils.remarks_editor import RemarksEditor
+from ...base_widget import ScrollableForm
+from ...utils.form_builder.form_definitions import FieldDef, Section
+from ...utils.form_builder.form_builder import build_form
+from ...utils.remarks_editor import RemarksEditor
 
 CHUNK = "machinery_emissions_data"
 BASE_DOCS_URL = "https://yourdocs.com/carbon/machinery/"
@@ -196,6 +196,17 @@ _LUMPSUM_KEYS = [
     ("fuel_ef", 2.69),
 ]
 
+DETAILED_FIELDS = [
+    FieldDef(
+        "default_days",
+        "Default No. of Days",
+        "Set a default number of working days then click Apply to All Rows.",
+        "int",
+        options=(0, 9999),
+        unit="days",
+    ),
+]
+
 
 # ── Equipment row ─────────────────────────────────────────────────────────────
 
@@ -337,46 +348,21 @@ class _DetailedTable(QWidget):
         "Emissions (kg CO2e)",
         "",
     ]
+    _ROW_H = 36
+    _HEADER_H = 38  # fallback if header not yet painted
 
-    def __init__(self, on_change, parent=None):
+    def __init__(self, on_change, default_days: QSpinBox, parent=None):
         super().__init__(parent)
         self._on_change = on_change
         self._rows: list[_EquipmentRow] = []
+        self._default_days = default_days
+        self._cached_total: float = 0.0  # updated by _recalculate, read by get_total
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
 
-        # Default days — QFormLayout style matching build_form output
-        days_container = QWidget()
-        days_form = QFormLayout(days_container)
-        days_form.setContentsMargins(0, 0, 0, 4)
-        days_form.setSpacing(8)
-        days_form.setLabelAlignment(Qt.AlignLeft)
-        days_form.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
-
-        self._default_days = QSpinBox()
-        self._default_days.setRange(0, 9999)
-        self._default_days.setButtonSymbols(QSpinBox.NoButtons)
-        self._default_days.setSuffix("  days")
-        self._default_days.setMinimumWidth(120)
-        self._default_days.setMaximumWidth(160)
-        self._default_days.setToolTip("Set then click Apply to All Rows")
-
-        days_field_row = QWidget()
-        days_field_layout = QHBoxLayout(days_field_row)
-        days_field_layout.setContentsMargins(0, 0, 0, 0)
-        days_field_layout.setSpacing(8)
-        days_field_layout.addWidget(self._default_days)
-        btn_apply = QPushButton("Apply to All Rows")
-        btn_apply.setFixedHeight(28)
-        btn_apply.clicked.connect(self._apply_default_days)
-        days_field_layout.addWidget(btn_apply)
-        days_field_layout.addStretch()
-        days_form.addRow("Default No. of Days:", days_field_row)
-        layout.addWidget(days_container)
-
-        # Table
+        # Table — no fixed height; grows/shrinks via sizeHint override
         self._table = QTableWidget(0, len(self.HEADERS))
         self._table.setHorizontalHeaderLabels(self.HEADERS)
         hh = self._table.horizontalHeader()
@@ -388,8 +374,10 @@ class _DetailedTable(QWidget):
         self._table.verticalHeader().setVisible(False)
         self._table.setEditTriggers(QTableWidget.NoEditTriggers)
         self._table.setSelectionMode(QTableWidget.NoSelection)
-        self._table.verticalHeader().setDefaultSectionSize(36)
+        self._table.verticalHeader().setDefaultSectionSize(self._ROW_H)
         self._table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self._table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         layout.addWidget(self._table)
 
         # Subtotals
@@ -418,11 +406,38 @@ class _DetailedTable(QWidget):
         btn_clear = QPushButton("Clear All")
         btn_clear.setMinimumHeight(35)
         btn_clear.clicked.connect(self._clear_all)
+        btn_apply = QPushButton("Apply Days to All Rows")
+        btn_apply.setMinimumHeight(35)
+        btn_apply.clicked.connect(self._apply_default_days)
         btn_layout.addWidget(btn_add)
         btn_layout.addWidget(btn_defaults)
         btn_layout.addWidget(btn_clear)
+        btn_layout.addWidget(btn_apply)
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
+
+        # Size the table to exactly fit header-only on startup.
+        # _refresh_table_height() pins both min and max, so the table never
+        # floats or leaves blank space regardless of row count.
+        self._refresh_table_height()
+
+    # ── Height management ─────────────────────────────────────────────────
+
+    def _table_content_height(self) -> int:
+        hh = self._table.horizontalHeader()
+        header_h = hh.height() if hh.height() > 0 else self._HEADER_H
+        rows_h = self._table.rowCount() * self._ROW_H
+        return header_h + rows_h + 4  # +4 for frame border
+
+    def _refresh_table_height(self):
+        """Pin the table to exactly fit its content — no scrollbars, no blank stretch."""
+        h = self._table_content_height()
+        self._table.setMinimumHeight(h)
+        self._table.setMaximumHeight(h)
+        self._table.updateGeometry()
+        self.updateGeometry()
+
+    # ── Row management ────────────────────────────────────────────────────
 
     def _apply_default_days(self):
         for row in self._rows:
@@ -430,20 +445,20 @@ class _DetailedTable(QWidget):
         self._recalculate()
 
     def _add_blank_row(self, d: dict | None = None):
-        row_idx = len(self._rows)
+        # Use object-identity delete so closures never go stale
+        eq = _EquipmentRow(on_change=self._recalculate, on_delete=lambda: None)
+        eq.btn_delete.clicked.disconnect()
+        eq.btn_delete.clicked.connect(
+            lambda _checked=False, r=eq: self._delete_row_by_ref(r)
+        )
 
-        def on_change():
-            self._recalculate()
-
-        def on_delete(r=row_idx):
-            self._delete_row(r)
-
-        eq = _EquipmentRow(on_change=on_change, on_delete=on_delete)
         if d:
             eq.load_dict(d)
+
+        row_idx = self._table.rowCount()
         self._rows.append(eq)
         self._table.insertRow(row_idx)
-        self._table.setRowHeight(row_idx, 36)
+        self._table.setRowHeight(row_idx, self._ROW_H)
         self._table.setCellWidget(row_idx, 0, eq.name)
         self._table.setCellWidget(row_idx, 1, eq.source)
         self._table.setCellWidget(row_idx, 2, eq.rate)
@@ -453,19 +468,18 @@ class _DetailedTable(QWidget):
         self._table.setItem(row_idx, 6, eq.consumption_item)
         self._table.setItem(row_idx, 7, eq.emissions_item)
         self._table.setCellWidget(row_idx, 8, eq.btn_delete)
-        self._update_height()
+        self._refresh_table_height()
         self._recalculate()
 
-    def _delete_row(self, row_idx: int):
-        eq = self._rows[row_idx]
-        actual = self._rows.index(eq)
-        self._table.removeRow(actual)
-        self._rows.pop(actual)
-        for i, r in enumerate(self._rows):
-            r.btn_delete.clicked.disconnect()
-            r.btn_delete.clicked.connect(
-                lambda checked=False, idx=i: self._delete_row(idx)
-            )
+    def _delete_row_by_ref(self, eq: "_EquipmentRow"):
+        """Delete by object identity — never affected by index shifts."""
+        try:
+            idx = self._rows.index(eq)
+        except ValueError:
+            return
+        self._rows.pop(idx)
+        self._table.removeRow(idx)
+        self._refresh_table_height()
         self._recalculate()
 
     def _load_defaults(self):
@@ -494,12 +508,11 @@ class _DetailedTable(QWidget):
                 return
         self._table.setRowCount(0)
         self._rows.clear()
+        self._cached_total = 0.0
+        self._refresh_table_height()
         self._recalculate()
 
-    def _update_height(self):
-        h = self._table.horizontalHeader().height() or 35
-        h += self._table.rowCount() * 36
-        self._table.setFixedHeight(h + 10)
+    # ── Calculation ───────────────────────────────────────────────────────
 
     def _recalculate(self):
         diesel_total = elec_total = 0.0
@@ -509,23 +522,24 @@ class _DetailedTable(QWidget):
                 diesel_total += em
             else:
                 elec_total += em
-        total = diesel_total + elec_total
+        self._cached_total = diesel_total + elec_total
         self._lbl_diesel_sub.setText(f"Diesel: {diesel_total:,.2f} kg CO2e")
         self._lbl_elec_sub.setText(f"Electricity: {elec_total:,.2f} kg CO2e")
-        self._lbl_detail_total.setText(f"Subtotal: {total:,.2f} kg CO2e")
+        self._lbl_detail_total.setText(f"Subtotal: {self._cached_total:,.2f} kg CO2e")
         self._on_change()
 
     def get_total(self) -> float:
-        return sum(eq.recalculate() for eq in self._rows)
+        """Return last recalculated total — avoids redundant row traversal."""
+        return self._cached_total
+
+    # ── Data I/O ──────────────────────────────────────────────────────────
 
     def collect(self) -> dict:
         return {
-            "default_days": int(self._default_days.value()),
             "rows": [eq.to_dict() for eq in self._rows],
         }
 
     def load(self, data: dict):
-        self._default_days.setValue(int(data.get("default_days", 0)))
         self._clear_all(confirm=False)
         for d in data.get("rows", []):
             self._add_blank_row(d)
@@ -593,13 +607,46 @@ class MachineryEmissions(ScrollableForm):
         self._stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # Index 0 — Detailed table
-        self._detailed_table = _DetailedTable(on_change=self._on_totals_changed)
-        self._stack.addWidget(self._detailed_table)
+        detailed_widget = QWidget()
+        detailed_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        detailed_vbox = QVBoxLayout(detailed_widget)
+        detailed_vbox.setContentsMargins(0, 0, 0, 0)
+        detailed_vbox.setSpacing(4)
+
+        # default_days row — small form layout for consistent label+field style
+        days_form_widget = QWidget()
+        days_form_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        days_form_layout = QFormLayout(days_form_widget)
+        days_form_layout.setContentsMargins(0, 0, 0, 0)
+        days_form_layout.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
+        days_form_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        days_form_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        days_form_layout.setVerticalSpacing(4)
+        days_form_layout.setHorizontalSpacing(8)
+
+        _saved = self.form
+        self.form = days_form_layout
+        build_form(self, DETAILED_FIELDS, BASE_DOCS_URL)
+        self.form = _saved
+        self._field_map.pop("default_days", None)  # saved manually via collect_data
+
+        detailed_vbox.addWidget(days_form_widget)
+
+        self._detailed_table = _DetailedTable(
+            on_change=self._on_totals_changed,
+            default_days=self.default_days,
+        )
+        detailed_vbox.addWidget(self._detailed_table)
+        self._stack.addWidget(detailed_widget)
 
         # Index 1 — Lump Sum via build_form temp-swap
         lumpsum_widget = QWidget()
         lumpsum_layout = QFormLayout(lumpsum_widget)
         lumpsum_layout.setContentsMargins(0, 0, 0, 0)
+        lumpsum_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        lumpsum_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        lumpsum_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        lumpsum_layout.setVerticalSpacing(8)
 
         _saved = self.form
         self.form = lumpsum_layout
@@ -635,6 +682,7 @@ class MachineryEmissions(ScrollableForm):
 
         self._stack.addWidget(lumpsum_widget)
         f.addRow(self._stack)
+        self._shrink_stack_to_current()
 
         # ── Grand total (bottom) ───────────────────────────────────────────
         bottom_banner = QGroupBox()
@@ -672,9 +720,29 @@ class MachineryEmissions(ScrollableForm):
 
     # ── Slots ─────────────────────────────────────────────────────────────
 
+    def _shrink_stack_to_current(self):
+        idx = self._stack.currentIndex()
+        for i in range(self._stack.count()):
+            w = self._stack.widget(i)
+            if i == idx:
+                w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                w.adjustSize()
+            else:
+                w.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+
+        # Cap the stack to the sizeHint of the current panel in BOTH modes.
+        # The detailed panel's sizeHint is now reliable because _refresh_table_height
+        # pins the inner QTableWidget's min/max on every row change.
+        hint = self._stack.currentWidget().sizeHint().height()
+        self._stack.setMaximumHeight(max(hint, 0))
+
+        self._stack.adjustSize()
+        self._stack.updateGeometry()
+
     def _on_mode_toggled(self, btn_id: int, checked: bool):
         if checked:
             self._stack.setCurrentIndex(btn_id)
+            self._shrink_stack_to_current()
             self._on_totals_changed()
 
     def _on_totals_changed(self):
@@ -686,6 +754,8 @@ class MachineryEmissions(ScrollableForm):
         mode = self._current_mode()
         if mode == "detailed":
             total = self._detailed_table.get_total()
+            # Re-fit the stack after every row change so no blank space lingers.
+            self._shrink_stack_to_current()
         else:
             total = self._lumpsum_elec_total() + self._lumpsum_fuel_total()
             self._lbl_lumpsum_total.setText(f"Lump Sum Subtotal: {total:,.2f} kg CO2e")
@@ -724,6 +794,9 @@ class MachineryEmissions(ScrollableForm):
 
         return {
             "mode": self._current_mode(),
+            "default_days": (
+                int(self.default_days.value()) if hasattr(self, "default_days") else 0
+            ),
             "detailed": self._detailed_table.collect(),
             "lumpsum": lumpsum,
             "remarks": self._remarks.to_html(),
@@ -749,6 +822,11 @@ class MachineryEmissions(ScrollableForm):
 
             self._detailed_table.load(data.get("detailed", {}))
 
+            if hasattr(self, "default_days"):
+                self.default_days.blockSignals(True)
+                self.default_days.setValue(int(data.get("default_days", 0)))
+                self.default_days.blockSignals(False)
+
             ls = data.get("lumpsum", {})
             for key, default in _LUMPSUM_KEYS:
                 w = getattr(self, key, None)
@@ -761,6 +839,8 @@ class MachineryEmissions(ScrollableForm):
             self._remarks.from_html(data.get("remarks", ""))
         finally:
             self._loading = False
+        # Shrink/expand stack AFTER all rows are loaded so sizeHint is correct
+        self._shrink_stack_to_current()
         self._on_totals_changed()
 
     # ── Base overrides ────────────────────────────────────────────────────

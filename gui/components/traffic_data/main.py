@@ -1,9 +1,14 @@
+"""
+gui/components/traffic_data/main.py
+"""
+
+from pathlib import Path
+
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QFormLayout,
-    QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -21,6 +26,15 @@ from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
 from ..utils.remarks_editor import RemarksEditor
+from ..utils.wpi_manager import WPIManager, WPIProfile
+from .wpi_table import _WPITable
+from .wpi_selector import _WPISelector
+
+# ── WPI DB path ───────────────────────────────────────────────────────────────
+
+_WPI_DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "wpi_db.json"
+
+# ── Lane types ────────────────────────────────────────────────────────────────
 
 LANE_TYPES = [
     {
@@ -117,10 +131,11 @@ _VEHICLES = [
 ]
 _HAS_PWR = {"hcv", "mcv"}
 
-
 BRIDGE_CHUNK = "bridge_data"
 CHUNK = "traffic_and_road_data"
 BASE_DOCS_URL = "https://yourdocs.com/traffic/"
+
+# ── Field definitions ─────────────────────────────────────────────────────────
 
 TRAFFIC_FIELDS = [
     Section("Alternate Road Configuration"),
@@ -209,16 +224,10 @@ OUTSIDE_INDIA_FIELDS = [
     ),
 ]
 
-
 PROJECT_MODE_FIELDS = [
-    FieldDef(
-        "mode",
-        "Calculation Mode",
-        "",
-        "combo",
-        options=["INDIA", "GLOBAL"],
-    ),
+    FieldDef("mode", "Calculation Mode", "", "combo", options=["INDIA", "GLOBAL"]),
 ]
+
 
 # ── Vehicle Table ─────────────────────────────────────────────────────────────
 
@@ -379,26 +388,15 @@ class _PeakHoursTable(QTableWidget):
     def _recalculate(self):
         if self._rebuilding:
             return
-
-        # Current peak total
         total = sum(sb.value() for sb in self._spinboxes)
-
-        # Clamp each spinbox so total never exceeds 100
         for sb in self._spinboxes:
             others = total - sb.value()
             sb.blockSignals(True)
             sb.setMaximum(max(0.0, 100.0 - others))
             sb.blockSignals(False)
-
-        # Remaining hours (out of 24)
         remaining_hours = 24 - len(self._spinboxes)
-
-        # Remaining percentage
         remaining_percent = max(0.0, 100.0 - total)
-
-        # Average for other hours
         avg = remaining_percent / remaining_hours if remaining_hours > 0 else 0.0
-
         if self._other_label:
             self._other_label.setText(f"{avg:.2f} %")
 
@@ -425,11 +423,15 @@ class TrafficData(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name=CHUNK)
         self._suppress_lane_signal = False
+        # Load WPI manager — DB profiles loaded once at startup
+        self._wpi_manager = WPIManager(_WPI_DB_PATH)
         self._build_ui()
 
     def showEvent(self, event):
         super().showEvent(event)
         self._sync_mode_from_country()
+
+    # ── Severity auto-adjust ──────────────────────────────────────────────────
 
     def _on_severity_changed(self):
         sender = self.sender()
@@ -438,15 +440,12 @@ class TrafficData(ScrollableForm):
         fatal = self.severity_fatal
 
         if sender == minor:
-            # Adjust fatal first, then major if fatal exhausted
             remaining = max(0.0, 100.0 - minor.value())
             if major.value() <= remaining:
-                # Major fits, fatal takes the rest
                 fatal.blockSignals(True)
                 fatal.setValue(remaining - major.value())
                 fatal.blockSignals(False)
             else:
-                # Fatal exhausted (0), major absorbs the rest
                 fatal.blockSignals(True)
                 fatal.setValue(0.0)
                 fatal.blockSignals(False)
@@ -455,7 +454,6 @@ class TrafficData(ScrollableForm):
                 major.blockSignals(False)
 
         elif sender == major:
-            # Only adjust fatal
             total_fixed = minor.value() + major.value()
             if total_fixed > 100.0:
                 sender.blockSignals(True)
@@ -466,7 +464,6 @@ class TrafficData(ScrollableForm):
             fatal.blockSignals(False)
 
         elif sender == fatal:
-            # Only adjust major
             total_fixed = minor.value() + fatal.value()
             if total_fixed > 100.0:
                 sender.blockSignals(True)
@@ -478,10 +475,12 @@ class TrafficData(ScrollableForm):
 
         self._on_field_changed()
 
+    # ── UI construction ───────────────────────────────────────────────────────
+
     def _build_ui(self):
         main_form = self.form
 
-        # ── Mode Selector ─────────────────────────────────────────────────────
+        # ── Mode selector ─────────────────────────────────────────────────────
         _temp_form = self.form
         self.form = main_form
         build_form(self, PROJECT_MODE_FIELDS, BASE_DOCS_URL)
@@ -489,21 +488,23 @@ class TrafficData(ScrollableForm):
 
         self.mode.setFixedWidth(220)
         self.mode.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        # Constrain the parent section container too
         if self.mode.parentWidget():
-            self.mode.parentWidget().setFixedWidth(300)
-            self.mode.parentWidget().setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-        # Wire mode combo to stack switcher
+            self.mode.parentWidget().setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Fixed
+            )
         self.mode.currentIndexChanged.connect(self._on_mode_changed)
 
         self._stack = QStackedWidget()
-        self._stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        # self._stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
-        # ── Panel: India ──────────────────────────────────────────────────────
+        # ── Panel 0: INDIA ────────────────────────────────────────────────────
         india_widget = QWidget()
         india_layout = QFormLayout(india_widget)
         india_layout.setContentsMargins(0, 0, 0, 0)
+        india_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        india_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        india_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        india_layout.setVerticalSpacing(8)
 
         india_layout.addRow(QLabel("<b>Vehicle Traffic Data</b>"))
         self._vehicle_table = _VehicleTrafficTable(on_change=self._on_field_changed)
@@ -513,13 +514,11 @@ class TrafficData(ScrollableForm):
         self._force_free_flow.stateChanged.connect(self._on_field_changed)
         india_layout.addRow(self._force_free_flow)
 
-        # Inject TRAFFIC_FIELDS into india_layout via build_form
         _temp_form = self.form
         self.form = india_layout
         build_form(self, TRAFFIC_FIELDS, BASE_DOCS_URL)
         self.form = _temp_form
 
-        # Wire severity fields for auto-adjustment
         self.severity_minor.valueChanged.connect(self._on_severity_changed)
         self.severity_major.valueChanged.connect(self._on_severity_changed)
         self.severity_fatal.valueChanged.connect(self._on_severity_changed)
@@ -528,7 +527,6 @@ class TrafficData(ScrollableForm):
         self._peak_table = _PeakHoursTable(on_change=self._on_field_changed)
         india_layout.addRow(self._peak_table)
 
-        # Wire up auto-fill and peak count listeners
         if hasattr(self, "alternate_road_carriageway"):
             self.alternate_road_carriageway.currentIndexChanged.connect(
                 self._on_lane_changed
@@ -537,21 +535,66 @@ class TrafficData(ScrollableForm):
             self.num_peak_hours.valueChanged.connect(self._on_peak_count_changed)
             self._peak_table.rebuild(self.num_peak_hours.value())
 
+        # ── WPI section (India only) ──────────────────────────────────────────
+        india_layout.addRow(QLabel("<b>WPI Adjustment Factors</b>"))
+
+        # Unlisted warning (shown if any DB entries failed integrity on load)
+        self._wpi_warning = QLabel()
+        self._wpi_warning.setStyleSheet("color: #b71c1c;")
+        self._wpi_warning.setWordWrap(True)
+        self._wpi_warning.setVisible(False)
+        india_layout.addRow(self._wpi_warning)
+        warn = (
+            self._wpi_manager.unlisted_warning()
+            if hasattr(self._wpi_manager, "unlisted_warning")
+            else None
+        )
+        if not warn and self._wpi_manager.unlisted:
+            names = ", ".join(p.name for p in self._wpi_manager.unlisted)
+            warn = f"⚠ WPI profiles failed integrity check and were unlisted: {names}"
+        if warn:
+            self._wpi_warning.setText(warn)
+            self._wpi_warning.setVisible(True)
+
+        # Selector bar
+        self._wpi_selector = _WPISelector(self._wpi_manager)
+        self._wpi_selector.profile_selected.connect(self._on_wpi_profile_selected)
+        self._wpi_selector.profile_saved.connect(self._on_wpi_profile_saved)
+        self._wpi_selector.profile_deleted.connect(self._on_wpi_profile_deleted)
+        self._wpi_selector.edit_requested.connect(self._on_wpi_edit_requested)
+        india_layout.addRow(self._wpi_selector)
+
+        # Table
+        self._wpi_table = _WPITable()
+        self._wpi_table.data_changed.connect(self._on_field_changed)
+        india_layout.addRow(self._wpi_table)
+
+        # Load first profile into table
+        first = self._wpi_selector.current_profile()
+        if first:
+            self._wpi_table.load_from_data(first.data)
+            self._wpi_table.set_editable(first.is_custom)
+
         self._stack.addWidget(india_widget)  # index 0
 
-        # ── Panel: Outside India ──────────────────────────────────────────────
+        # ── Panel 1: GLOBAL ───────────────────────────────────────────────────
         outside_widget = QWidget()
         outside_layout = QFormLayout(outside_widget)
         outside_layout.setContentsMargins(0, 0, 0, 0)
+        outside_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        outside_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        outside_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        outside_layout.setVerticalSpacing(8)
 
         _temp_form = self.form
         self.form = outside_layout
         build_form(self, OUTSIDE_INDIA_FIELDS, BASE_DOCS_URL)
         self.form = _temp_form
 
-        self._stack.addWidget(outside_widget)  # index 1
+        self._stack.addWidget(outside_widget)
+        self._shrink_stack_to_current()
 
-        # ── Shared bottom widgets ─────────────────────────────────────────────
+        # ── Shared bottom ─────────────────────────────────────────────────────
         main_form.addRow(self._stack)
 
         self._remarks = RemarksEditor(
@@ -559,18 +602,12 @@ class TrafficData(ScrollableForm):
         )
         main_form.addRow(self._remarks)
 
-        btn_row = QWidget()
-        btn_layout = QHBoxLayout(btn_row)
-        btn_layout.setContentsMargins(0, 10, 0, 10)
-        btn_layout.setSpacing(10)
-
+        btn_row = QHBoxLayout()
         btn_clear = QPushButton("Clear All")
         btn_clear.setMinimumHeight(35)
         btn_clear.setFixedWidth(120)
         btn_clear.clicked.connect(self.clear_all)
         btn_clear.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-        btn_row = QHBoxLayout()
         btn_row.addWidget(btn_clear)
         btn_row.addStretch()
 
@@ -583,7 +620,8 @@ class TrafficData(ScrollableForm):
 
     def _on_mode_changed(self, idx: int):
         self._stack.setCurrentIndex(idx)
-        self._on_field_changed()  # This saves the mode to the chunk
+        self._shrink_stack_to_current()
+        self._on_field_changed()
 
     def _on_lane_changed(self, _idx: int):
         if self._suppress_lane_signal:
@@ -603,16 +641,13 @@ class TrafficData(ScrollableForm):
     def _sync_mode_from_country(self):
         if not self.controller or not self.controller.engine:
             return
-
         bridge = self.controller.engine.fetch_chunk(BRIDGE_CHUNK) or {}
         country = bridge.get("location_country", "GLOBAL")
-
         is_india = country.strip().upper() == "INDIA"
 
         self.mode.setEnabled(is_india)
 
         if not is_india:
-            # Empty chunk OR non-India country → force Outside India
             idx = self.mode.findText("GLOBAL")
             if idx >= 0:
                 self.mode.blockSignals(True)
@@ -621,22 +656,62 @@ class TrafficData(ScrollableForm):
                 self._stack.setCurrentIndex(idx)
         else:
             self._stack.setCurrentIndex(self.mode.currentIndex())
+        self._shrink_stack_to_current()
+
+    def _shrink_stack_to_current(self):
+        """
+        Hide all panels except current so the stack shrinks to fit.
+        This works inside QScrollArea unlike setFixedHeight.
+        """
+        for i in range(self._stack.count()):
+            w = self._stack.widget(i)
+            if i == self._stack.currentIndex():
+                w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                w.adjustSize()
+            else:
+                w.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self._stack.setMaximumHeight(
+            self._stack.currentWidget().sizeHint().height()
+            if self._stack.currentWidget()
+            else 16_777_215
+        )
+        self._stack.adjustSize()
+        self._stack.updateGeometry()
+
+    # ── WPI slot handlers ─────────────────────────────────────────────────────
+
+    def _on_wpi_profile_selected(self, profile: WPIProfile):
+        """Load selected profile into table, set editability."""
+        self._wpi_table.load_from_data(profile.data)
+        self._wpi_table.set_editable(profile.is_custom)
+        self._on_field_changed()
+
+    def _on_wpi_profile_saved(self, profile: WPIProfile):
+        """After save-as — reload custom profiles into manager and save chunk."""
+        self._on_field_changed()
+
+    def _on_wpi_profile_deleted(self, profile_id: str):
+        """After delete — save chunk to reflect removed profile reference."""
+        self._on_field_changed()
+
+    def _on_wpi_edit_requested(self):
+        """
+        Selector needs current table data to complete a Save As.
+        Collect and hand back via collect_and_save().
+        """
+        data = self._wpi_table.collect_to_data()
+        self._wpi_selector.collect_and_save(data)
 
     # ── Data collection ───────────────────────────────────────────────────────
 
     def collect_data(self) -> dict:
-        """Collect ALL UI data into a single dict for saving."""
-        # 1. All registered scalar fields (TRAFFIC_FIELDS + OUTSIDE_INDIA_FIELDS)
-        #    via _field_map — handles QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit, etc.
         data = super().get_data_dict()
 
-        # 2. Non-field-map fields
         data["mode"] = self.mode.currentText()
-
         data["remarks"] = self._remarks.to_html()
         data["force_free_flow_off_peak"] = bool(self._force_free_flow.isChecked())
 
-        # 3. Vehicle table — merge with existing engine data to preserve extra keys
+        # Vehicle table — merge to preserve extra keys
         existing_veh = {}
         if self.controller and self.controller.engine:
             existing_veh = (self.controller.engine.fetch_chunk(CHUNK) or {}).get(
@@ -650,39 +725,40 @@ class TrafficData(ScrollableForm):
             merged_veh[key] = base
         data["vehicle_data"] = merged_veh
 
-        # 4. Peak hour distribution
         data["peak_hour_distribution"] = self._peak_table.collect_to_dict()
+
+        # WPI — store selected profile id + snapshot of data + custom profiles
+        current_profile = self._wpi_selector.current_profile()
+        data["wpi"] = {
+            "selected_profile_id": current_profile.id if current_profile else None,
+            "selected_profile_name": current_profile.name if current_profile else None,
+            "data_snapshot": self._wpi_table.collect_to_data(),
+            "common_state": self._wpi_table.common_state(),
+            "custom_profiles": self._wpi_manager.dump_custom_profiles(),
+        }
 
         return data
 
     # ── Data loading ──────────────────────────────────────────────────────────
 
     def load_data(self, data: dict):
-        """Populate all UI widgets from a saved dict."""
         if not data:
             return
         self.blockSignals(True)
         self._suppress_lane_signal = True
         try:
-            # 1. Non-field-map fields
             self._remarks.from_html(data.get("remarks", ""))
             self._force_free_flow.setChecked(
                 bool(data.get("force_free_flow_off_peak", False))
             )
 
-            # 2. All scalar fields via base — block self.mode separately to
-            #    prevent _on_mode_changed firing and triggering autosave during load
             self.mode.blockSignals(True)
             super().load_data_dict(data)
             self.mode.blockSignals(False)
-
-            # 3. Sync stack to loaded mode value (since signal was blocked)
             self._stack.setCurrentIndex(self.mode.currentIndex())
 
-            # 4. Vehicle table
             self._vehicle_table.load_from_dict(data.get("vehicle_data", {}))
 
-            # 5. Peak hours table
             n_peak = int(data.get("num_peak_hours", 1))
             if hasattr(self, "num_peak_hours"):
                 self.num_peak_hours.blockSignals(True)
@@ -691,15 +767,47 @@ class TrafficData(ScrollableForm):
             self._peak_table.rebuild(n_peak)
             self._peak_table.load_from_dict(data.get("peak_hour_distribution", {}))
 
+            # WPI
+            wpi = data.get("wpi", {})
+            if wpi:
+                self._load_wpi(wpi)
+
         finally:
             self.blockSignals(False)
             self._suppress_lane_signal = False
             self._vehicle_table.update_height()
             self._peak_table.update_height()
-            # Force stack to correct height after load
-            current = self._stack.currentWidget()
-            if current:
-                self._stack.setFixedHeight(current.sizeHint().height())
+            self._shrink_stack_to_current()
+
+    def _load_wpi(self, wpi: dict):
+        """Restore WPI state from saved chunk data."""
+        # 1. Reload custom profiles into manager
+        custom_raw = wpi.get("custom_profiles", [])
+        self._wpi_manager.load_custom_profiles(custom_raw)
+
+        # 2. Refresh selector combo
+        selected_id = wpi.get("selected_profile_id")
+        self._wpi_selector.refresh(select_id=selected_id)
+
+        # 3. Load data snapshot into table
+        snapshot = wpi.get("data_snapshot")
+        if snapshot:
+            self._wpi_table.load_from_data(snapshot)
+
+        # 4. Restore common-to-all checkbox states
+        common_state = wpi.get("common_state", {})
+        if common_state:
+            # Keys are stored as strings in JSON — convert back to int
+            self._wpi_table.load_common_state(
+                {int(k): v for k, v in common_state.items()}
+            )
+
+        # 5. Set editability based on resolved profile
+        profile = self._wpi_manager.get_by_id(selected_id) if selected_id else None
+        if not profile:
+            profile = self._wpi_selector.current_profile()
+        if profile:
+            self._wpi_table.set_editable(profile.is_custom)
 
     # ── Clear all ─────────────────────────────────────────────────────────────
 
@@ -708,27 +816,29 @@ class TrafficData(ScrollableForm):
         self._vehicle_table.load_from_dict({})
         self._peak_table.rebuild(1)
         self._remarks.clear_content()
-        # Reset all registered scalar fields to their minimum value
         for f in PROJECT_MODE_FIELDS + TRAFFIC_FIELDS + OUTSIDE_INDIA_FIELDS:
             if isinstance(f, FieldDef):
                 attr = getattr(self, f.key, None)
                 if isinstance(attr, (QSpinBox, QDoubleSpinBox)):
                     attr.setValue(attr.minimum())
+        # Reset WPI to first DB profile
+        self._wpi_selector.refresh()
+        first = self._wpi_selector.current_profile()
+        if first:
+            self._wpi_table.load_from_data(first.data)
+            self._wpi_table.set_editable(first.is_custom)
         self.blockSignals(False)
         self._on_field_changed()
 
     # ── Base overrides ────────────────────────────────────────────────────────
 
     def get_data_dict(self) -> dict:
-        """Override base: delegate to collect_data() for full save."""
         return self.collect_data()
 
     def load_data_dict(self, data: dict):
-        """Override base: delegate to load_data() for full load."""
         self.load_data(data)
 
     def refresh_from_engine(self):
-        """Override base: load full chunk including tables."""
         if not self.controller or not self.controller.engine:
             return
         if not self.controller.engine.is_active() or not self.chunk_name:

@@ -142,12 +142,14 @@ class SocialCost(ScrollableForm):
 
         # ── Stack: one panel per methodology ─────────────────────────────────
         self._stack = QStackedWidget()
-        self._stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self._stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # ── Panel 0: NITI Aayog ───────────────────────────────────────────────
         niti_widget = QWidget()
         niti_layout = QFormLayout(niti_widget)
         niti_layout.setContentsMargins(0, 0, 0, 0)
+        niti_layout.setSpacing(8)
+        niti_layout.setLabelAlignment(Qt.AlignRight)
 
         self._niti_base_label = QLabel(
             f"Base Value: <b>{NITI_AAYOG_SCC_INR} INR/kgCO2e</b> (NITI Aayog, 2023)"
@@ -177,6 +179,8 @@ class SocialCost(ScrollableForm):
         ricke_widget = QWidget()
         ricke_layout = QFormLayout(ricke_widget)
         ricke_layout.setContentsMargins(0, 0, 0, 0)
+        ricke_layout.setSpacing(8)
+        ricke_layout.setLabelAlignment(Qt.AlignRight)
 
         _temp = self.form
         self.form = ricke_layout
@@ -201,6 +205,8 @@ class SocialCost(ScrollableForm):
         custom_widget = QWidget()
         custom_layout = QFormLayout(custom_widget)
         custom_layout.setContentsMargins(0, 0, 0, 0)
+        custom_layout.setSpacing(8)
+        custom_layout.setLabelAlignment(Qt.AlignRight)
 
         _temp = self.form
         self.form = custom_layout
@@ -213,6 +219,7 @@ class SocialCost(ScrollableForm):
         self._stack.addWidget(custom_widget)  # index 2
 
         main_form.addRow(self._stack)
+        self._shrink_stack()  # set initial height to sizeHint
 
         # ── Remarks ───────────────────────────────────────────────────────────
         # self._remarks = RemarksEditor(
@@ -235,6 +242,18 @@ class SocialCost(ScrollableForm):
         btn_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         main_form.addRow(btn_widget)
 
+    # ── Stack sizing ──────────────────────────────────────────────────────────
+
+    def _shrink_stack(self):
+        """Cap the stack height to its current panel's sizeHint so the scroll
+        area never leaves blank space below the content."""
+        w = self._stack.currentWidget()
+        if w is None:
+            return
+        hint = w.sizeHint().height()
+        self._stack.setMaximumHeight(max(hint, 0))
+        self._stack.updateGeometry()
+
     # ── showEvent ─────────────────────────────────────────────────────────────
 
     def showEvent(self, event):
@@ -255,6 +274,7 @@ class SocialCost(ScrollableForm):
             self._update_scientific_result()
         else:
             self._stack.setCurrentIndex(2)
+        self._shrink_stack()
         self._on_field_changed()
 
     # ── Result Calculations ───────────────────────────────────────────────────

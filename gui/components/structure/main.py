@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QStackedWidget,
 )
+from PySide6.QtGui import QPalette
 from .widgets.foundation import FoundationWidget
 from .widgets.super_structure import SuperStructureWidget
 from .widgets.substructure import SubStructureWidget
@@ -47,6 +48,13 @@ class StructureTabView(QWidget):
 
         # 1. Active Tabs
         self.tab_view = QTabWidget()
+
+        # QTabWidget's content pane paints using Base palette role, which differs
+        # from Window in dark mode. Copy Window → Base so both are identical.
+        palette = self.tab_view.palette()
+        palette.setColor(QPalette.Base, palette.color(QPalette.Window))
+        self.tab_view.setPalette(palette)
+
         self.foundation_tab = FoundationWidget(controller=controller)
         self.substructure_tab = SubStructureWidget(controller=controller)
         self.superstructure_tab = SuperStructureWidget(controller=controller)

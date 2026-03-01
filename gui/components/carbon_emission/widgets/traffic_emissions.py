@@ -250,8 +250,9 @@ class TrafficEmissions(ScrollableForm):
         self.mode.setFixedWidth(220)
         self.mode.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         if self.mode.parentWidget():
-            self.mode.parentWidget().setFixedWidth(300)
-            self.mode.parentWidget().setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            self.mode.parentWidget().setSizePolicy(
+                QSizePolicy.Expanding, QSizePolicy.Fixed
+            )
         self.mode.currentIndexChanged.connect(self._on_mode_changed)
         self.mode.setEnabled(False)  # driven by traffic data, not user
 
@@ -264,12 +265,16 @@ class TrafficEmissions(ScrollableForm):
 
         # Stack
         self._stack = QStackedWidget()
-        self._stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        # self._stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
         # ── Panel 0: Calculate by Vehicle ─────────────────────────────────────
         calc_widget = QWidget()
         calc_layout = QFormLayout(calc_widget)
         calc_layout.setContentsMargins(0, 0, 0, 0)
+        calc_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        calc_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        calc_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        calc_layout.setVerticalSpacing(8)
 
         self._reroute_label = QLabel("—")
         calc_layout.addRow("Reroute Distance (from Traffic Data):", self._reroute_label)
@@ -297,6 +302,10 @@ class TrafficEmissions(ScrollableForm):
         direct_widget = QWidget()
         direct_layout = QFormLayout(direct_widget)
         direct_layout.setContentsMargins(0, 0, 0, 0)
+        direct_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        direct_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        direct_layout.setFormAlignment(Qt.AlignTop | Qt.AlignLeft)
+        direct_layout.setVerticalSpacing(8)
 
         _temp = self.form
         self.form = direct_layout
@@ -305,8 +314,8 @@ class TrafficEmissions(ScrollableForm):
         self.form = _temp
 
         self._stack.addWidget(direct_widget)  # index 1
-
         main_form.addRow(self._stack)
+        self._shrink_stack_to_current()
 
         # Remarks
         self._remarks = RemarksEditor(
@@ -341,10 +350,27 @@ class TrafficEmissions(ScrollableForm):
             )
         self.data_changed.emit()
 
+    def _shrink_stack_to_current(self):
+        for i in range(self._stack.count()):
+            w = self._stack.widget(i)
+            if i == self._stack.currentIndex():
+                w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                w.adjustSize()
+            else:
+                w.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self._stack.setMaximumHeight(
+            self._stack.currentWidget().sizeHint().height()
+            if self._stack.currentWidget()
+            else 16_777_215
+        )
+        self._stack.adjustSize()
+        self._stack.updateGeometry()
+
     def _on_mode_changed(self, idx: int):
         if self._suppress_mode_signal:
             return
         self._stack.setCurrentIndex(idx)
+        self._shrink_stack_to_current()
         self._on_field_changed()
 
     def _on_load_defaults(self):
@@ -355,46 +381,65 @@ class TrafficEmissions(ScrollableForm):
         self._total_label.setText(f"{self._emissions_table.total_emissions():.4f}")
 
     def _load_traffic_context(self):
-        if not self.controller or not self.controller.engine:
+        if not (self.controller and self.controller.engine):
             return
 
-        # ── Step 1: check country from bridge_data ────────────────────────
+        # ── Load data ─────────────────────────────────────────────────────
         bridge = self.controller.engine.fetch_chunk("bridge_data") or {}
-        country = str(bridge.get("location_country", "")).strip().upper()
-        is_india = country == "INDIA"
-
-        # ── Step 2: determine target mode ─────────────────────────────────
         traffic = self.controller.engine.fetch_chunk(TRAFFIC_CHUNK) or {}
+
+        # ── Extract + normalize values ─────────────────────────────────────
+        raw_country = bridge.get("location_country")
+        raw_mode = traffic.get("mode")
+
+        country = str(raw_country or "").strip().upper()
+        traffic_mode = str(raw_mode or "").strip().upper()
         reroute = float(traffic.get("additional_reroute_distance_km", 0.0))
-        traffic_mode = str(traffic.get("mode", "")).strip().upper()
 
-        if not is_india:
-            mapped = "Enter Directly"
-        else:
-            mapped = (
-                "Calculate by Vehicle" if traffic_mode == "INDIA" else "Enter Directly"
-            )
+        is_india = country == "INDIA"
+        can_calculate = is_india and traffic_mode == "INDIA"
 
-        # ── Apply mode ────────────────────────────────────────────────────
+        # ── Debug Output ───────────────────────────────────────────────────
+        print("==== Traffic Context Debug ====")
+        print(f"bridge_data.location_country (raw) : {raw_country}")
+        print(f"country (normalized)              : {country}")
+        print(f"traffic.mode (raw)                : {raw_mode}")
+        print(f"traffic_mode (normalized)         : {traffic_mode}")
+        print(f"additional_reroute_distance_km    : {reroute}")
+        print(f"is_india                         : {is_india}")
+        print(f"can_calculate                    : {can_calculate}")
+        print("================================")
+
+        # ── Mode Handling ──────────────────────────────────────────────────
         self._suppress_mode_signal = True
-        idx = self.mode.findText(mapped)
-        if idx >= 0:
-            self.mode.setCurrentIndex(idx)
-            self._stack.setCurrentIndex(idx)
+
+        if not can_calculate:
+            # Force "Enter Directly"
+            idx = self.mode.findText("Enter Directly")
+            if idx >= 0:
+                self.mode.setCurrentIndex(idx)
+                self._stack.setCurrentIndex(idx)
+
         self._suppress_mode_signal = False
 
-        # Disable combo when country forces the mode
-        self.mode.setEnabled(is_india)
+        # Enable combo ONLY when calculation is allowed
+        self.mode.setEnabled(can_calculate)
 
-        # ── Load vehicle data & reroute ───────────────────────────────────
+        # ── Load reroute + vehicle data ────────────────────────────────────
         self._emissions_table.set_reroute_distance(reroute)
         self._reroute_label.setText(f"{reroute:.3f} km")
         self._emissions_table.load_vehicles_from_traffic(
             traffic.get("vehicle_data", {})
         )
 
-        # ── Warning — only for India + Calculate by Vehicle + no reroute ──
-        if is_india and mapped == "Calculate by Vehicle" and reroute == 0.0:
+        # ── Warning Logic ───────────────────────────────────────────────────
+        show_warning = (
+            can_calculate
+            and self.mode.currentText() == "Calculate by Vehicle"
+            and reroute == 0.0
+        )
+
+        if show_warning:
             self._warning_label.setText(
                 "⚠ Reroute distance is 0 km — please fill in the Traffic Data tab first."
             )
@@ -402,7 +447,9 @@ class TrafficEmissions(ScrollableForm):
         else:
             self._warning_label.setVisible(False)
 
+        # ── Final refresh ───────────────────────────────────────────────────
         self._refresh_total()
+        self._shrink_stack_to_current()
 
     # ── Data Collection ───────────────────────────────────────────────────────
 
