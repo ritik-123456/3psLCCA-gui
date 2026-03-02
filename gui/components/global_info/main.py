@@ -100,8 +100,7 @@ GENERAL_FIELDS = [
         "agency_phone",
         "Phone",
         "Contact phone number.",
-        "text",
-        doc_slug="agency-phone",
+        "phone",   # ← new custom type
     ),
     FieldDef(
         "agency_logo",

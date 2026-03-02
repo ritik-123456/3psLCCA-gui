@@ -20,8 +20,8 @@ from __future__ import annotations
 import base64
 from typing import Any
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, QRegularExpression
+from PySide6.QtGui import QPixmap, QRegularExpressionValidator
 from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
@@ -36,7 +36,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
 from .form_definitions import FieldDef, Section
 from .image_utils import compress_image, resolve_img_settings
 
@@ -135,12 +134,14 @@ def _make_upload_img_widget(
             settings = resolve_img_settings(preset)
             img_bytes = compress_image(file_path, settings)
         except Exception as e:
-            QMessageBox.warning(host, "Image Error", f"Could not process image:\n{e}")
+            QMessageBox.warning(host, "Image Error",
+                                f"Could not process image:\n{e}")
             return
 
         pixmap = QPixmap()
         pixmap.loadFromData(img_bytes)
-        scaled = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        scaled = pixmap.scaled(
+            120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         _preview.setPixmap(scaled)
         _preview.setText("")
 
@@ -274,7 +275,22 @@ def build_form(
                 widget.setSuffix(f" {f.unit}")
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
-            widget.valueChanged.connect(lambda _, w=widget: w.setStyleSheet(""))
+            widget.valueChanged.connect(
+                lambda _, w=widget: w.setStyleSheet(""))
+
+        elif f.field_type == "phone":
+            widget = QLineEdit()
+            widget.setMinimumHeight(30)
+            # widget.setPlaceholderText("e.g. +1 555 123 4567")
+
+            # Allow: optional +, digits, spaces, dashes, parentheses
+            regex = QRegularExpression(r"^\+?[0-9\s\-\(\)]{7,20}$")
+            validator = QRegularExpressionValidator(regex)
+            widget.setValidator(validator)
+
+            setattr(host, f.key, host.field(f.key, widget))
+
+            widget.textChanged.connect(lambda _, w=widget: w.setStyleSheet(""))
 
         # ── float ─────────────────────────────────────────────────────────
         elif f.field_type == "float":
@@ -286,7 +302,8 @@ def build_form(
                 widget.setSuffix(f" {f.unit}")
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
-            widget.valueChanged.connect(lambda _, w=widget: w.setStyleSheet(""))
+            widget.valueChanged.connect(
+                lambda _, w=widget: w.setStyleSheet(""))
 
         # ── combo ─────────────────────────────────────────────────────────
         elif f.field_type == "combo":
@@ -294,7 +311,8 @@ def build_form(
             widget.addItems(f.options)
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
-            widget.currentIndexChanged.connect(lambda _, w=widget: w.setStyleSheet(""))
+            widget.currentIndexChanged.connect(
+                lambda _, w=widget: w.setStyleSheet(""))
 
         # ── upload_img ────────────────────────────────────────────────────
         elif f.field_type == "upload_img":

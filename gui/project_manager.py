@@ -91,7 +91,7 @@ class ProjectManager:
                     "general_info",
                 )
                 engine.stage_update(
-                    {"location_country": country},
+                    {"project_country": country},
                     "bridge_data",
                 )
                 # Force flush to disk NOW — project_loaded fires on the next

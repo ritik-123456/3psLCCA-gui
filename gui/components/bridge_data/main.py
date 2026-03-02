@@ -48,7 +48,7 @@ BRIDGE_FIELDS = [
         "project_country",
         "Country",
         "Country in which the bridge is situated.",
-        "combo",
+        "text",
         options=COUNTRIES,
         required=True,
         doc_slug="location-country",
@@ -205,15 +205,18 @@ BRIDGE_FIELDS = [
 
 
 class BridgeData(ScrollableForm):
+    _LOCKED = {"project_country"}
+
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="bridge_data")
 
         self.required_keys = build_form(self, BRIDGE_FIELDS, BASE_DOCS_URL)
 
         # location_country is set at project creation — lock it
-        _locked = {"location_country"}
-        self.required_keys = [k for k in self.required_keys if k not in _locked]
-        for key in _locked:
+
+        self.required_keys = [
+            k for k in self.required_keys if k not in self._LOCKED]
+        for key in self._LOCKED:
             w = getattr(self, key, None)
             if w is not None:
                 w.setEnabled(False)
@@ -262,6 +265,8 @@ class BridgeData(ScrollableForm):
         for entry in BRIDGE_FIELDS:
             if isinstance(entry, Section):
                 continue
+            if entry.key in self._LOCKED:
+                continue  # never clear country or currency
 
             widget = getattr(self, entry.key, None)
             if widget is None:

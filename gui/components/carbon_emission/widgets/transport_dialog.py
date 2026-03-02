@@ -135,14 +135,14 @@ class VehicleRouteStep(QWidget):
         )
 
         self.capacity_in = self._create_labeled_spin(
-            v_grid, "Total Capacity (t) *", 0, 1000, 2, 1, 0
+            v_grid, "Gross Capacity of Vehicle (t) *", 0, 1000, 2, 1, 0
         )
         self.loading_in = self._create_labeled_spin(
             v_grid, "Target Loading (%) *", 0, 100, 1, 1, 1, default=100
         )
 
         self.empty_wt_in = self._create_labeled_spin(
-            v_grid, "Empty Weight (t) *", 0, 1000, 2, 2, 0
+            v_grid, "Empty Weight of Vehicle (t) *", 0, 1000, 2, 2, 0
         )
         self.eff_pay_lbl = self._create_labeled_readonly(
             v_grid, "Effective Payload (t)", 2, 1
