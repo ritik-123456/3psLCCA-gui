@@ -124,7 +124,6 @@ class _WPITable(QTableWidget):
         self._build_label_row()
         self._build_checkbox_row()
         self._build_data_rows()
-        self.update_height()
         # Apply initial read-only opacity to all spinboxes
         for sb in self._spinboxes.values():
             self._apply_spinbox_opacity(sb, False)
@@ -135,7 +134,7 @@ class _WPITable(QTableWidget):
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionMode(QTableWidget.NoSelection)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # Hide Qt's built-in column header — we use row 0 and 1 instead
         self.horizontalHeader().setVisible(False)
@@ -192,8 +191,15 @@ class _WPITable(QTableWidget):
         """Row 2 — one centered QCheckBox per column."""
         for col in range(_N_COLS):
             cb = QCheckBox()
-            cb.setToolTip("Common to all vehicles")
+            is_veh_dim = _is_vehicle_dim(_COLUMNS[col])
             cb.setChecked(True)
+            if not is_veh_dim:
+                cb.setEnabled(False)
+                cb.setToolTip(
+                    "This factor is not vehicle-specific — always common to all"
+                )
+            else:
+                cb.setToolTip("Common to all vehicles")
             cb.stateChanged.connect(lambda state, c=col: self._on_common_toggled(c))
 
             container = QWidget()
@@ -218,7 +224,7 @@ class _WPITable(QTableWidget):
 
             for col in range(_N_COLS):
                 sb = QDoubleSpinBox()
-                sb.setRange(0.0, 99.9999)
+                sb.setRange(0.0, float("inf"))
                 sb.setDecimals(4)
                 sb.setValue(1.0)
                 sb.setButtonSymbols(QDoubleSpinBox.NoButtons)
@@ -232,7 +238,7 @@ class _WPITable(QTableWidget):
                 self.setCellWidget(row, col, sb)
                 self._spinboxes[(row, col)] = sb
 
-    # ── Height ────────────────────────────────────────────────────────────────
+    # ── Size ──────────────────────────────────────────────────────────────────
 
     def sizeHint(self):
         h = sum(self.rowHeight(r) for r in range(self.rowCount()))
@@ -240,16 +246,6 @@ class _WPITable(QTableWidget):
 
     def minimumSizeHint(self):
         return self.sizeHint()
-
-    def update_height(self):
-        self.updateGeometry()
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        w = self.viewport().width()
-        per_col = max(72, w // _N_COLS)
-        for col in range(_N_COLS):
-            self.setColumnWidth(col, per_col)
 
     # ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -260,8 +256,9 @@ class _WPITable(QTableWidget):
             is_first = row == _ROW_DATA
             is_common = cb.isChecked()
             self._set_cell_editable(row, col, editable and (is_first or not is_common))
-        for cb in self._checkboxes.values():
-            cb.setEnabled(editable)
+        for col, cb in self._checkboxes.items():
+            # Non-vehicle-dim columns stay frozen regardless of editable mode
+            cb.setEnabled(editable and _is_vehicle_dim(_COLUMNS[col]))
 
     def _set_cell_editable(self, row: int, col: int, editable: bool):
         sb = self._spinboxes.get((row, col))
@@ -364,6 +361,27 @@ class _WPITable(QTableWidget):
                 val = self._spinboxes[(row, col)].value()
                 _set_value(data, cdef.path, vkey, val)
         return data
+
+    def validate(self) -> list[str]:
+        """Return list of error strings for any WPI cell that is zero."""
+        errors = []
+        for col, cdef in enumerate(_COLUMNS):
+            cb = self._checkboxes[col]
+            is_common = cb.isChecked()
+            rows_to_check = (
+                [_ROW_DATA]
+                if is_common
+                else range(_ROW_DATA, _ROW_DATA + len(_VEHICLES))
+            )
+            for row in rows_to_check:
+                if self._spinboxes[(row, col)].value() == 0.0:
+                    vkey, vlabel = _VEHICLES[row - _ROW_DATA]
+                    label = f"{cdef.group} / {cdef.label}"
+                    if is_common:
+                        errors.append(f"WPI value cannot be zero: {label}")
+                    else:
+                        errors.append(f"WPI value cannot be zero: {label} ({vlabel})")
+        return errors
 
     def is_common(self, col: int) -> bool:
         return self._checkboxes[col].isChecked()

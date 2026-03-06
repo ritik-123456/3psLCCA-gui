@@ -65,7 +65,7 @@ GENERAL_FIELDS = [
         "Agency Name",
         "Name of the organization responsible for this evaluation.",
         "text",
-        required=True,
+        # required=True,
         doc_slug="agency-name",
     ),
     FieldDef(

@@ -32,7 +32,7 @@ BRIDGE_FIELDS = [
         "Name of Bridge",
         "The official or commonly used name identifying the bridge.",
         "text",
-        required=True,
+        # required=True,
         doc_slug="bridge-name",
     ),
     FieldDef(
@@ -40,7 +40,7 @@ BRIDGE_FIELDS = [
         "Owner",
         "Name of the owner, client, or responsible agency for this bridge.",
         "text",
-        required=True,
+        # required=True,
         doc_slug="user-agency",
     ),
     # ── Location ─────────────────────────────────────────────────────────

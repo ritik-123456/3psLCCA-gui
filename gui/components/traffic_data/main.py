@@ -200,7 +200,11 @@ TRAFFIC_FIELDS = [
         (2000.0, 99_999.0, 2),
         unit="(mm/km)",
         required=True,
-        warn=(0.01, 10000.0, "Road Roughness is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            10000.0,
+            "Road Roughness is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "road_rise_m_per_km",
@@ -210,7 +214,11 @@ TRAFFIC_FIELDS = [
         (0.0, 9_999.0, 3),
         unit="(m/km)",
         required=True,
-        warn=(0.01, 9_999.0, "Road Rise is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            9_999.0,
+            "Road Rise is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "road_fall_m_per_km",
@@ -220,7 +228,11 @@ TRAFFIC_FIELDS = [
         (0.0, 9_999.0, 3),
         unit="(m/km)",
         required=True,
-        warn=(0.01, 9_999.0, "Road Fall is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            9_999.0,
+            "Road Fall is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "additional_reroute_distance_km",
@@ -229,7 +241,11 @@ TRAFFIC_FIELDS = [
         "float",
         (0.0, 9_999.0, 3),
         unit="(km)",
-        warn=(0.01, 1000, "Additional Reroute Distance is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            1000,
+            "Additional Reroute Distance is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "additional_travel_time_min",
@@ -238,7 +254,11 @@ TRAFFIC_FIELDS = [
         "float",
         (0.0, 9_999.0, 3),
         unit="(min)",
-        warn=(0.01, 1000, "Additional Travel Time is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            1000,
+            "Additional Travel Time is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "crash_rate_accidents_per_million_km",
@@ -248,7 +268,11 @@ TRAFFIC_FIELDS = [
         (0.0, 999_999.0, 2),
         unit="(acc / M km)",
         required=True,
-        warn=(0.01, 1000, "Crash Rate is 0 or unusually high — please verify the value"),
+        warn=(
+            0.01,
+            1000,
+            "Crash Rate is 0 or unusually high — please verify the value",
+        ),
     ),
     FieldDef(
         "work_zone_multiplier",
@@ -260,7 +284,11 @@ TRAFFIC_FIELDS = [
     ),
     Section("Traffic Flow"),
     FieldDef(
-        "num_peak_hours", "Number of Peak Hours", "", "int", (0, 24),
+        "num_peak_hours",
+        "Number of Peak Hours",
+        "",
+        "int",
+        (0, 24),
         required=True,
         warn=(1, 24, "Number of Peak Hours must be between 1 and 24"),
     ),
@@ -483,6 +511,18 @@ class _PeakHoursTable(QTableWidget):
 
 
 # ── Main Class ────────────────────────────────────────────────────────────────
+
+
+def _compute_wpi_ratio(selected: dict, base: dict) -> dict:
+    """Recursively compute element-wise ratio: selected / base."""
+    result = {}
+    for key, val in selected.items():
+        if isinstance(val, dict):
+            result[key] = _compute_wpi_ratio(val, base.get(key, {}))
+        else:
+            base_val = base.get(key, 1.0) if isinstance(base, dict) else 1.0
+            result[key] = val / base_val if base_val else 1.0
+    return result
 
 
 class TrafficData(ScrollableForm):
@@ -796,10 +836,24 @@ class TrafficData(ScrollableForm):
 
         # WPI — store selected profile id + snapshot of data + custom profiles
         current_profile = self._wpi_selector.current_profile()
+        selected_data = self._wpi_table.collect_to_data()
+
+        # Base is always 2019; ratio = selected / base element-wise
+        base_profile = self._wpi_manager.get_by_id("wpi_2019")
+        base_data = base_profile.data if base_profile else selected_data
+        ratio_data = _compute_wpi_ratio(selected_data, base_data)
+
         data["wpi"] = {
             "selected_profile_id": current_profile.id if current_profile else None,
             "selected_profile_name": current_profile.name if current_profile else None,
-            "data_snapshot": self._wpi_table.collect_to_data(),
+            "profile_type": (
+                "custom" if (current_profile and current_profile.is_custom) else "db"
+            ),
+            "data_snapshot": {
+                "base": base_data,
+                "selected": selected_data,
+                "ratio": ratio_data,
+            },
             "common_state": self._wpi_table.common_state(),
             "custom_profiles": self._wpi_manager.dump_custom_profiles(),
         }
@@ -859,7 +913,13 @@ class TrafficData(ScrollableForm):
         # 3. Load data snapshot into table
         snapshot = wpi.get("data_snapshot")
         if snapshot:
-            self._wpi_table.load_from_data(snapshot)
+            # data_snapshot may be the new three-part dict or legacy flat dict
+            selected_snapshot = (
+                snapshot.get("selected", snapshot)
+                if isinstance(snapshot, dict) and "selected" in snapshot
+                else snapshot
+            )
+            self._wpi_table.load_from_data(selected_snapshot)
 
         # 4. Restore common-to-all checkbox states
         common_state = wpi.get("common_state", {})
@@ -916,7 +976,9 @@ class TrafficData(ScrollableForm):
                 vehicle_data = self._vehicle_table.collect_to_dict()
                 total_vpd = sum(v["vehicles_per_day"] for v in vehicle_data.values())
                 if total_vpd == 0:
-                    warnings.append("No vehicle traffic data — all vehicles per day are 0")
+                    warnings.append(
+                        "No vehicle traffic data — all vehicles per day are 0"
+                    )
 
                 # Severity distribution must sum to 100% when there is traffic
                 total_sev = (
@@ -928,6 +990,9 @@ class TrafficData(ScrollableForm):
                     errors.append(
                         f"Accident severity must sum to 100% — currently {total_sev:.1f}%"
                     )
+
+            # WPI values must not be zero
+            errors.extend(self._wpi_table.validate())
 
         else:  # GLOBAL — road user cost entered directly, not computed via IS SP30
             result = validate_form(OUTSIDE_INDIA_FIELDS, self)
