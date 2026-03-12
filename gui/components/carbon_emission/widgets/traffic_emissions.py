@@ -341,15 +341,12 @@ class TrafficEmissions(ScrollableForm):
         main_form.addRow(self._remarks)
 
         # Clear All
-        self.btn_clear = QPushButton("Clear All")
-        self.btn_clear.setMinimumHeight(35)
-        self.btn_clear.setFixedWidth(120)
-        self.btn_clear.clicked.connect(self.clear_all)
-        self.btn_clear.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        btn_clear = QPushButton("Clear All")
+        btn_clear.setMinimumHeight(35)
+        btn_clear.clicked.connect(self.clear_all)
 
         btn_row = QHBoxLayout()
-        btn_row.addWidget(self.btn_clear)
-        btn_row.addStretch()
+        btn_row.addWidget(btn_clear)
         btn_widget = QWidget()
         btn_widget.setLayout(btn_row)
         btn_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)

@@ -165,14 +165,13 @@ class SocialCost(ScrollableForm):
 
         # Clear button
         self.btn_clear = QPushButton("Clear All")
-        self.btn_clear.setFixedWidth(120)
+        # self.btn_clear.setFixedWidth(120)
         self.btn_clear.setMinimumHeight(35)
         self.btn_clear.setMaximumHeight(35)
         self.btn_clear.clicked.connect(self.clear_all)
         row = QHBoxLayout()
         row.setContentsMargins(0, 4, 0, 0)
         row.addWidget(self.btn_clear)
-        row.addStretch()
         f.addRow(row)
 
     def _make_panel_layout(self, parent):

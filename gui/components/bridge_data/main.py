@@ -273,7 +273,6 @@ class BridgeData(ScrollableForm):
         self.btn_clear_all.clicked.connect(self.clear_all)
 
         btn_layout.addWidget(self.btn_clear_all)
-        btn_layout.addStretch()
         self.form.addRow(btn_row)
 
     # ── Suggested values ─────────────────────────────────────────────────

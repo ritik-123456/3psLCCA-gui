@@ -127,7 +127,6 @@ class FinancialData(ScrollableForm):
 
         btn_layout.addWidget(self.btn_load_suggested)
         btn_layout.addWidget(self.btn_clear_all)
-        btn_layout.addStretch()
         self.form.addRow(btn_row)
 
     # ── Suggested values ──────────────────────────────────────────────────────
