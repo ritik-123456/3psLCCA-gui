@@ -1,0 +1,4406 @@
+[
+    {
+        "data": [
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (manual) (0 to 1.5)",
+                "rate": 198.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (manual) (1.5 to 3)",
+                "rate": 198.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (manual) (3.0 to 4.5)",
+                "rate": 255.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (manual) (4.5 to 6)",
+                "rate": 255.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (manual) (Above 6)",
+                "rate": 340.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Large Project (0 to 1.5)",
+                "rate": 100.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Large Project (1.5 to 3)",
+                "rate": 100.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Large Project (3.0 to 4.5)",
+                "rate": 110.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Large Project (4.5 to 6)",
+                "rate": 110.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Large Project (Above 6)",
+                "rate": 123.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Medium Project (0 to 1.5)",
+                "rate": 104,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Medium Project (1.5 to 3)",
+                "rate": 104,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Medium Project (3.0 to 4.5)",
+                "rate": 114.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Medium Project (4.5 to 6)",
+                "rate": 114.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Medium Project (Above 6)",
+                "rate": 128.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Small Project (0 to 1.5)",
+                "rate": 128.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Small Project (1.5 to 3)",
+                "rate": 128.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Small Project (3.0 to 4.5)",
+                "rate": 141.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Small Project (4.5 to 6)",
+                "rate": 141.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Soil (Mechanical) Small Project (Above 6)",
+                "rate": 158.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Manual) (0 to 1.5)",
+                "rate": 283.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Manual) (1.5 to 3)",
+                "rate": 283.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Manual) (3.0 to 4.5)",
+                "rate": 283.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Manual) (4.5 to 6)",
+                "rate": 283.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Manual) (Above 6)",
+                "rate": 283.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Large (0 to 1.5)",
+                "rate": 620.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Large (1.5 to 3)",
+                "rate": 620.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Large (3.0 to 4.5)",
+                "rate": 620.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Large (4.5 to 6)",
+                "rate": 620.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Large (Above 6)",
+                "rate": 620.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Medium (0 to 1.5)",
+                "rate": 658.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Medium (1.5 to 3)",
+                "rate": 658.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Medium (3.0 to 4.5)",
+                "rate": 658.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Medium (4.5 to 6)",
+                "rate": 658.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Medium (Above 6)",
+                "rate": 658.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Small (0 to 1.5)",
+                "rate": 680.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Small (1.5 to 3)",
+                "rate": 680.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Small (3.0 to 4.5)",
+                "rate": 680.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Small (4.5 to 6)",
+                "rate": 680.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Ordinary Rock (No Blasting-Mechanical) Small (Above 6)",
+                "rate": 680.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Large (0 to 1.5m)",
+                "rate": 381.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Large (1.5 to 3m)",
+                "rate": 381.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Large (3 to 4.5m)",
+                "rate": 381.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Large (4.5 to 6m)",
+                "rate": 381.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Large (Above 6m)",
+                "rate": 381.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Medium (0 to 1.5m)",
+                "rate": 389.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Medium (1.5 to 3m)",
+                "rate": 389.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Medium (3 to 4.5m)",
+                "rate": 389.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Medium (4.5 to 6m)",
+                "rate": 389.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Medium (Above 6m)",
+                "rate": 389.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Small (0 to 1.5m)",
+                "rate": 423.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Small (1.5 to 3m)",
+                "rate": 423.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Small (3 to 4.5m)",
+                "rate": 423.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Small (4.5 to 6m)",
+                "rate": 423.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (Blasting- Manual) Small (Above 6m)",
+                "rate": 423.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Large (0 to 1.5)",
+                "rate": 833.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Large (1.5 to 3)",
+                "rate": 833.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Large (3.0 to 4.5)",
+                "rate": 833.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Large (4.5 to 6)",
+                "rate": 833.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Large (Above 6)",
+                "rate": 833.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Medium (0 to 1.5)",
+                "rate": 861.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Medium (1.5 to 3)",
+                "rate": 861.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Medium (3.0 to 4.5)",
+                "rate": 861.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Medium (4.5 to 6)",
+                "rate": 861.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Medium (Above 6)",
+                "rate": 861.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Small (0 to 1.5)",
+                "rate": 902.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Small (1.5 to 3)",
+                "rate": 902.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Small (3.0 to 4.5)",
+                "rate": 902.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Small (4.5 to 6)",
+                "rate": 902.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Hard Rock (No Blasting-Mechanical) Small (Above 6)",
+                "rate": 902.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Manual) (0 to 1.5)",
+                "rate": 811.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Manual) (1.5 to 3)",
+                "rate": 811.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Manual) (3.0 to 4.5)",
+                "rate": 811.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Manual) (4.5 to 6)",
+                "rate": 811.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Manual) (Above 6)",
+                "rate": 811.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Large (0 to 1.5)",
+                "rate": 260.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Large (1.5 to 3)",
+                "rate": 260.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Large (3.0 to 4.5)",
+                "rate": 260.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Large (4.5 to 6)",
+                "rate": 260.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Large (Above 6)",
+                "rate": 260.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Medium (0 to 1.5)",
+                "rate": 269.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Medium (1.5 to 3)",
+                "rate": 269.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Medium (3.0 to 4.5)",
+                "rate": 269.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Medium (4.5 to 6)",
+                "rate": 269.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Medium (Above 6)",
+                "rate": 269.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Small (0 to 1.5)",
+                "rate": 332.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Small (1.5 to 3)",
+                "rate": 332.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Small (3.0 to 4.5)",
+                "rate": 332.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Small (4.5 to 6)",
+                "rate": 332.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": "not_available",
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "not_available",
+                "conversion_factor": "not_available",
+                "name": "Marshy Soil (Mechanical) Small (Above 6)",
+                "rate": 332.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Foundation",
+        "type": "Excavation"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Large",
+                "rate": 77952.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Medium",
+                "rate": 78010,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Small",
+                "rate": 78119.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74401.1,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74458.4,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 74567.6,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (0 to 5m) (750mm)",
+                "rate": 8574.5,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (5 to 10m) (750mm)",
+                "rate": 8574.5,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (10 to 15m) (750mm)",
+                "rate": 8574.5,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (15m to 20m) (750mm)",
+                "rate": 8574.5,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (Above 20m) (750mm)",
+                "rate": 8574.5,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (0 to 5m) (750mm)",
+                "rate": 8583.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (5 to 10m) (750mm)",
+                "rate": 8583.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (10 to 15m) (750mm)",
+                "rate": 8583.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (15m to 20m) (750mm)",
+                "rate": 8583.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (Above 20m) (750mm)",
+                "rate": 8583.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (0 to 5m) (750mm)",
+                "rate": 8670.3,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (5 to 10m) (750mm)",
+                "rate": 8670.3,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (10 to 15m) (750mm)",
+                "rate": 8670.3,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (15m to 20m) (750mm)",
+                "rate": 8670.3,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (Above 20m) (750mm)",
+                "rate": 8670.3,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (0 to 5m) (1000mm)",
+                "rate": 10847.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (5 to 10m) (1000mm)",
+                "rate": 10847.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (10 to 15m) (1000mm)",
+                "rate": 10847.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (15m to 20m) (1000mm)",
+                "rate": 10847.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (Above 20m) (1000mm)",
+                "rate": 10847.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (0 to 5m) (1000mm)",
+                "rate": 10864.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (5 to 10m) (1000mm)",
+                "rate": 10864.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (10 to 15m) (1000mm)",
+                "rate": 10864.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (15m to 20m) (1000mm)",
+                "rate": 10864.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (Above 20m) (1000mm)",
+                "rate": 10864.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (0 to 5m) (1000mm)",
+                "rate": 11018.2,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (5 to 10m) (1000mm)",
+                "rate": 11018.2,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (10 to 15m) (1000mm)",
+                "rate": 11018.2,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (15m to 20m) (1000mm)",
+                "rate": 11018.2,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (Above 20m) (1000mm)",
+                "rate": 11018.2,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (0 to 5m) (1200mm)",
+                "rate": 14045.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (5 to 10m) (1200mm)",
+                "rate": 14045.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (10 to 15m) (1200mm)",
+                "rate": 14045.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (15m to 20m) (1200mm)",
+                "rate": 14045.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (Above 20m) (1200mm)",
+                "rate": 14045.6,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (0 to 5m) (1200mm)",
+                "rate": 14069.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (5 to 10m) (1200mm)",
+                "rate": 14069.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (10 to 15m) (1200mm)",
+                "rate": 14069.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (15m to 20m) (1200mm)",
+                "rate": 14069.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (Above 20m) (1200mm)",
+                "rate": 14069.8,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (0 to 5m) (1200mm)",
+                "rate": 14291,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (5 to 10m) (1200mm)",
+                "rate": 14291,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (10 to 15m) (1200mm)",
+                "rate": 14291,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (15m to 20m) (1200mm)",
+                "rate": 14291,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (Above 20m) (1200mm)",
+                "rate": 14291,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (0 to 5m) (1500mm)",
+                "rate": 19166.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (5 to 10m) (1500mm)",
+                "rate": 19166.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (10 to 15m) (1500mm)",
+                "rate": 19166.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (15m to 20m) (1500mm)",
+                "rate": 19166.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Large (Above 20m) (1500mm)",
+                "rate": 19166.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (0 to 5m) (1500mm)",
+                "rate": 19204.7,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (5 to 10m) (1500mm)",
+                "rate": 19204.7,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (10 to 15m) (1500mm)",
+                "rate": 19204.7,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (15m to 20m) (1500mm)",
+                "rate": 19204.7,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Medium (Above 20m) (1500mm)",
+                "rate": 19204.7,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (0 to 5m) (1500mm)",
+                "rate": 19550.4,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (5 to 10m) (1500mm)",
+                "rate": 19550.4,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (10 to 15m) (1500mm)",
+                "rate": 19550.4,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (15m to 20m) (1500mm)",
+                "rate": 19550.4,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of bored pile (M35) Small (Above 20m) (1500mm)",
+                "rate": 19550.4,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            }
+        ],
+        "sheetName": "Foundation",
+        "type": "Pile"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Large",
+                "rate": 77952.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Medium",
+                "rate": 78010,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Small",
+                "rate": 78119.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74401.1,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74458.4,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 74567.6,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Concrete Pump) Large (M15)",
+                "rate": 4251.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Concrete Pump) Medium (M15)",
+                "rate": 4257.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Concrete Pump) Small (M15)",
+                "rate": 4280.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Manual Placing) Large (M15)",
+                "rate": 4541.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Manual Placing) Medium (M15)",
+                "rate": 4547.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Plain Cement Concrete (Manual Placing) Small (M15)",
+                "rate": 4570.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M20)",
+                "rate": 5255.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M25)",
+                "rate": 5270.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M30)",
+                "rate": 5315.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M35)",
+                "rate": 5454,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M40)",
+                "rate": 5590.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Concrete Pump) (M45)",
+                "rate": 5627.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M20)",
+                "rate": 5286.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M25)",
+                "rate": 5301.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M30)",
+                "rate": 5346,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M35)",
+                "rate": 5484.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M40)",
+                "rate": 5621.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting of pile cap (Manual Placing) (M45)",
+                "rate": 5657.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Foundation",
+        "type": "Pile cap"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Large",
+                "rate": 78186.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Medium",
+                "rate": 78244,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Small",
+                "rate": 78353.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74635,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74692.4,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 74801.5,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Large (0 to 5)",
+                "rate": 5215.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Large (5 to 7.5)",
+                "rate": 5404.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Large (7.5 to 10)",
+                "rate": 5404.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Large (10 to 12.5)",
+                "rate": 5641.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Large (12.5 to 15)",
+                "rate": 5641.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Medium (0 to 5)",
+                "rate": 5221.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Medium (5 to 7.5)",
+                "rate": 5411,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Medium (7.5 to 10)",
+                "rate": 5411,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Medium (10 to 12.5)",
+                "rate": 5648.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Medium (12.5 to 15)",
+                "rate": 5648.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Small (0 to 5)",
+                "rate": 5247.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Small (5 to 7.5)",
+                "rate": 5437.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Small (7.5 to 10)",
+                "rate": 5437.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Small (10 to 12.5)",
+                "rate": 5676.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M20) Small (12.5 to 15)",
+                "rate": 5676.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Large (0 to 5)",
+                "rate": 5710.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Large (5 to 7.5)",
+                "rate": 5897.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Large (7.5 to 10)",
+                "rate": 5897.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Large (10 to 12.5)",
+                "rate": 6178,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Large (12.5 to 15)",
+                "rate": 6178,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Medium (0 to 5)",
+                "rate": 5716.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Medium (5 to 7.5)",
+                "rate": 5903.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Medium (7.5 to 10)",
+                "rate": 5903.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Medium (10 to 12.5)",
+                "rate": 6184.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Medium (12.5 to 15)",
+                "rate": 6184.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Smalll (0 to 5)",
+                "rate": 5742.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Smalll (5 to 7.5)",
+                "rate": 5930.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Smalll (7.5 to 10)",
+                "rate": 5930.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Smalll (10 to 12.5)",
+                "rate": 6212.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M25) Smalll (12.5 to 15)",
+                "rate": 6212.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Large (0 to 5)",
+                "rate": 5758.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Large (5 to 7.5)",
+                "rate": 5920.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Large (7.5 to 10)",
+                "rate": 5920.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Large (10 to 12.5)",
+                "rate": 6150.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Large (12.5 to 15)",
+                "rate": 6150.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Medium (0 to 5)",
+                "rate": 5764.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Medium (5 to 7.5)",
+                "rate": 5926.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Medium (7.5 to 10)",
+                "rate": 5926.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Medium (10 to 12.5)",
+                "rate": 6157.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Medium (12.5 to 15)",
+                "rate": 6157.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Small (0 to 5)",
+                "rate": 5790.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Small (5 to 7.5)",
+                "rate": 5953.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Small (7.5 to 10)",
+                "rate": 5953.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Small (10 to 12.5)",
+                "rate": 6184.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M30) Small (12.5 to 15)",
+                "rate": 6184.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Large (0 to 5)",
+                "rate": 5904.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Large (5 to 7.5)",
+                "rate": 6033.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Large (7.5 to 10)",
+                "rate": 6033.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Large (10 to 12.5)",
+                "rate": 6227,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Large (12.5 to 15)",
+                "rate": 6227,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Medium (0 to 5)",
+                "rate": 5911,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Medium (5 to 7.5)",
+                "rate": 6040,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Medium (7.5 to 10)",
+                "rate": 6040,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Medium (10 to 12.5)",
+                "rate": 6233.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Medium (12.5 to 15)",
+                "rate": 6233.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Small (0 to 5)",
+                "rate": 5936.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Small (5 to 7.5)",
+                "rate": 6066.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Small (7.5 to 10)",
+                "rate": 6066.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Small (10 to 12.5)",
+                "rate": 6260.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M35) Small (12.5 to 15)",
+                "rate": 6260.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Large (0 to 5)",
+                "rate": 6181.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Large (5 to 7.5)",
+                "rate": 6379.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Large (7.5 to 10)",
+                "rate": 6379.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Large (10 to 12.5)",
+                "rate": 6088,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Large (12.5 to 15)",
+                "rate": 6088,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Medium (0 to 5)",
+                "rate": 6187.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Medium (5 to 7.5)",
+                "rate": 6385.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Medium (7.5 to 10)",
+                "rate": 6385.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Medium (10 to 12.5)",
+                "rate": 6094.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Medium (12.5 to 15)",
+                "rate": 6094.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Small (0 to 5)",
+                "rate": 6214.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Small (5 to 7.5)",
+                "rate": 6413.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Small (7.5 to 10)",
+                "rate": 6413.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Small (10 to 12.5)",
+                "rate": 6120,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M40) Small (12.5 to 15)",
+                "rate": 6120,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Large (0 to 5)",
+                "rate": 6088,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Large (5 to 7.5)",
+                "rate": 6220.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Large (7.5 to 10)",
+                "rate": 6220.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Large (10 to 12.5)",
+                "rate": 6420.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Large (12.5 to 15)",
+                "rate": 6420.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Medium (0 to 5)",
+                "rate": 6094.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Medium (5 to 7.5)",
+                "rate": 6227,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Medium (7.5 to 10)",
+                "rate": 6227,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Medium (10 to 12.5)",
+                "rate": 6426.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Medium (12.5 to 15)",
+                "rate": 6426.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Small (0 to 5)",
+                "rate": 6120,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Small (5 to 7.5)",
+                "rate": 6253.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Small (7.5 to 10)",
+                "rate": 6253.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Small (10 to 12.5)",
+                "rate": 6453.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M45) Small (12.5 to 15)",
+                "rate": 6453.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Large (0 to 5)",
+                "rate": 6899.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Large (5 to 7.5)",
+                "rate": 7049.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Large (7.5 to 10)",
+                "rate": 7049.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Large (10 to 12.5)",
+                "rate": 7275.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Large (12.5 to 15)",
+                "rate": 7275.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Medium (0 to 5)",
+                "rate": 6905.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Medium (5 to 7.5)",
+                "rate": 7055.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Medium (7.5 to 10)",
+                "rate": 7055.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Medium (10 to 12.5)",
+                "rate": 7281.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Medium (12.5 to 15)",
+                "rate": 7281.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Small (0 to 5)",
+                "rate": 6931.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Small (5 to 7.5)",
+                "rate": 7082.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Small (7.5 to 10)",
+                "rate": 7082.3,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Small (10 to 12.5)",
+                "rate": 7309.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier (M50) Small (12.5 to 15)",
+                "rate": 7309.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Sub Structure",
+        "type": "Pier"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Large",
+                "rate": 78186.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Medium",
+                "rate": 78244,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Small",
+                "rate": 78353.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74635,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74692.4,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 74801.5,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M20) Large",
+                "rate": 5215.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M20) Medium",
+                "rate": 5221.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M20) Small",
+                "rate": 5247.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M25) Large",
+                "rate": 5710.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M25) Medium",
+                "rate": 5716.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M25) Small",
+                "rate": 5742.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M30) Large",
+                "rate": 5758.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M30) Medium",
+                "rate": 5764.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M30) Small",
+                "rate": 5790.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M35) Large",
+                "rate": 5904.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M35) Medium",
+                "rate": 5911,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M35) Small",
+                "rate": 5936.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap(M40) Large",
+                "rate": 6181.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap(M40) Medium",
+                "rate": 6187.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap(M40) Small",
+                "rate": 6214.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M45) Large",
+                "rate": 6088,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M45) Medium",
+                "rate": 6094.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M45) Small",
+                "rate": 6120,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M50) Large",
+                "rate": 6899.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M50) Medium",
+                "rate": 6905.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pier Cap (M50) Small",
+                "rate": 6931.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Sub Structure",
+        "type": "Pier Cap"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Large",
+                "rate": 78186.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Medium",
+                "rate": 78244,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (Mild Steel) Small",
+                "rate": 78353.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74635,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74692.4,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 74801.5,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M20) Large",
+                "rate": 5215.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M20) Medium",
+                "rate": 5221.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M20) Small",
+                "rate": 5247.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M25) Large",
+                "rate": 5710.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M25) Medium",
+                "rate": 5716.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M25) Small",
+                "rate": 5742.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M30) Large",
+                "rate": 5758.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M30) Medium",
+                "rate": 5764.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M30) Small",
+                "rate": 5790.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M35) Large",
+                "rate": 5904.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M35) Medium",
+                "rate": 5911,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M35) Small",
+                "rate": 5936.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal(M40) Large",
+                "rate": 6181.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M40) Medium",
+                "rate": 6187.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M40) Small",
+                "rate": 6214.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M45) Large",
+                "rate": 6088,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M45) Medium",
+                "rate": 6094.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M45) Small",
+                "rate": 6120,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M50) Large",
+                "rate": 6899.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M50) Medium",
+                "rate": 6905.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Pedestal (M50) Small",
+                "rate": 6931.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Sub Structure",
+        "type": "Pedestal"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Cast Steel Rocker bearing",
+                "rate": 458.7,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Forged Steel Rocker Bearing",
+                "rate": 255.9,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Sliding plate bearing with PTFE surface sliding",
+                "rate": 219.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Sliding plate bearing with stainless steel plate",
+                "rate": 196.5,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "POT- PTFE bearing",
+                "rate": 193.8,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            }
+        ],
+        "sheetName": "Sub Structure",
+        "type": "Bearings"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Tendon  and Ancillaries",
+                "rate": 150364,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74868.8,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74926.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 75035.3,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Structural Steel main Girder",
+                "rate": 131732.1,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Precast Pretensioned Girders (M40 Concrete - HYSD rebars) Large",
+                "rate": 30013.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Precast Pretensioned Girders (M40 Concrete - HYSD rebars) Medium",
+                "rate": 40974.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Precast Pretensioned Girders (M40 Concrete - HYSD rebars) Small",
+                "rate": 51955.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Super Structure",
+        "type": "Girder"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74868.8,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74926.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 75035.3,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Large (0 to 5)",
+                "rate": 6271.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Large (5 to 7.5)",
+                "rate": 6536.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Large (7.5 to 10)",
+                "rate": 6536.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Large (10 to 12.5)",
+                "rate": 6802.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Large (12.5 to 15)",
+                "rate": 6802.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Medium (0 to 5)",
+                "rate": 6277.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Medium (5 to 7.5)",
+                "rate": 6543.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Medium (7.5 to 10)",
+                "rate": 6543.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Medium (10 to 12.5)",
+                "rate": 6809.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Medium (12.5 to 15)",
+                "rate": 6809.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Small (0 to 5)",
+                "rate": 6305.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Small (5 to 7.5)",
+                "rate": 6572.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Small (7.5 to 10)",
+                "rate": 6572.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Small (10 to 12.5)",
+                "rate": 6839.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M35) Small (12.5 to 15)",
+                "rate": 6839.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Large  (0 to 5)",
+                "rate": 6426.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Large  (5 to 7.5)",
+                "rate": 6698.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Large  (7.5 to 10)",
+                "rate": 6698.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Large  (10 to 12.5)",
+                "rate": 6970.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Large  (12.5 to 15)",
+                "rate": 6970.7,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Medium (0 to 5)",
+                "rate": 6432.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Medium (5 to 7.5)",
+                "rate": 6705.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Medium (7.5 to 10)",
+                "rate": 6705.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Medium (10 to 12.5)",
+                "rate": 6977.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Medium (12.5 to 15)",
+                "rate": 6977.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Small (0 to 5)",
+                "rate": 6460.4,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Small (5 to 7.5)",
+                "rate": 6734.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Small (7.5 to 10)",
+                "rate": 6734.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Small (10 to 12.5)",
+                "rate": 7007.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M40) Small (12.5 to 15)",
+                "rate": 7007.8,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Large  (0 to 5)",
+                "rate": 6357.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Large  (5 to 7.5)",
+                "rate": 6631.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Large  (7.5 to 10)",
+                "rate": 6631.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Large  (10 to 12.5)",
+                "rate": 6906,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Large  (12.5 to 15)",
+                "rate": 6906,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Medium (0 to 5)",
+                "rate": 6364.2,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Medium (5 to 7.5)",
+                "rate": 6638.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Medium (7.5 to 10)",
+                "rate": 6638.5,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Medium (10 to 12.5)",
+                "rate": 6912.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Medium (12.5 to 15)",
+                "rate": 6912.9,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Small (0 to 5)",
+                "rate": 6391.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Small (5 to 7.5)",
+                "rate": 6667.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Small (7.5 to 10)",
+                "rate": 6667.1,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Small (10 to 12.5)",
+                "rate": 6942.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 2400,
+                "name": "Concreting in Deck Slab (M45) Small (12.5 to 15)",
+                "rate": 6942.6,
+                "rate_src": "Bihar SOR",
+                "unit": "cum"
+            }
+        ],
+        "sheetName": "Super Structure",
+        "type": "Deck Slab"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Large",
+                "rate": 74868.8,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Medium",
+                "rate": 74926.2,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            },
+            {
+                "carbon_emission": 2.6,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Rebar (HYSD) Small",
+                "rate": 75035.3,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            }
+        ],
+        "sheetName": "Super Structure",
+        "type": "Diaphragm"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1000,
+                "name": "Steel Cross Bracing",
+                "rate": 131732.1,
+                "rate_src": "Bihar SOR",
+                "unit": "MT"
+            }
+        ],
+        "sheetName": "Super Structure",
+        "type": "Cross Bracings"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.5,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 9.577,
+                "name": "Mild Steel railing",
+                "rate": 3758.7,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "Precast RCC Railing (M30) Large",
+                "rate": 1903.6,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "Precast RCC Railing (M30) Medium",
+                "rate": 1905.2,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "Precast RCC Railing (M30) Small",
+                "rate": 1909.5,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "RCC Railing (M30) Large",
+                "rate": 1843.9,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "RCC Railing (M30) Medium",
+                "rate": 1845.4,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 204.9,
+                "name": "RCC Railing (M30) Small",
+                "rate": 1849.7,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Crash Barrier (Height-900 mm) Large",
+                "rate": 3434.9,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Crash Barrier (Height-900 mm) Medium",
+                "rate": 3437.8,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Crash Barrier (Height-900 mm) Small",
+                "rate": 3447.4,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 715.2,
+                "name": "Crash Barrier (Height-1100 mm) Large",
+                "rate": 4015,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 715.2,
+                "name": "Crash Barrier (Height-1100 mm) Medium",
+                "rate": 4018.4,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 715.2,
+                "name": "Crash Barrier (Height-1100 mm) Small",
+                "rate": 4029.7,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1233.6,
+                "name": "Crash Barrier (Heigth-1500 mm) Large",
+                "rate": 6918.6,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1233.6,
+                "name": "Crash Barrier (Heigth-1500 mm) Medium",
+                "rate": 6924.6,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 1233.6,
+                "name": "Crash Barrier (Heigth-1500 mm) Small",
+                "rate": 6944,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Median (Height-900 mm) Large",
+                "rate": 3434.9,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Median (Height-900 mm) Medium",
+                "rate": 3437.8,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            },
+            {
+                "carbon_emission": 0.11,
+                "carbon_emission_src": "IFC",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 609.6,
+                "name": "Median (Height-900 mm) Small",
+                "rate": 3447.4,
+                "rate_src": "Bihar SOR",
+                "unit": "RMT"
+            }
+        ],
+        "sheetName": "Miscellaneous",
+        "type": "Railing & Crash Barrier & Median"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 2.8,
+                "carbon_emission_src": "not_available",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": 58.5,
+                "name": "Drainage Spouts (GI Pipe-100 mm)",
+                "rate": 5588.7,
+                "rate_src": "Bihar SOR",
+                "unit": "number"
+            }
+        ],
+        "sheetName": "Miscellaneous",
+        "type": "Drainage"
+    },
+    {
+        "data": [
+            {
+                "carbon_emission": 16.2,
+                "carbon_emission_src": "ICE",
+                "carbon_emission_units_den": "m2",
+                "conversion_factor": 0.12,
+                "name": "Asphalt wearing course (12mm)",
+                "rate": 486.6,
+                "rate_src": "Bihar SOR",
+                "unit": "m2"
+            },
+            {
+                "carbon_emission": 2.547,
+                "carbon_emission_src": "ICE",
+                "carbon_emission_units_den": "kg",
+                "conversion_factor": "not_available",
+                "name": "Strip Seal Expansion Joint (Catering to maximum horizontal movement upto 70mm)",
+                "rate": 13860.9,
+                "rate_src": "Bihar SOR",
+                "unit": "Rmt"
+            }
+        ],
+        "sheetName": "Miscellaneous",
+        "type": "Asphalt, Utilities and Other Materials"
+    }
+]

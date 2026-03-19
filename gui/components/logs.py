@@ -109,14 +109,14 @@ class Logs(QWidget):
         # Update health badge
         report = self.controller.get_health_report()
         if report:
-            shards = report.get("shards_count", 0)
-            backups = report.get("backups_count", 0)
-            checkpoints = report.get("checkpoints_count", 0)
+            chunks = report.get("chunk_count", 0)
+            checkpoints = report.get("checkpoint_count", 0)
             pending = report.get("pending_syncs", 0)
-            self.health_label.setText(
-                f"Shards: {shards}  |  Backups: {backups}  |  "
-                f"Checkpoints: {checkpoints}  |  Pending: {pending}"
-            )
+            wal = "WAL" if report.get("wal_exists") else ""
+            parts = [f"Chunks: {chunks}", f"Checkpoints: {checkpoints}", f"Pending: {pending}"]
+            if wal:
+                parts.append(wal)
+            self.health_label.setText("  |  ".join(parts))
 
     def _clear_display(self):
         """Clears the display (does not clear the engine's log_history)."""

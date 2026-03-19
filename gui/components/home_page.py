@@ -5,7 +5,12 @@ Home screen for the LCCA application.
 """
 
 import os
-from PySide6.QtCore import Qt, QSize, QPoint, QRect, QTimer
+import re
+import json
+import shutil
+import hashlib
+import zipfile
+from PySide6.QtCore import Qt, QSize, QPoint, QRect, QTimer, Signal
 from PySide6.QtGui import QFont, QColor, QPainter, QBrush, QPen
 from PySide6.QtWidgets import (
     QWidget,
@@ -18,6 +23,12 @@ from PySide6.QtWidgets import (
     QFrame,
     QSizePolicy,
     QMessageBox,
+    QInputDialog,
+    QFileDialog,
+    QDialog,
+    QFormLayout,
+    QMenu,
+    QApplication,
     QAbstractItemView,
     QStyledItemDelegate,
     QStyleOptionViewItem,
@@ -45,6 +56,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
       - Display name (bold)
       - Modified / Created dates (muted)
       - Status badge (coloured pill, top-right)
+      - ⋮ button at far right
     """
 
     CARD_HEIGHT = 72
@@ -53,9 +65,17 @@ class ProjectCardDelegate(QStyledItemDelegate):
     BADGE_PADDING = 6
     BADGE_H = 18
     RADIUS = 6
+    DOT_SIZE = 20
 
     def sizeHint(self, option, index):
         return QSize(option.rect.width(), self.CARD_HEIGHT)
+
+    @staticmethod
+    def _dot_rect(card_rect: QRect) -> QRect:
+        size = ProjectCardDelegate.DOT_SIZE
+        x = card_rect.right() - size - 6
+        y = card_rect.top() + (card_rect.height() - size) // 2
+        return QRect(x, y, size, size)
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
 
@@ -83,7 +103,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
 
-        # ── Status badge ──────────────────────────────────────────────────────
+        # ── Status badge (shifted left to make room for ⋮ button) ─────────────
         status = data.get("status", "ok") if data else "ok"
         cfg = STATUS_CONFIG.get(status, STATUS_CONFIG["ok"])
         badge_text = cfg["label"]
@@ -97,7 +117,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
         fm = painter.fontMetrics()
         badge_w = fm.horizontalAdvance(badge_text) + self.BADGE_PADDING * 2
         badge_rect = QRect(
-            rect.right() - badge_w - self.PADDING_H,
+            rect.right() - badge_w - self.PADDING_H - self.DOT_SIZE - 4,
             rect.top() + self.PADDING_V,
             badge_w,
             self.BADGE_H,
@@ -130,7 +150,6 @@ class ProjectCardDelegate(QStyledItemDelegate):
         name_font.setBold(True)
         painter.setFont(name_font)
         painter.setPen(text_col)
-        # print(data)
         name = (data.get("display_name") or "Unnamed") if data else "Unnamed"
         name_fm = painter.fontMetrics()
         name_text = name_fm.elidedText(name, Qt.ElideRight, text_maxw)
@@ -156,6 +175,14 @@ class ProjectCardDelegate(QStyledItemDelegate):
         if parts:
             painter.drawText(QPoint(text_x, sub_y), "   ·   ".join(parts))
 
+        # ── Three-dot button ──────────────────────────────────────────────────
+        dot_rect = self._dot_rect(rect)
+        dot_font = QFont()
+        dot_font.setPointSize(11)
+        painter.setFont(dot_font)
+        painter.setPen(muted_col)
+        painter.drawText(dot_rect, Qt.AlignCenter, "⋮")
+
         painter.restore()
 
 
@@ -169,6 +196,30 @@ class ProjectListItem(QListWidgetItem):
         self.display_name = project_info.get("display_name", self.project_id)
         self.setData(Qt.UserRole, project_info)
         self.setSizeHint(QSize(0, ProjectCardDelegate.CARD_HEIGHT))
+
+
+# ── List widget with ⋮ click detection ───────────────────────────────────────
+
+
+class ProjectListWidget(QListWidget):
+    """QListWidget that detects clicks on the ⋮ button of each card."""
+
+    menu_requested = Signal(str, QPoint)  # project_id, global pos
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                item = self.item(index.row())
+                if isinstance(item, ProjectListItem):
+                    item_rect = self.visualRect(index)
+                    card_rect = item_rect.adjusted(6, 3, -6, -3)
+                    dot_rect = ProjectCardDelegate._dot_rect(card_rect)
+                    if dot_rect.contains(event.pos()):
+                        global_pos = self.viewport().mapToGlobal(event.pos())
+                        self.menu_requested.emit(item.project_id, global_pos)
+                        return
+        super().mousePressEvent(event)
 
 
 # ── Home page ─────────────────────────────────────────────────────────────────
@@ -209,7 +260,7 @@ class HomePage(QWidget):
         bar.setFrameShape(QFrame.StyledPanel)
         bar.setFixedHeight(64)
 
-        layout = QHBoxLayout(bar)  # keep horizontal layout
+        layout = QHBoxLayout(bar)
         layout.setContentsMargins(28, 0, 28, 0)
 
         # ── Title ───────────────────────────────────────────────
@@ -219,7 +270,7 @@ class HomePage(QWidget):
         f.setBold(True)
         title.setFont(f)
         layout.addWidget(title)
-        layout.addStretch()  # same as original
+        layout.addStretch()
 
         # ── Subtitle ────────────────────────────────────────────
         if special_effect:
@@ -231,39 +282,29 @@ class HomePage(QWidget):
                 "📖 Every project tells a story make yours count.",
             ]
 
-            # Subtitle label
             subtitle = QLabel(quotes[0])
             sub_f = QFont()
             sub_f.setPointSize(8)
             subtitle.setFont(sub_f)
             subtitle.setEnabled(True)
-
-            # Allow multi-line wrapping
             subtitle.setWordWrap(True)
-
-            # Fix the maximum width to keep header stable
             subtitle.setFixedWidth(250)
-
-            # Ensure it expands vertically if needed
             subtitle.setSizePolicy(
-                subtitle.sizePolicy().horizontalPolicy(),  # keep horizontal policy as is
-                subtitle.sizePolicy().verticalPolicy(),  # vertical can expand with text
+                subtitle.sizePolicy().horizontalPolicy(),
+                subtitle.sizePolicy().verticalPolicy(),
             )
-
             layout.addWidget(subtitle)
 
-            # Rotate quotes every 5 seconds (special effect)
             index = {"value": 0}
 
             def update_quote():
                 index["value"] = (index["value"] + 1) % len(quotes)
                 subtitle.setText(quotes[index["value"]])
 
-            timer = QTimer(subtitle)  # attach to label for auto-cleanup
+            timer = QTimer(subtitle)
             timer.timeout.connect(update_quote)
             timer.start(5000)
         else:
-            # default static subtitle
             subtitle = QLabel("Life Cycle Cost Analysis")
             sub_f = QFont()
             sub_f.setPointSize(10)
@@ -292,7 +333,15 @@ class HomePage(QWidget):
         self.btn_new.clicked.connect(lambda: self.manager.open_project(is_new=True))
         layout.addWidget(self.btn_new)
 
-        layout.addSpacing(32)
+        layout.addSpacing(8)
+
+        self.btn_load = QPushButton("📂  Load Shared Project...")
+        self.btn_load.setFixedHeight(36)
+        self.btn_load.setToolTip("Import a .3psLCCA archive shared by someone else")
+        self.btn_load.clicked.connect(self._load_shared_project)
+        layout.addWidget(self.btn_load)
+
+        layout.addSpacing(24)
         layout.addWidget(self._divider())
         layout.addSpacing(24)
 
@@ -309,13 +358,14 @@ class HomePage(QWidget):
         layout.addLayout(row)
         layout.addSpacing(8)
 
-        # Project list with card delegate
-        self.project_list = QListWidget()
+        # Project list with card delegate and ⋮ detection
+        self.project_list = ProjectListWidget()
         self.project_list.setMinimumHeight(240)
         self.project_list.setItemDelegate(ProjectCardDelegate())
         self.project_list.setMouseTracking(True)
         self.project_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.project_list.itemDoubleClicked.connect(self._open_selected)
+        self.project_list.menu_requested.connect(self._show_card_menu)
         layout.addWidget(self.project_list)
 
         layout.addSpacing(10)
@@ -388,6 +438,13 @@ class HomePage(QWidget):
         line.setFrameShadow(QFrame.Sunken)
         return line
 
+    def _item_for_pid(self, pid: str) -> "ProjectListItem | None":
+        for i in range(self.project_list.count()):
+            item = self.project_list.item(i)
+            if isinstance(item, ProjectListItem) and item.project_id == pid:
+                return item
+        return None
+
     # ── Public API ────────────────────────────────────────────────────────────
 
     def set_active_project(self, project_id: str | None):
@@ -411,7 +468,6 @@ class HomePage(QWidget):
             reverse=True,
         )
 
-        # Build a map of open projects: id -> window
         open_windows = {
             win.project_id: win
             for win in self.manager.windows
@@ -432,12 +488,11 @@ class HomePage(QWidget):
                 pid = p["project_id"]
                 if pid in open_windows:
                     p["status"] = "locked"
-                    # Use in-memory display name — more up to date than disk
                     mem_name = open_windows[pid].controller.active_display_name
                     if mem_name:
                         p["display_name"] = mem_name
                 elif p["status"] == "locked":
-                    p["status"] = "ok"  # stale lock, project not open here
+                    p["status"] = "ok"
 
                 self.project_list.addItem(ProjectListItem(p))
 
@@ -453,6 +508,311 @@ class HomePage(QWidget):
         pid = self._selected_pid()
         if pid:
             self.manager.open_project(project_id=pid)
+
+    # ── Three-dot menu ────────────────────────────────────────────────────────
+
+    def _show_card_menu(self, pid: str, global_pos: QPoint):
+        item = self._item_for_pid(pid)
+        display = item.display_name if item else pid
+
+        menu = QMenu(self)
+        menu.addAction("Copy Name", lambda: self._copy_name(display))
+        menu.addAction("Share / Export...", lambda: self._share_project(pid, display))
+        menu.addSeparator()
+        menu.addAction("Rename", lambda: self._rename_by_pid(pid, display))
+        menu.addAction("Info", lambda: self._show_project_info(pid))
+        menu.exec(global_pos)
+
+    def _copy_name(self, display: str):
+        QApplication.clipboard().setText(display)
+
+    def _share_project(self, pid: str, display: str):
+        if self.manager.is_project_open(pid):
+            QMessageBox.warning(
+                self,
+                "Cannot Export",
+                "This project is currently open in a window.\n\n"
+                "Close it first, then export it.",
+            )
+            return
+
+        dest, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export Project",
+            f"{display}.3psLCCA",
+            "3psLCCA Archive (*.3psLCCA)",
+        )
+        if not dest:
+            return
+
+        engine, status = SafeChunkEngine.open(pid)
+        if status != "SUCCESS" or engine is None:
+            QMessageBox.warning(
+                self,
+                "Export Failed",
+                f"Could not open project for export.\n\n{status}",
+            )
+            return
+
+        zip_name = engine.create_checkpoint(
+            label="export",
+            notes=f"Exported from 3psLCCA",
+            include_blobs=True,
+        )
+        if zip_name is None:
+            engine.detach()
+            QMessageBox.warning(
+                self,
+                "Export Failed",
+                "Could not create the export archive.",
+            )
+            return
+
+        src = engine.checkpoint_manual / zip_name
+        engine.detach()
+
+        try:
+            shutil.copy2(str(src), dest)
+            QMessageBox.information(
+                self,
+                "Export Complete",
+                f"Project exported to:\n{dest}",
+            )
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Export Failed",
+                f"Could not save archive to destination:\n{e}",
+            )
+
+    def _rename_by_pid(self, pid: str, current_name: str):
+        if self.manager.is_project_open(pid):
+            QMessageBox.warning(
+                self,
+                "Cannot Rename",
+                "This project is currently open in a window.\n\n"
+                "Close it first, then rename it.",
+            )
+            return
+
+        new_name, ok = QInputDialog.getText(
+            self,
+            "Rename Project",
+            "New name:",
+            text=current_name,
+        )
+        new_name = new_name.strip()
+        if not ok or not new_name or new_name == current_name:
+            return
+
+        engine, status = SafeChunkEngine.open(pid)
+        if status != "SUCCESS" or engine is None:
+            QMessageBox.warning(
+                self,
+                "Rename Failed",
+                f"Could not open project to rename it.\n\n{status}",
+            )
+            return
+
+        engine.rename(new_name)
+        engine.detach()
+        self.manager.refresh_all_home_screens()
+
+    def _load_shared_project(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Shared Project",
+            "",
+            "3psLCCA Archive (*.3psLCCA)",
+        )
+        if not path:
+            return
+
+        # ── Validate archive ──────────────────────────────────────────────
+        if not zipfile.is_zipfile(path):
+            QMessageBox.warning(
+                self,
+                "Invalid File",
+                "The selected file is not a valid 3psLCCA archive.\n\n"
+                "Make sure you are opening a file exported from 3psLCCA.",
+            )
+            return
+
+        # ── Read metadata from archive ────────────────────────────────────
+        try:
+            with zipfile.ZipFile(path, "r") as zf:
+                names = zf.namelist()
+
+                # ── Authenticate as genuine 3psLCCA archive ───────────────
+                # checkpoint_meta.json is always written by the engine and
+                # contains our engine-specific fields.  A random ZIP renamed
+                # to .3psLCCA will lack these.
+                if "checkpoint_meta.json" not in names:
+                    QMessageBox.warning(
+                        self,
+                        "Invalid Archive",
+                        "This file does not appear to be a valid 3psLCCA project archive.\n\n"
+                        "It is missing the required checkpoint metadata.",
+                    )
+                    return
+
+                meta = json.loads(zf.read("checkpoint_meta.json").decode("utf-8"))
+
+                # engine_ver is written by SafeChunkEngine — must be present
+                if not meta.get("engine_ver"):
+                    QMessageBox.warning(
+                        self,
+                        "Invalid Archive",
+                        "This file does not appear to be a valid 3psLCCA project archive.\n\n"
+                        "The checkpoint metadata is missing the engine signature.",
+                    )
+                    return
+
+                # project_id must be a non-empty string
+                archive_pid = meta.get("project_id", "")
+                if not isinstance(archive_pid, str) or not archive_pid.strip():
+                    QMessageBox.warning(
+                        self,
+                        "Invalid Archive",
+                        "This file does not appear to be a valid 3psLCCA project archive.\n\n"
+                        "The checkpoint metadata does not contain a valid project ID.",
+                    )
+                    return
+
+                # ── Binary chunk magic check ──────────────────────────────
+                # Every .lcca chunk file starts with MAGIC b"\x4c\x43\x43\x41"
+                # ("LCCA") followed by zlib-compressed JSON.  Readable mode is
+                # disabled in production, so any genuine archive must have this.
+                LCCA_MAGIC = b"\x4c\x43\x43\x41"
+                chunk_entries = [n for n in names if n.startswith("chunks/") and n.endswith(".lcca")]
+                if chunk_entries:
+                    first_chunk = zf.read(chunk_entries[0])
+                    if first_chunk[:4] != LCCA_MAGIC:
+                        QMessageBox.warning(
+                            self,
+                            "Invalid Archive",
+                            "This file does not appear to be a valid 3psLCCA project archive.\n\n"
+                            "The chunk data does not match the expected binary format.",
+                        )
+                        return
+
+                display_name = None
+                if "version.json" in names:
+                    data = json.loads(zf.read("version.json").decode("utf-8"))
+                    # version.json must also carry engine_version to be genuine
+                    if not data.get("engine_version"):
+                        QMessageBox.warning(
+                            self,
+                            "Invalid Archive",
+                            "This file does not appear to be a valid 3psLCCA project archive.\n\n"
+                            "The project metadata is missing the engine version.",
+                        )
+                        return
+                    display_name = (data.get("display_name") or data.get("project_id") or "").strip()
+                if not display_name:
+                    display_name = archive_pid.strip()
+
+        except zipfile.BadZipFile:
+            QMessageBox.warning(
+                self,
+                "Invalid File",
+                "The selected file could not be opened as a 3psLCCA archive.\n\n"
+                "The file may be corrupted or was not exported from 3psLCCA.",
+            )
+            return
+        except Exception as e:
+            QMessageBox.warning(self, "Load Failed", f"Unexpected error reading archive:\n{e}")
+            return
+
+        display_name = display_name or "Imported Project"
+        project_id = re.sub(r"[^\w\-]", "_", display_name)[:40].strip("_") or "imported_project"
+
+        # ── Create blank project ──────────────────────────────────────────
+        engine, status = SafeChunkEngine.new(
+            project_id=project_id,
+            display_name=display_name,
+        )
+        if status != "SUCCESS" or engine is None:
+            QMessageBox.warning(self, "Load Failed", f"Could not create project:\n{status}")
+            return
+
+        pid = engine.project_id
+
+        # ── Copy archive into project's checkpoint_manual folder ──────────
+        zip_name = os.path.basename(path)
+        dest_zip = engine.checkpoint_manual / zip_name
+        try:
+            shutil.copy2(path, dest_zip)
+            sha = hashlib.sha256(dest_zip.read_bytes()).hexdigest()
+            (engine.checkpoint_manual / f"{zip_name}.sha256").write_text(sha)
+        except Exception as e:
+            engine.detach()
+            QMessageBox.warning(self, "Load Failed", f"Could not copy archive:\n{e}")
+            return
+
+        # ── Restore from checkpoint ───────────────────────────────────────
+        success = engine.restore_checkpoint(zip_name)
+        engine.detach()
+
+        if not success:
+            QMessageBox.warning(
+                self, "Load Failed",
+                "Archive could not be restored. It may be corrupt or incompatible."
+            )
+            return
+
+        self.manager.refresh_all_home_screens()
+
+        result = QMessageBox.question(
+            self,
+            "Project Loaded",
+            f"'{display_name}' loaded successfully.\n\nOpen it now?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
+        )
+        if result == QMessageBox.Yes:
+            self.manager.open_project(project_id=pid)
+
+    def _show_project_info(self, pid: str):
+        info = SafeChunkEngine.get_project_info(pid)
+        if not info:
+            QMessageBox.warning(self, "Info", "Could not read project info.")
+            return
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Project Info — {info.get('display_name', pid)}")
+        dlg.setMinimumWidth(360)
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
+
+        form = QFormLayout()
+        form.setSpacing(6)
+        rows = [
+            ("Project ID",       info.get("project_id", "")),
+            ("Display Name",     info.get("display_name", "")),
+            ("Status",           info.get("status", "").capitalize()),
+            ("Created",          info.get("created_at", "—")),
+            ("Last Modified",    info.get("last_modified", "—")),
+            ("Chunks",           str(info.get("chunk_count", 0))),
+            ("Checkpoints",      str(info.get("checkpoint_count", 0))),
+            ("Last Checkpoint",  info.get("last_checkpoint_date") or "—"),
+            ("Size",             f"{info.get('size_kb', 0)} KB"),
+            ("Clean Close",      "Yes" if info.get("clean_close") else "No"),
+            ("Engine Version",   info.get("engine_version", "—")),
+        ]
+        for label, value in rows:
+            lbl = QLabel(value)
+            lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            form.addRow(f"{label}:", lbl)
+
+        layout.addLayout(form)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(dlg.accept)
+        layout.addWidget(close_btn)
+
+        dlg.exec()
 
     def _delete_selected(self):
         pid = self._selected_pid()

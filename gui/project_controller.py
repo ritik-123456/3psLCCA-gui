@@ -29,7 +29,6 @@ class ProjectController(QObject):
         project_id: str,
         is_new: bool = False,
         display_name: str = None, # type: ignore
-        readable: bool = True,
     ) -> bool:
         if self.engine:
             self.close_project()
@@ -38,7 +37,7 @@ class ProjectController(QObject):
             self.engine, status = SafeChunkEngine.new(
                 project_id,
                 display_name=display_name,
-                readable=readable,
+                readable=False,
             )
         else:
             self.engine, status = SafeChunkEngine.open(project_id)
@@ -120,9 +119,19 @@ class ProjectController(QObject):
     def list_checkpoints(self) -> list:
         return self.engine.list_checkpoints() if self.engine else []
 
+    def delete_checkpoint(self, zip_name: str) -> bool:
+        if self.engine and self.engine.is_active():
+            return self.engine.delete_checkpoint(zip_name)
+        return False
+
     # --------------------------------------------------------------------------
     # ROLLBACK
     # --------------------------------------------------------------------------
+
+    def list_chunks(self) -> list[str]:
+        if self.engine and self.engine.is_active():
+            return self.engine.list_chunks()
+        return []
 
     def get_rollback_options(self, chunk_name: str) -> list:
         """Returns available rollback copies for a chunk."""

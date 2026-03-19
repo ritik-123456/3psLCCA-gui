@@ -185,6 +185,7 @@ class OutputsPage(ScrollableForm):
             results = run_full_lcc_analysis(
                 data_object, life_cycle_construction_cost_breakdown, wpi=wpi_metadata, debug=True
             )
+            print(results)
             self._last_all_data = all_data
             self._last_lcc_breakdown = life_cycle_construction_cost_breakdown
             self._show_calculation_success(results)
@@ -320,18 +321,6 @@ class OutputsPage(ScrollableForm):
         """
         carbon_emissions  = data.get("carbon_emission_data")
         carbon_cost_per_kg = carbon_emissions.get("social_cost_data").get("result").get("cost_of_carbon_local")
-
-        diversion = carbon_emissions.get("diversion_emissions", {})
-        if diversion.get("mode") == "Calculate by Vehicle":
-            diversion_kgCO2e_per_day = float(diversion.get("total_calculated_emissions", 0.0))
-        else:
-            diversion_kgCO2e_per_day = float(diversion.get("total_direct_emissions", 0.0))
-
-        _bridge = data.get("bridge_data", {})
-        construction_days = (
-            float(_bridge.get("duration_construction_months", 0))
-            * float(_bridge.get("days_per_month", 30))
-        )
 
         total_kgCO2e = (
               float(carbon_emissions.get("material_emissions_data").get("total_kgCO2e"))    # Embodied carbon of materials used
@@ -510,47 +499,48 @@ class OutputsPage(ScrollableForm):
             #------------------------------------Traffic-and-Road-Data-India-Start--------------------------------------------
             _traffic_road_data = data.get("traffic_and_road_data")
             _traffic_vehicle_data = _traffic_road_data.get("vehicle_data")
-            _emission_factors = data.get("carbon_emission_data").get("diversion_emissions").get("emission_factors")
+            _ef = data.get("carbon_emission_data", {}).get("diversion_emissions", {}).get("emission_factors", {})
+            _emission_factors = {k: float(v or 0.0) for k, v in _ef.items()}
 
             small_cars    = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("small_cars").get("vehicles_per_day")),
-                                float(_emission_factors.get("small_cars")),
+                                _emission_factors.get("small_cars", 0.0),
                                 float(_traffic_vehicle_data.get("small_cars").get("accident_percentage"))
                             )
             big_cars      = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("big_cars").get("vehicles_per_day")),
-                                float(_emission_factors.get("big_cars")),
+                                _emission_factors.get("big_cars", 0.0),
                                 float(_traffic_vehicle_data.get("big_cars").get("accident_percentage"))
                             )
             two_wheelers  = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("two_wheelers").get("vehicles_per_day")),
-                                float(_emission_factors.get("two_wheelers")),
+                                _emission_factors.get("two_wheelers", 0.0),
                                 float(_traffic_vehicle_data.get("two_wheelers").get("accident_percentage"))
                             )
             o_buses       = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("o_buses").get("vehicles_per_day")),
-                                float(_emission_factors.get("o_buses")),
+                                _emission_factors.get("o_buses", 0.0),
                                 float(_traffic_vehicle_data.get("o_buses").get("accident_percentage"))
                             )
             d_buses       = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("d_buses").get("vehicles_per_day")),
-                                float(_emission_factors.get("d_buses")),
+                                _emission_factors.get("d_buses", 0.0),
                                 float(_traffic_vehicle_data.get("d_buses").get("accident_percentage"))
                             )
             lcv           = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("lcv").get("vehicles_per_day")),
-                                float(_emission_factors.get("lcv")),
+                                _emission_factors.get("lcv", 0.0),
                                 float(_traffic_vehicle_data.get("lcv").get("accident_percentage"))
                             )
             hcv           = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("hcv").get("vehicles_per_day")),
-                                float(_emission_factors.get("hcv")),
+                                _emission_factors.get("hcv", 0.0),
                                 float(_traffic_vehicle_data.get("hcv").get("accident_percentage")),
                                 pwr=float(_traffic_vehicle_data.get("hcv").get("pwr"))
                             )
             mcv           = VehicleMetaData(
                                 int(_traffic_vehicle_data.get("mcv").get("vehicles_per_day")),
-                                float(_emission_factors.get("mcv")),
+                                _emission_factors.get("mcv", 0.0),
                                 float(_traffic_vehicle_data.get("mcv").get("accident_percentage")),
                                 pwr=float(_traffic_vehicle_data.get("mcv").get("pwr"))
                             )
@@ -613,7 +603,11 @@ class OutputsPage(ScrollableForm):
             )
         else:
             #------------------------------------Traffic-and-Road-Data-Global-Start--------------------------------------------
-            total_vehicular_carbon_emission = float(data.get("carbon_emission_data").get("transport_emissions_data").get("total_kgCO2e"))
+            _diversion = data.get("carbon_emission_data", {}).get("diversion_emissions", {})
+            if _diversion.get("mode") == "Calculate by Vehicle":
+                total_vehicular_carbon_emission = float(_diversion.get("total_calculated_emissions", 0.0))
+            else:
+                total_vehicular_carbon_emission = float(_diversion.get("total_direct_emissions", 0.0))
             total_daily_ruc = float(data.get("traffic_and_road_data").get("road_user_cost_per_day"))
             
             daily_road_user_cost_with_vehicular_emissions=DailyRoadUserCost(

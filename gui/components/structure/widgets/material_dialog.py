@@ -493,6 +493,17 @@ def _list_sor_types(db_keys: list = None) -> list[str]:
         return []
 
 
+_REQUIRED_ITEM_KEYS = (
+    "name", "unit", "rate", "rate_src",
+    "carbon_emission", "carbon_emission_units_den",
+    "conversion_factor", "carbon_emission_src",
+)
+
+def _validate_item(item: dict) -> bool:
+    """Return True if item has all required schema keys and is usable."""
+    return all(k in item for k in _REQUIRED_ITEM_KEYS)
+
+
 def _load_material_suggestions(db_keys: list = None, comp_name: str = None) -> dict:
     _ensure_registry_on_path()
 
@@ -529,6 +540,9 @@ def _load_material_suggestions(db_keys: list = None, comp_name: str = None) -> d
 
             if comp_lower:
                 for item in engine._iter_items():
+                    if not _validate_item(item):
+                        print(f"[MaterialDialog] Skipping item with missing schema keys: {item.get('name', '<unnamed>')}")
+                        continue
                     t = item.get('type', '').lower()
                     if t == comp_lower or comp_lower in t or t in comp_lower:
                         name = item.get('name', '').strip()
@@ -536,11 +550,16 @@ def _load_material_suggestions(db_keys: list = None, comp_name: str = None) -> d
                             result[name] = item
                 if not result:
                     for item in engine._iter_items():
+                        if not _validate_item(item):
+                            continue
                         name = item.get('name', '').strip()
                         if name:
                             result[name] = item
             else:
                 for item in engine._iter_items():
+                    if not _validate_item(item):
+                        print(f"[MaterialDialog] Skipping item with missing schema keys: {item.get('name', '<unnamed>')}")
+                        continue
                     name = item.get('name', '').strip()
                     if name:
                         result[name] = item
@@ -554,6 +573,9 @@ def _load_material_suggestions(db_keys: list = None, comp_name: str = None) -> d
             names_to_load = cdb.list_db_names() if load_all_custom else custom_names
             for db_name in names_to_load:
                 for item in cdb.get_items(db_name):
+                    if not _validate_item(item):
+                        print(f"[MaterialDialog] Skipping custom item with missing schema keys: {item.get('name', '<unnamed>')}")
+                        continue
                     name = item.get("name", "").strip()
                     if not name:
                         continue
@@ -730,8 +752,6 @@ class MaterialDialog(QDialog):
             self.sor_cb = QComboBox()
             self.sor_cb.setMinimumHeight(26)
             self.sor_cb.wheelEvent = lambda event: event.ignore()
-            if len(self._sor_options) > 1:
-                self.sor_cb.addItem("All databases", None)
             for opt in self._sor_options:
                 self.sor_cb.addItem(opt["label"], opt["db_key"])
             self.sor_cb.addItem("— No suggestions —", self._NO_SUGGESTIONS_CODE)
@@ -758,7 +778,7 @@ class MaterialDialog(QDialog):
         # ── Material Name ─────────────────────────────────────────────────
         root.addWidget(_lbl("Material Name *"))
         self.name_in = QLineEdit(v.get("material_name", ""))
-        self.name_in.setPlaceholderText("e.g. Ready-mix Concrete M25")
+        self.name_in.setPlaceholderText("e.g. Ready-mix Concrete M25  (type ? to browse all)")
         self.name_in.setMinimumHeight(32)
         root.addWidget(self.name_in)
 
@@ -1218,7 +1238,7 @@ class MaterialDialog(QDialog):
             from search_engine import AdvancedSearchEngine
         except ImportError:
             return
-        if not q:
+        if not q or q == "?":
             filtered = sorted(self._suggestions.keys())
         else:
             filtered = sorted(
@@ -1226,7 +1246,7 @@ class MaterialDialog(QDialog):
                 if AdvancedSearchEngine.is_match(q, name)
             )
         self._active_completer.setModel(QStringListModel(filtered, self))
-        if filtered and q:
+        if filtered and (q == "?" or q):
             self._active_completer.complete()
 
     def _reset_sor_state(self):

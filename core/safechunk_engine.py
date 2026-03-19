@@ -36,6 +36,7 @@ from typing import Optional, Callable
 LCCA_EXT = ".lcca"
 BAK_EXT = ".lcca.bak"
 EBAK_EXT = ".lcca.ebak"
+BLOB_EXT = ".blob"
 MAGIC = b"\x4c\x43\x43\x41"  # LCCA in hex
 ENGINE_VER = "3.0.0"
 MANUAL_CHECKPOINT_RETENTION = 10
@@ -138,6 +139,8 @@ class SafeChunkEngine:
         self.checkpoint_manual = self.checkpoint_path / "manual"
         self.checkpoint_auto = self.checkpoint_path / "auto"
         self.manifest_path = self.project_path / "manifest.json"
+        self.blob_manifest_path = self.project_path / "blob_manifest.json"
+        self.blobs_path = self.project_path / "blobs"
         self.version_path = self.project_path / "version.json"
         self.lock_path = self.project_path / ".lock"
         self.wal_path = self.project_path / "wal.log"
@@ -209,6 +212,7 @@ class SafeChunkEngine:
             self.chunks_bak_path,
             self.checkpoint_manual,
             self.checkpoint_auto,
+            self.blobs_path,
         ]:
             path.mkdir(parents=True, exist_ok=True)
 
@@ -247,6 +251,14 @@ class SafeChunkEngine:
                         self._log(f"GC: Removed orphan: {f.name}")
                     except Exception:
                         pass
+
+        # Stale blob tmp files
+        for tmp in self.blobs_path.glob("*.tmp"):
+            try:
+                tmp.unlink()
+                self._log(f"GC: Removed stale blob tmp: {tmp.name}")
+            except Exception:
+                pass
 
     # --------------------------------------------------------------------------
     # LIFECYCLE
@@ -359,8 +371,24 @@ class SafeChunkEngine:
                     f"Integrity: {len(damaged)} chunk(s) failed hash check "
                     f"{damaged} — restoring from backup."
                 )
+                unrecovered = []
                 for name in damaged:
-                    self._restore_chunk_from_backup(name)
+                    if not self._restore_chunk_from_backup(name):
+                        unrecovered.append(name)
+                if unrecovered:
+                    self._handle_error(
+                        f"Could not restore {len(unrecovered)} chunk(s) — "
+                        f"no valid backup found: {unrecovered}. "
+                        f"Data for these chunks is permanently lost."
+                    )
+
+            # ── Blob integrity check ───────────────────────────────────────────
+            damaged_blobs = self._verify_blobs()
+            if damaged_blobs:
+                self._handle_error(
+                    f"{len(damaged_blobs)} blob(s) are missing or corrupt: "
+                    f"{damaged_blobs}. These files need to be re-uploaded."
+                )
 
             self._engine_active = True
             self._log(
@@ -404,6 +432,7 @@ class SafeChunkEngine:
         # ── Update manifest hashes (only if data changed) ────────────────────
         if self._session_dirty:
             self._update_manifest_hashes()
+            self._update_blob_manifest_hashes()
 
         # ── Auto-checkpoint if content changed since last checkpoint ──────────
         if self._session_dirty and self._checkpoint_needed():
@@ -466,6 +495,13 @@ class SafeChunkEngine:
     # --------------------------------------------------------------------------
 
     def _load_manifest(self) -> dict:
+        if not self.manifest_path.exists():
+            self._log(
+                "WARNING: manifest.json is missing. "
+                "Integrity check will be skipped this session. "
+                "Hashes will be rebuilt on next clean close."
+            )
+            return {"chunks": {}}
         manifest = self._read_admin(self.manifest_path, default={"chunks": {}})
         if manifest.pop("_corrupted", False):
             self._log(
@@ -556,7 +592,11 @@ class SafeChunkEngine:
             except Exception as e:
                 self._log(f"{label} invalid/corrupt for {chunk_name}: {e}")
 
-        self._log(f"No valid backup found for {chunk_name}.")
+        self._handle_error(
+            f"No valid backup found for '{chunk_name}' — "
+            f".bak and .ebak are both missing or corrupt. "
+            f"This chunk's data is permanently lost."
+        )
         return False
 
     # --------------------------------------------------------------------------
@@ -655,8 +695,8 @@ class SafeChunkEngine:
         Buffers data in memory and triggers debounce + force-save timers.
         Appends to WAL immediately for crash protection.
         """
-        if not chunk_name or not chunk_name.strip():
-            self._log("WARNING: stage_update called with empty chunk_name. Ignored.")
+        if not self._safe_name(chunk_name):
+            self._log(f"WARNING: stage_update rejected unsafe chunk_name: {chunk_name!r}")
             return
 
         with self._write_lock:
@@ -691,6 +731,9 @@ class SafeChunkEngine:
         Returns chunk data.
         Priority: staged memory → .lcca → .lcca.bak → .lcca.ebak → {}
         """
+        if not self._safe_name(chunk_name):
+            self._log(f"WARNING: fetch_chunk rejected unsafe chunk_name: {chunk_name!r}")
+            return {}
         with self._write_lock:
             if chunk_name in self._staged_data:
                 return copy.deepcopy(self._staged_data[chunk_name])
@@ -709,11 +752,21 @@ class SafeChunkEngine:
             if not src.exists():
                 continue
             try:
-                return _decode(src.read_bytes())
+                data = _decode(src.read_bytes())
+                if label != ".lcca":
+                    self._handle_error(
+                        f"'{chunk_name}.lcca' is missing or unreadable at runtime — "
+                        f"serving data from {label}. "
+                        f"Data may be one save behind."
+                    )
+                return data
             except Exception as e:
                 self._log(f"Read failed {chunk_name}{label}: {e}. Trying next.")
 
-        self._log(f"All copies unreadable for: {chunk_name}.")
+        self._handle_error(
+            f"All copies of '{chunk_name}' are missing or unreadable "
+            f"(.lcca, .bak, .ebak). Returning empty dict — data is lost."
+        )
         return {}
 
     @requires_active
@@ -824,7 +877,7 @@ class SafeChunkEngine:
         Always returns True if no checkpoint exists yet.
         """
         last_cps = sorted(
-            self.checkpoint_auto.glob("cp_*.zip"),
+            self.checkpoint_auto.glob("cp_*.3psLCCA"),
             key=os.path.getmtime,
             reverse=True,
         )
@@ -853,25 +906,36 @@ class SafeChunkEngine:
             return True  # if anything fails, create checkpoint to be safe
 
     def _create_auto_checkpoint(self) -> str | None:
-        """Creates an auto checkpoint in checkpoints/auto/."""
+        """Creates an auto checkpoint in checkpoints/auto/.
+        Never includes blobs — must stay fast for clean close."""
         return self._write_checkpoint(
             folder=self.checkpoint_auto,
             label="auto_close",
             notes="Automatic checkpoint on clean close.",
             retention=AUTO_CHECKPOINT_RETENTION,
+            include_blobs=False,
         )
 
     @requires_active
-    def create_checkpoint(self, label: str = "manual", notes: str = "") -> str | None:
+    def create_checkpoint(
+        self, label: str = "manual", notes: str = "", include_blobs: bool = False
+    ) -> str | None:
         """
         Creates a manual checkpoint in checkpoints/manual/.
         Keeps last MANUAL_CHECKPOINT_RETENTION checkpoints.
+
+        include_blobs=False (default): chunks only — fast, small ZIP.
+        include_blobs=True: chunks + blobs — full snapshot, can be large.
+          Use for a true point-in-time backup before major changes.
+          Blob hashes are always recorded in checkpoint_meta.json regardless,
+          so mismatches can be detected even when blobs are not included.
         """
         return self._write_checkpoint(
             folder=self.checkpoint_manual,
             label=label,
             notes=notes,
             retention=MANUAL_CHECKPOINT_RETENTION,
+            include_blobs=include_blobs,
         )
 
     def _write_checkpoint(
@@ -880,10 +944,18 @@ class SafeChunkEngine:
         label: str,
         notes: str,
         retention: int,
+        include_blobs: bool = False,
     ) -> str | None:
         """
         Core checkpoint writer.
         Writes ZIP + SHA256 to specified folder, enforces retention.
+
+        include_blobs=False: chunks only — fast, no blob data in ZIP.
+        include_blobs=True: chunks + blobs — full snapshot.
+
+        Blob hashes are always written into checkpoint_meta.json regardless
+        of include_blobs, so restore can detect blob mismatches even when
+        blobs were not included in the ZIP.
         """
         self.force_sync()
 
@@ -891,20 +963,32 @@ class SafeChunkEngine:
         timestamp = (
             time.strftime("%Y%m%d_%H%M%S") + f"_{int(time.time() * 1000) % 1000:03d}"
         )
-        zip_name = f"cp_{clean_label}_{timestamp}.zip"
+        zip_name = f"cp_{clean_label}_{timestamp}.3psLCCA"
         zip_path = folder / zip_name
+
+        # Snapshot blob hashes at checkpoint time (always, regardless of include_blobs)
+        blob_manifest = self._load_blob_manifest()
+        blob_hashes = {
+            name: info.get("hash") if isinstance(info, dict) else info
+            for name, info in blob_manifest.get("blobs", {}).items()
+        }
 
         try:
             with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
                 for f in self.chunks_path.glob(f"*{LCCA_EXT}"):
                     zf.write(f, arcname=f"chunks/{f.name}")
-                for f in self.chunks_bak_path.iterdir():
-                    if f.is_file():
-                        zf.write(f, arcname=f"chunks_bak/{f.name}")
                 if self.manifest_path.exists():
                     zf.write(self.manifest_path, arcname="manifest.json")
                 if self.version_path.exists():
                     zf.write(self.version_path, arcname="version.json")
+
+                # Include blobs only when explicitly requested
+                if include_blobs:
+                    for f in self.blobs_path.glob(f"*{BLOB_EXT}"):
+                        zf.write(f, arcname=f"blobs/{f.name}")
+                    if self.blob_manifest_path.exists():
+                        zf.write(self.blob_manifest_path, arcname="blob_manifest.json")
+
                 zf.writestr(
                     "checkpoint_meta.json",
                     json.dumps(
@@ -919,6 +1003,8 @@ class SafeChunkEngine:
                             "type": (
                                 "auto" if folder == self.checkpoint_auto else "manual"
                             ),
+                            "includes_blobs": include_blobs,
+                            "blob_hashes": blob_hashes,  # always recorded
                         },
                         indent=4,
                     ),
@@ -929,7 +1015,7 @@ class SafeChunkEngine:
             (folder / f"{zip_name}.sha256").write_text(sha)
 
             # Enforce retention for this folder only
-            zips = sorted(folder.glob("cp_*.zip"), key=os.path.getmtime)
+            zips = sorted(folder.glob("cp_*.3psLCCA"), key=os.path.getmtime)
             while len(zips) > retention:
                 oldest = zips.pop(0)
                 oldest.unlink()
@@ -978,6 +1064,14 @@ class SafeChunkEngine:
         """
         Restores project from checkpoint ZIP.
         Verifies SHA256 before extracting.
+
+        If the checkpoint includes blobs (include_blobs=True was used),
+        blobs on disk are fully replaced with the checkpoint's copies.
+
+        If the checkpoint does not include blobs, chunk data is restored
+        but blobs on disk are left untouched. A warning is logged listing
+        any blobs whose current hash differs from what was recorded at
+        checkpoint time, so the caller knows which files may be mismatched.
         """
         zip_path = self._resolve_checkpoint_path(zip_name)
         if zip_path is None:
@@ -1004,20 +1098,89 @@ class SafeChunkEngine:
             staging.mkdir()
 
             with zipfile.ZipFile(zip_path, "r") as zf:
-                zf.extractall(path=staging)
+                # ── ZIP bomb check ────────────────────────────────────────
+                MAX_EXTRACT_BYTES = 512 * 1024 * 1024  # 512 MB
+                total = sum(m.file_size for m in zf.infolist())
+                if total > MAX_EXTRACT_BYTES:
+                    raise ValueError(
+                        f"Archive is too large to extract "
+                        f"({total / 1024 / 1024:.0f} MB, limit 512 MB)."
+                    )
+                # ── ZIP Slip check — safe member-by-member extraction ─────
+                staging_resolved = staging.resolve()
+                for member in zf.infolist():
+                    target = (staging / member.filename).resolve()
+                    if not str(target).startswith(str(staging_resolved)):
+                        raise ValueError(
+                            f"Unsafe path in archive: '{member.filename}'"
+                        )
+                    zf.extract(member, staging)
 
             if (staging / "chunks").exists():
                 if self.chunks_path.exists():
                     shutil.rmtree(self.chunks_path)
                 shutil.move(str(staging / "chunks"), str(self.chunks_path))
 
-            if (staging / "chunks_bak").exists():
-                if self.chunks_bak_path.exists():
-                    shutil.rmtree(self.chunks_bak_path)
-                shutil.move(str(staging / "chunks_bak"), str(self.chunks_bak_path))
+            # Clear stale bak files — they'll rebuild naturally on next save
+            if self.chunks_bak_path.exists():
+                shutil.rmtree(self.chunks_bak_path)
+            self.chunks_bak_path.mkdir(parents=True, exist_ok=True)
 
             if (staging / "manifest.json").exists():
                 shutil.move(str(staging / "manifest.json"), str(self.manifest_path))
+
+            # ── Blob restore ──────────────────────────────────────────────────
+            meta = {}
+            meta_path = staging / "checkpoint_meta.json"
+            if meta_path.exists():
+                try:
+                    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                except Exception:
+                    pass
+
+            if (staging / "blobs").exists():
+                # Full blob restore — checkpoint was created with include_blobs=True
+                if self.blobs_path.exists():
+                    shutil.rmtree(self.blobs_path)
+                shutil.move(str(staging / "blobs"), str(self.blobs_path))
+                if (staging / "blob_manifest.json").exists():
+                    shutil.move(
+                        str(staging / "blob_manifest.json"),
+                        str(self.blob_manifest_path),
+                    )
+                self._log("Blobs restored from checkpoint.")
+            else:
+                # Blobs not in checkpoint — check for mismatches and warn
+                cp_blob_hashes = meta.get("blob_hashes", {})
+                if cp_blob_hashes:
+                    current_blob_manifest = self._load_blob_manifest()
+                    current_hashes = {
+                        name: info.get("hash") if isinstance(info, dict) else info
+                        for name, info in current_blob_manifest.get("blobs", {}).items()
+                    }
+                    mismatched = [
+                        name
+                        for name, cp_hash in cp_blob_hashes.items()
+                        if current_hashes.get(name) != cp_hash
+                    ]
+                    missing = [
+                        name
+                        for name in cp_blob_hashes
+                        if not (self.blobs_path / f"{name}{BLOB_EXT}").exists()
+                    ]
+                    if missing:
+                        self._handle_error(
+                            f"Checkpoint restored (chunks only). "
+                            f"{len(missing)} blob(s) expected by this checkpoint "
+                            f"are missing from disk: {missing}. Re-upload them."
+                        )
+                    elif mismatched:
+                        self._log(
+                            f"Checkpoint restored (chunks only). "
+                            f"{len(mismatched)} blob(s) on disk differ from "
+                            f"checkpoint state: {mismatched}. "
+                            f"Use create_checkpoint(include_blobs=True) for a full snapshot."
+                        )
 
             shutil.rmtree(staging, ignore_errors=True)
             self._wal_clear()
@@ -1041,7 +1204,7 @@ class SafeChunkEngine:
         ]
 
         for folder, cp_type in sources:
-            for zp in folder.glob("cp_*.zip"):
+            for zp in folder.glob("cp_*.3psLCCA"):
                 try:
                     verified = self.verify_checkpoint(zp.name)
                     meta = {}
@@ -1061,6 +1224,8 @@ class SafeChunkEngine:
                             "date": meta.get("timestamp", ""),
                             "notes": meta.get("notes", ""),
                             "verified": verified,
+                            "includes_blobs": meta.get("includes_blobs", False),
+                            "blob_count": len(meta.get("blob_hashes", {})),
                             "warning": (
                                 ""
                                 if verified
@@ -1074,9 +1239,33 @@ class SafeChunkEngine:
 
         return sorted(results, key=lambda x: x["date"], reverse=True)
 
+    def delete_checkpoint(self, zip_name: str) -> bool:
+        """Deletes a checkpoint ZIP and its .sha256 sidecar."""
+        zip_path = self._resolve_checkpoint_path(zip_name)
+        if zip_path is None:
+            self._log(f"delete_checkpoint: '{zip_name}' not found.")
+            return False
+        try:
+            zip_path.unlink()
+            sha_path = zip_path.parent / f"{zip_name}.sha256"
+            if sha_path.exists():
+                sha_path.unlink()
+            self._log(f"Checkpoint deleted: {zip_name}")
+            return True
+        except Exception as e:
+            self._handle_error(f"delete_checkpoint failed: {e}")
+            return False
+
     # --------------------------------------------------------------------------
     # ROLLBACK HELPERS
     # --------------------------------------------------------------------------
+
+    def list_chunks(self) -> list[str]:
+        """Returns names of all stored chunks."""
+        return [
+            f.name[: -len(LCCA_EXT)]
+            for f in self.chunks_path.glob(f"*{LCCA_EXT}")
+        ]
 
     def get_rollback_options(self, chunk_name: str) -> list[dict]:
         """
@@ -1145,6 +1334,268 @@ class SafeChunkEngine:
         except Exception as e:
             self._log(f"Rollback failed for {chunk_name}: {e}")
             return False
+
+    # --------------------------------------------------------------------------
+    # BLOB STORAGE  (binary files: images, PDFs, ZIPs, etc.)
+    # No WAL, no memory staging, no deep copy — streamed directly to disk.
+    # No backup copies — blobs are uploaded once and re-uploaded if lost.
+    # Checkpoint stores blob hashes only — not the blobs themselves.
+    # --------------------------------------------------------------------------
+
+    def _load_blob_manifest(self) -> dict:
+        if not self.blob_manifest_path.exists():
+            self._log(
+                "WARNING: blob_manifest.json is missing. "
+                "Blob integrity check will be skipped this session. "
+                "Hashes will be rebuilt on next clean close."
+            )
+            return {"blobs": {}}
+        manifest = self._read_admin(self.blob_manifest_path, default={"blobs": {}})
+        if manifest.pop("_corrupted", False):
+            self._log(
+                "WARNING: blob_manifest.json is corrupt. "
+                "Blob integrity check will recompute hashes from disk."
+            )
+            return {"blobs": {}}
+        return manifest
+
+    def _update_blob_manifest_hashes(self):
+        """Recomputes SHA256 of every .blob file and writes blob_manifest.json."""
+        manifest = self._load_blob_manifest()
+        blobs = manifest.get("blobs", {})
+
+        for blob_file in self.blobs_path.glob(f"*{BLOB_EXT}"):
+            blob_name = blob_file.name[: -len(BLOB_EXT)]
+            try:
+                file_hash = hashlib.sha256(blob_file.read_bytes()).hexdigest()
+                blobs[blob_name] = {
+                    "hash": file_hash,
+                    "size": blob_file.stat().st_size,
+                    "saved_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            except Exception as e:
+                self._log(f"Blob hash failed for {blob_name}: {e}")
+
+        manifest["blobs"] = blobs
+        manifest["project_id"] = self.project_id
+        manifest["engine_version"] = self.VERSION
+        manifest["hashes_updated"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        self._write_admin(self.blob_manifest_path, manifest)
+        self._log("Blob manifest hashes updated.")
+
+    def _verify_blobs(self) -> list[str]:
+        """
+        Verifies each .blob file against stored SHA256 in blob_manifest.json.
+        Returns list of blob names that failed — empty list means all good.
+        """
+        manifest = self._load_blob_manifest()
+        blobs = manifest.get("blobs", {})
+        damaged = []
+
+        for blob_name, info in blobs.items():
+            if not isinstance(info, dict):
+                continue
+            stored_hash = info.get("hash")
+            if not stored_hash:
+                continue
+            blob_file = self.blobs_path / f"{blob_name}{BLOB_EXT}"
+            if not blob_file.exists():
+                damaged.append(blob_name)
+                continue
+            try:
+                if hashlib.sha256(blob_file.read_bytes()).hexdigest() != stored_hash:
+                    damaged.append(blob_name)
+            except Exception:
+                damaged.append(blob_name)
+
+        return damaged
+
+    @requires_active
+    def store_blob(
+        self,
+        data: bytes | str | Path,
+        blob_name: str = None,
+        overwrite: bool = False,
+    ) -> str | None:
+        """
+        Stores a binary file (image, PDF, ZIP, etc.) as a managed blob.
+
+        data can be:
+          - bytes        — raw binary data (blob_name required)
+          - str / Path   — path to a file on disk (streamed, never fully loaded)
+
+        blob_name (optional):
+          - If omitted and data is a path, the filename is used automatically.
+            e.g. store_blob("docs/2024_report.pdf") → blob_name = "2024_report.pdf"
+          - If omitted and data is bytes, raises an error (no filename to derive from).
+          - Collision handling depends on overwrite flag (see below).
+
+        overwrite=False (default):
+          - If blob_name already exists, auto-increments to avoid collision.
+            e.g. "report.pdf" → "report_1.pdf" → "report_2.pdf"
+          - The final stored name is always returned so caller knows what was used.
+        overwrite=True:
+          - Replaces existing blob with the same name.
+
+        Writes directly to disk with atomic tmp → fsync → rename.
+        No WAL, no memory staging, no deep copy.
+
+        Returns the final blob_name it was stored under on success, None on failure.
+        """
+        # ── Derive blob_name from path if not provided ────────────────────────
+        if not blob_name:
+            if isinstance(data, (str, Path)):
+                blob_name = Path(data).name
+            else:
+                self._handle_error(
+                    "store_blob: blob_name is required when data is bytes "
+                    "(no filename to derive from)."
+                )
+                return None
+
+        blob_name = blob_name.strip()
+        if not self._safe_name(blob_name):
+            self._handle_error(
+                f"store_blob: rejected unsafe blob_name: {blob_name!r}. "
+                "Name must not contain path separators or '..'."
+            )
+            return None
+
+        # ── Collision handling ────────────────────────────────────────────────
+        if not overwrite:
+            # Auto-increment: "report.pdf" → "report_1.pdf" → "report_2.pdf"
+            stem = Path(blob_name).stem
+            suffix = Path(blob_name).suffix  # e.g. ".pdf"
+            candidate = blob_name
+            counter = 1
+            while (self.blobs_path / f"{candidate}{BLOB_EXT}").exists():
+                candidate = f"{stem}_{counter}{suffix}"
+                counter += 1
+            if candidate != blob_name:
+                self._log(
+                    f"Blob '{blob_name}' already exists — "
+                    f"storing as '{candidate}' instead."
+                )
+            blob_name = candidate
+
+        blob_file = self.blobs_path / f"{blob_name}{BLOB_EXT}"
+        tmp = self.blobs_path / f"{blob_name}.tmp"
+
+        try:
+            # Stream from path or write from bytes — atomic tmp → fsync → rename
+            if isinstance(data, (str, Path)):
+                src = Path(data)
+                if not src.exists():
+                    self._handle_error(f"store_blob: source file not found: {src}")
+                    return None
+                shutil.copy2(src, tmp)
+                with open(tmp, "rb") as f:
+                    os.fsync(f.fileno())
+            else:
+                with open(tmp, "wb") as f:
+                    f.write(data)
+                    f.flush()
+                    os.fsync(f.fileno())
+
+            tmp.replace(blob_file)
+            self._session_dirty = True
+            self._log(
+                f"Blob stored: '{blob_name}' "
+                f"({blob_file.stat().st_size / 1024:.1f} KB)."
+            )
+            return blob_name
+
+        except Exception as e:
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+            self._handle_error(f"store_blob failed for '{blob_name}': {e}")
+            return None
+
+    @requires_active
+    def fetch_blob(self, blob_name: str) -> bytes | None:
+        """
+        Returns raw bytes for a stored blob.
+        Returns None and fires on_fault if the blob is missing or unreadable.
+        """
+        if not self._safe_name(blob_name):
+            self._handle_error(f"fetch_blob: rejected unsafe blob_name: {blob_name!r}")
+            return None
+        blob_file = self.blobs_path / f"{blob_name}{BLOB_EXT}"
+
+        if not blob_file.exists():
+            self._handle_error(
+                f"Blob '{blob_name}' not found. "
+                f"It may have been deleted or never uploaded."
+            )
+            return None
+        try:
+            return blob_file.read_bytes()
+        except Exception as e:
+            self._handle_error(
+                f"Blob '{blob_name}' could not be read: {e}. "
+                f"The file may be corrupt — re-upload it."
+            )
+            return None
+
+    @requires_active
+    def delete_blob(self, blob_name: str) -> bool:
+        """
+        Deletes a blob from disk and removes its entry from blob_manifest.json.
+        Returns True on success, False if blob did not exist or deletion failed.
+        """
+        if not self._safe_name(blob_name):
+            self._log(f"delete_blob: rejected unsafe blob_name: {blob_name!r}")
+            return False
+        blob_file = self.blobs_path / f"{blob_name}{BLOB_EXT}"
+
+        if not blob_file.exists():
+            self._log(f"delete_blob: '{blob_name}' not found.")
+            return False
+
+        try:
+            blob_file.unlink()
+
+            # Remove from manifest
+            manifest = self._load_blob_manifest()
+            manifest.get("blobs", {}).pop(blob_name, None)
+            self._write_admin(self.blob_manifest_path, manifest)
+
+            self._session_dirty = True
+            self._log(f"Blob deleted: '{blob_name}'.")
+            return True
+
+        except Exception as e:
+            self._handle_error(f"delete_blob failed for '{blob_name}': {e}")
+            return False
+
+    @requires_active
+    def list_blobs(self) -> list[dict]:
+        """
+        Returns metadata for all stored blobs.
+        Includes name, size_kb, and saved_at from manifest.
+        """
+        manifest = self._load_blob_manifest()
+        stored = manifest.get("blobs", {})
+        results = []
+
+        for blob_file in sorted(self.blobs_path.glob(f"*{BLOB_EXT}")):
+            blob_name = blob_file.name[: -len(BLOB_EXT)]
+            info = stored.get(blob_name, {})
+            try:
+                size = blob_file.stat().st_size
+            except Exception:
+                size = 0
+            results.append(
+                {
+                    "blob_name": blob_name,
+                    "size_kb": round(size / 1024, 1),
+                    "saved_at": info.get("saved_at", "unknown"),
+                }
+            )
+
+        return results
 
     # --------------------------------------------------------------------------
     # PROJECT MANAGEMENT
@@ -1356,8 +1807,8 @@ class SafeChunkEngine:
         cp_path = item / "checkpoints"
         if cp_path.exists():
             zips = sorted(
-                list((cp_path / "manual").glob("cp_*.zip"))
-                + list((cp_path / "auto").glob("cp_*.zip")),
+                list((cp_path / "manual").glob("cp_*.3psLCCA"))
+                + list((cp_path / "auto").glob("cp_*.3psLCCA")),
                 key=os.path.getmtime,
                 reverse=True,
             )
@@ -1403,8 +1854,8 @@ class SafeChunkEngine:
             "readable_mode": self.readable,
             "chunk_count": len(list(self.chunks_path.glob(f"*{LCCA_EXT}"))),
             "checkpoint_count": (
-                len(list(self.checkpoint_manual.glob("cp_*.zip")))
-                + len(list(self.checkpoint_auto.glob("cp_*.zip")))
+                len(list(self.checkpoint_manual.glob("cp_*.3psLCCA")))
+                + len(list(self.checkpoint_auto.glob("cp_*.3psLCCA")))
             ),
             "pending_syncs": len(self._staged_data),
             "wal_exists": self.wal_path.exists(),
@@ -1414,6 +1865,23 @@ class SafeChunkEngine:
     # --------------------------------------------------------------------------
     # INTERNAL HELPERS
     # --------------------------------------------------------------------------
+
+    @staticmethod
+    def _safe_name(name: str) -> bool:
+        """
+        Returns True if name is safe to use as a filename component.
+        Rejects empty strings, path separators, and traversal sequences.
+        """
+        if not name or not name.strip():
+            return False
+        p = Path(name)
+        # Must be a plain filename — no directory components
+        if p.name != name:
+            return False
+        # Reject traversal sequences explicitly
+        if ".." in name:
+            return False
+        return True
 
     def _log(self, message: str):
         msg = f"[{time.strftime('%H:%M:%S')}] {message}"

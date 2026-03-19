@@ -1015,7 +1015,7 @@ class TrafficData(ScrollableForm):
     def freeze(self, frozen: bool = True):
         freeze_form(TRAFFIC_FIELDS, self, frozen)
         freeze_form(OUTSIDE_INDIA_FIELDS, self, frozen)
-        freeze_widgets(frozen, self._vehicle_table, self.mode)
+        freeze_widgets(frozen, self._vehicle_table, self.mode, self._force_free_flow)
 
     def clear_validation(self):
         clear_field_styles(TRAFFIC_FIELDS, self)

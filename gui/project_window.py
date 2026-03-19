@@ -3,6 +3,8 @@ import os
 from PySide6.QtCore import Qt, QRect, QSize, QEvent, QPoint
 from PySide6.QtWidgets import (
     QHBoxLayout,
+    QInputDialog,
+    QFileDialog,
     QLabel,
     QMainWindow,
     QMenu,
@@ -26,6 +28,8 @@ from PySide6.QtWidgets import QToolTip
 
 from gui.components.save_status_bar import SaveStatusBar
 from gui.components.logs import Logs
+from gui.components.rollback_dialog import RollbackDialog
+from gui.components.blob_manager import BlobManagerDialog
 from gui.components.global_info.main import GeneralInfo
 from gui.components.bridge_data.main import BridgeData
 from gui.components.structure.main import StructureTabView
@@ -316,25 +320,77 @@ class ProjectWindow(QMainWindow):
 
         self.menubar = QMenuBar()
 
+        # ── File menu ─────────────────────────────────────────────────────
         self.menuFile = QMenu("&File", self.menubar)
-        for label in ["New", "Open"]:
-            self.menuFile.addAction(QAction(label, self))
+
+        action_new = QAction("New Project", self)
+        action_new.triggered.connect(lambda: self.manager.open_project(is_new=True))
+        self.menuFile.addAction(action_new)
+
+        action_open = QAction("Open Project", self)
+        action_open.triggered.connect(self.show_home)
+        self.menuFile.addAction(action_open)
+
         self.menuFile.addSeparator()
-        self.actionSave = QAction("Save", self)
+
+        self.actionSave = QAction("Save Now", self)
+        self.actionSave.triggered.connect(self._save_now)
         self.menuFile.addAction(self.actionSave)
-        for label in ["Save As...", "Create a Copy", "Print"]:
-            self.menuFile.addAction(QAction(label, self))
+
         self.menuFile.addSeparator()
-        for label in ["Rename", "Export", "Version History", "Info"]:
-            self.menuFile.addAction(QAction(label, self))
 
+        action_rename = QAction("Rename", self)
+        action_rename.triggered.connect(self._rename_project)
+        self.menuFile.addAction(action_rename)
+
+        action_export = QAction("Export...", self)
+        action_export.triggered.connect(self._export_project)
+        self.menuFile.addAction(action_export)
+
+        self.menuFile.addSeparator()
+
+        self.actionVersionHistory = QAction("Version History", self)
+        self.actionVersionHistory.triggered.connect(self._open_rollback_dialog)
+        self.menuFile.addAction(self.actionVersionHistory)
+
+        self.actionBlobManager = QAction("Blob Manager", self)
+        self.actionBlobManager.triggered.connect(self._open_blob_manager)
+        self.menuFile.addAction(self.actionBlobManager)
+
+        self.menuFile.addSeparator()
+
+        action_info = QAction("Info", self)
+        action_info.triggered.connect(self._show_project_info)
+        self.menuFile.addAction(action_info)
+
+        self.menuFile.addSeparator()
+
+        action_close = QAction("Close Project", self)
+        action_close.triggered.connect(self._close_project)
+        self.menuFile.addAction(action_close)
+
+        # ── Help menu ─────────────────────────────────────────────────────
         self.menuHelp = QMenu("&Help", self.menubar)
-        for label in ["Contact us", "Feedback"]:
-            self.menuHelp.addAction(QAction(label, self))
-        self.menuHelp.addSeparator()
-        for label in ["Video Tutorials", "Join our Community"]:
-            self.menuHelp.addAction(QAction(label, self))
 
+        action_contact = QAction("Contact Us", self)
+        action_contact.triggered.connect(
+            lambda: QMessageBox.information(
+                self, "Contact Us",
+                "For support or enquiries, please email:\nsupport@3pslcca.com"
+            )
+        )
+        self.menuHelp.addAction(action_contact)
+
+        action_feedback = QAction("Feedback", self)
+        action_feedback.triggered.connect(
+            lambda: QMessageBox.information(
+                self, "Feedback",
+                "We'd love to hear from you!\nPlease email:\nfeedback@3pslcca.com"
+            )
+        )
+        self.menuHelp.addAction(action_feedback)
+
+        # ── Menubar ───────────────────────────────────────────────────────
         home_action = QAction("Home", self)
         home_action.triggered.connect(self.show_home)
 
@@ -343,7 +399,6 @@ class ProjectWindow(QMainWindow):
         self.menubar.addAction(home_action)
         self.menubar.addMenu(self.menuFile)
         self.menubar.addMenu(self.menuHelp)
-        self.menubar.addAction(QAction("Tutorials", self))
         self.menubar.addAction(self.log_action)
 
         top_bar_layout.addWidget(self.menubar)
@@ -559,6 +614,116 @@ class ProjectWindow(QMainWindow):
             f"A critical storage error occurred:\n\n{error_message}\n\n"
             "Save a checkpoint immediately if possible, then restart.",
         )
+
+    def _close_project(self):
+        if not self.controller.engine or not self.controller.engine.is_active():
+            self.show_home()
+            return
+        self.controller.close_project()
+        self.project_id = None
+        self.setWindowTitle("LCCA - Home")
+        self.show_home()
+
+    def _save_now(self):
+        if self.controller.engine and self.controller.engine.is_active():
+            self.controller.engine.force_sync()
+            self.status_bar.showMessage("Saved.", 3000)
+
+    def _rename_project(self):
+        if not self.controller.engine or not self.controller.engine.is_active():
+            return
+        current = self.controller.active_display_name or self.project_id
+        new_name, ok = QInputDialog.getText(
+            self, "Rename Project", "New name:", text=current
+        )
+        new_name = new_name.strip()
+        if not ok or not new_name or new_name == current:
+            return
+        self.controller.engine.rename(new_name)
+        self.controller.active_display_name = new_name
+        self.setWindowTitle(f"LCCA - {new_name}")
+        self.manager.refresh_all_home_screens()
+
+    def _export_project(self):
+        if not self.controller.engine or not self.controller.engine.is_active():
+            return
+        display = self.controller.active_display_name or self.project_id
+        dest, _ = QFileDialog.getSaveFileName(
+            self, "Export Project", f"{display}.3psLCCA", "3psLCCA Archive (*.3psLCCA)"
+        )
+        if not dest:
+            return
+        import shutil
+        zip_name = self.controller.engine.create_checkpoint(
+            label="export", notes="Exported from 3psLCCA", include_blobs=True
+        )
+        if not zip_name:
+            QMessageBox.warning(self, "Export Failed", "Could not create export archive.")
+            return
+        src = self.controller.engine.checkpoint_manual / zip_name
+        try:
+            shutil.copy2(str(src), dest)
+            QMessageBox.information(self, "Export Complete", f"Project exported to:\n{dest}")
+        except Exception as e:
+            QMessageBox.warning(self, "Export Failed", str(e))
+
+    def _show_project_info(self):
+        if not self.project_id:
+            return
+        from core.safechunk_engine import SafeChunkEngine
+        from PySide6.QtWidgets import QDialog, QFormLayout, QVBoxLayout, QLabel, QPushButton
+        info = SafeChunkEngine.get_project_info(self.project_id)
+        if not info:
+            return
+        # Overlay live data from running engine
+        report = self.controller.get_health_report()
+        if report:
+            info["pending_syncs"] = report.get("pending_syncs", 0)
+            info["wal_exists"] = report.get("wal_exists", False)
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Project Info — {info.get('display_name', self.project_id)}")
+        dlg.setMinimumWidth(360)
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
+        form = QFormLayout()
+        form.setSpacing(6)
+        rows = [
+            ("Project ID",       info.get("project_id", "")),
+            ("Display Name",     info.get("display_name", "")),
+            ("Status",           info.get("status", "").capitalize()),
+            ("Created",          info.get("created_at", "—")),
+            ("Last Modified",    info.get("last_modified", "—")),
+            ("Chunks",           str(info.get("chunk_count", 0))),
+            ("Checkpoints",      str(info.get("checkpoint_count", 0))),
+            ("Last Checkpoint",  info.get("last_checkpoint_date") or "—"),
+            ("Size",             f"{info.get('size_kb', 0)} KB"),
+            ("Engine Version",   info.get("engine_version", "—")),
+            ("Pending Syncs",    str(info.get("pending_syncs", 0))),
+            ("WAL Active",       "Yes" if info.get("wal_exists") else "No"),
+        ]
+        for label, value in rows:
+            lbl = QLabel(value)
+            lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            form.addRow(f"{label}:", lbl)
+        layout.addLayout(form)
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(dlg.accept)
+        layout.addWidget(close_btn)
+        dlg.exec()
+
+    def _open_rollback_dialog(self):
+        if not self.controller.engine or not self.controller.engine.is_active():
+            return
+        dlg = RollbackDialog(self.controller, parent=self)
+        dlg.exec()
+
+    def _open_blob_manager(self):
+        if not self.controller.engine or not self.controller.engine.is_active():
+            return
+        dlg = BlobManagerDialog(self.controller, parent=self)
+        dlg.exec()
 
     # ── Close ─────────────────────────────────────────────────────────────────
 
