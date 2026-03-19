@@ -270,6 +270,17 @@ class _WPISelector(QWidget):
 
     # ── Combo management ──────────────────────────────────────────────────────
 
+    def freeze(self, frozen: bool = True):
+        """Disable all interactive controls when the project is locked."""
+        self._combo.setEnabled(not frozen)
+        for btn in (
+            self._btn_new, self._btn_save_as, self._btn_delete,
+            self._btn_save_lib, self._btn_import_lib,
+        ):
+            btn.setEnabled(not frozen)
+        if not frozen and self._current:
+            self._update_buttons(self._current)
+
     def _populate_combo(self, select_id: Optional[str] = None):
         self._combo.blockSignals(True)
         self._combo.clear()

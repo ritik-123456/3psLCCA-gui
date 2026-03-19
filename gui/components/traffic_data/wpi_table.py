@@ -249,6 +249,18 @@ class _WPITable(QTableWidget):
 
     # ── Mode ──────────────────────────────────────────────────────────────────
 
+    def freeze(self, frozen: bool = True):
+        """Freeze/unfreeze the whole table regardless of editable state."""
+        if frozen:
+            for sb in self._spinboxes.values():
+                sb.setReadOnly(True)
+                sb.setFrame(False)
+                self._apply_spinbox_opacity(sb, False)
+            for cb in self._checkboxes.values():
+                cb.setEnabled(False)
+        else:
+            self.set_editable(self._editable)
+
     def set_editable(self, editable: bool):
         self._editable = editable
         for (row, col), sb in self._spinboxes.items():

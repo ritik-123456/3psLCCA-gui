@@ -172,7 +172,7 @@ def _make_upload_img_widget(
     file_layout.addWidget(preview)
     file_layout.addWidget(btn_row)
 
-    return container, preview, logo_input
+    return container, preview, logo_input, btn_row
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +183,18 @@ def _make_upload_img_widget(
 #: clear_all() implementation can reset them without knowing internals.
 #: Attached to the host as  host._img_previews  by build_form().
 _IMG_PREVIEWS_ATTR = "_img_previews"
+_IMG_BTN_ROWS_ATTR = "_img_btn_rows"
+
+
+def freeze_img_uploads(host, fields: list, frozen: bool) -> None:
+    """Freeze/unfreeze Browse+Clear buttons for all upload_img fields."""
+    btn_rows: dict = getattr(host, _IMG_BTN_ROWS_ATTR, {})
+    for f in fields:
+        if isinstance(f, FieldDef) and f.field_type == "upload_img":
+            btn_row = btn_rows.get(f.key)
+            if btn_row:
+                for btn in btn_row.findChildren(QPushButton):
+                    btn.setEnabled(not frozen)
 
 
 def build_form(
@@ -221,8 +233,11 @@ def build_form(
     # Ensure a dict exists on the host for tracking upload_img previews
     if not hasattr(host, _IMG_PREVIEWS_ATTR):
         setattr(host, _IMG_PREVIEWS_ATTR, {})
+    if not hasattr(host, _IMG_BTN_ROWS_ATTR):
+        setattr(host, _IMG_BTN_ROWS_ATTR, {})
 
     img_previews: dict[str, QLabel] = getattr(host, _IMG_PREVIEWS_ATTR)
+    img_btn_rows: dict[str, QWidget] = getattr(host, _IMG_BTN_ROWS_ATTR)
     required_keys: list[str] = []
 
     for entry in fields:
@@ -329,10 +344,11 @@ def build_form(
 
         # ── upload_img ────────────────────────────────────────────────────
         elif f.field_type == "upload_img":
-            container, preview, logo_input = _make_upload_img_widget(
+            container, preview, logo_input, btn_row = _make_upload_img_widget(
                 host, f.key, f.options
             )
             img_previews[f.key] = preview
+            img_btn_rows[f.key] = btn_row
             setattr(host, f.key, host.field(f.key, logo_input))
             layout.addWidget(container)
 

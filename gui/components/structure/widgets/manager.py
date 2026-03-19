@@ -95,6 +95,9 @@ class StructureManagerWidget(QWidget):
         self.container_layout.addStretch()
         self.container.adjustSize()
 
+        if getattr(self, "_frozen", False):
+            self.freeze(True)
+
     def create_section(self, name):
         group = QGroupBox(name)
         g_layout = QVBoxLayout(group)

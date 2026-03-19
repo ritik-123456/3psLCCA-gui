@@ -498,6 +498,11 @@ class _PeakHoursTable(QTableWidget):
         if self._other_label:
             self._other_label.setText(f"{avg:.2f} %")
 
+    def freeze(self, frozen: bool = True):
+        for sb in self._spinboxes:
+            sb.setReadOnly(frozen)
+            sb.setStyleSheet("color: #a0a0a0;" if frozen else "")
+
     def collect_to_dict(self) -> dict:
         return {
             f"peak_hour_{i+1}": float(sb.value() / 100.0)
@@ -747,6 +752,18 @@ class TrafficData(ScrollableForm):
         self._shrink_stack_to_current()
         self._on_field_changed()
 
+    def _apply_carriageway_enabled(self):
+        """Sync carriage_width_in_m enabled state to the current lane selection."""
+        if not hasattr(self, "alternate_road_carriageway") or not hasattr(self, "carriage_width_in_m"):
+            return
+        text = self.alternate_road_carriageway.currentText()
+        if text == _NONE_LANE:
+            self.carriage_width_in_m.setEnabled(False)
+            return
+        lane = _BY_NAME.get(text)
+        if lane:
+            self.carriage_width_in_m.setEnabled(lane.get("width") is None)
+
     def _on_lane_changed(self, _idx: int):
         if self._suppress_lane_signal:
             return
@@ -945,6 +962,7 @@ class TrafficData(ScrollableForm):
             self._vehicle_table.update_height()
             self._peak_table.update_height()
             self._shrink_stack_to_current()
+            self._apply_carriageway_enabled()
 
     def _load_wpi(self, wpi: dict):
         """Restore WPI state from saved chunk data."""
@@ -1016,6 +1034,13 @@ class TrafficData(ScrollableForm):
         freeze_form(TRAFFIC_FIELDS, self, frozen)
         freeze_form(OUTSIDE_INDIA_FIELDS, self, frozen)
         freeze_widgets(frozen, self._vehicle_table, self.mode, self._force_free_flow)
+        self._peak_table.freeze(frozen)
+        self._wpi_selector.freeze(frozen)
+        self._wpi_table.freeze(frozen)
+        # freeze_form uses setReadOnly for spinboxes; carriage_width_in_m also
+        # uses setEnabled to reflect lane selection — reapply after any freeze change.
+        if not frozen:
+            self._apply_carriageway_enabled()
 
     def clear_validation(self):
         clear_field_styles(TRAFFIC_FIELDS, self)

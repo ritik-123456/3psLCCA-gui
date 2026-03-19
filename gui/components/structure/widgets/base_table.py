@@ -18,6 +18,7 @@ class StructureTableWidget(QTableWidget):
         self.manager = parent_manager
         self.component_name = component_name
         self.is_trash_view = is_trash_view
+        self._frozen = False
 
         # Setup 6 columns: Work Name, Rate, Qty, Source, Total, Action
         self.setColumnCount(6)
@@ -62,6 +63,8 @@ class StructureTableWidget(QTableWidget):
 
     def _on_cell_double_clicked(self, row, column):
         """Pass the visual row index to the manager to find the data and open the edit dialog."""
+        if self._frozen:
+            return
         self.manager.open_edit_dialog(self.component_name, row)
 
     def sizeHint(self):
@@ -154,6 +157,9 @@ class StructureTableWidget(QTableWidget):
             )
             actions_layout.addWidget(delete_btn)
 
+        if self._frozen:
+            for btn in actions_widget.findChildren(QPushButton):
+                btn.setEnabled(False)
         self.setCellWidget(row, 5, actions_widget)
 
         self.blockSignals(False)
@@ -161,6 +167,7 @@ class StructureTableWidget(QTableWidget):
 
     def freeze(self, frozen: bool = True):
         """Disable/enable action buttons in every row."""
+        self._frozen = frozen
         for row in range(self.rowCount()):
             container = self.cellWidget(row, 5)
             if container:

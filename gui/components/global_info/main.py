@@ -18,7 +18,7 @@ from PySide6.QtGui import QPixmap
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
-from ..utils.form_builder.form_builder import build_form, _IMG_PREVIEWS_ATTR
+from ..utils.form_builder.form_builder import build_form, _IMG_PREVIEWS_ATTR, freeze_img_uploads
 from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 
@@ -202,6 +202,7 @@ class GeneralInfo(ScrollableForm):
     # ── Validation ───────────────────────────────────────────────────────
     def freeze(self, frozen: bool = True):
         freeze_form(GENERAL_FIELDS, self, frozen)
+        freeze_img_uploads(self, GENERAL_FIELDS, frozen)
         freeze_widgets(frozen, self.btn_clear_all)
 
     def clear_validation(self):

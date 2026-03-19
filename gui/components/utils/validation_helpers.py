@@ -312,9 +312,14 @@ def freeze_form(
         if frozen:
             widget.setToolTip(LOCK_TOOLTIP)
             widget.installEventFilter(_lock_filter)
+            widget.setProperty("_pre_freeze_style", widget.styleSheet())
+            widget.setStyleSheet(widget.styleSheet() + "; color: #a0a0a0;")
         else:
             widget.removeEventFilter(_lock_filter)
             widget.setToolTip("")
+            orig = widget.property("_pre_freeze_style")
+            if orig is not None:
+                widget.setStyleSheet(orig)
         if isinstance(widget, (QLineEdit, QTextEdit)):
             widget.setReadOnly(frozen)
         elif isinstance(widget, QAbstractSpinBox):
