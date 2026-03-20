@@ -10,10 +10,9 @@ WPI + SOR dialogs open fresh each time (modeless).
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPainterPath, QPixmap
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QApplication,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -59,16 +58,17 @@ def _get_tools() -> list[dict]:
     try:
         from devtools_window import DevToolsWindow
         tools.append({
-            "key":   "project_inspector",
-            "icon":  "🔬",
-            "name":  "Project Inspector",
-            "desc":  (
-                "Open, inspect, and repair .3psLCCA project archives.\n"
-                "View chunks, metadata and blobs. Edit JSON directly,\n"
-                "run integrity checks, and export a fixed archive."
+            "key":    "project_inspector",
+            "icon":   "🔬",
+            "name":   "Project Inspector",
+            "desc":   (
+                "Open and inspect .3psLCCA project archive files.\n"
+                "Browse every chunk and blob stored inside the archive, view or edit their "
+                "raw JSON, run integrity checks, and export a repaired copy. "
+                "Use this when a project fails to open or behaves unexpectedly."
             ),
             "accent": _BLUE,
-            "open":  lambda parent, _ref={}: _open_main_window(DevToolsWindow, _ref, parent),
+            "open":   lambda parent, _ref={}: _open_main_window(DevToolsWindow, _ref, parent),
         })
     except ImportError as e:
         tools.append(_error_card("Project Inspector", str(e)))
@@ -77,55 +77,76 @@ def _get_tools() -> list[dict]:
     try:
         from wpi_tool import WpiDatabaseDialog
         tools.append({
-            "key":   "wpi_database",
-            "icon":  "🗃",
-            "name":  "WPI Database",
-            "desc":  (
-                "Create, edit, and verify WPI index entries.\n"
-                "Rehash and save wpi_db.json from a folder\n"
-                "or the default project database path."
+            "key":    "wpi_database",
+            "icon":   "🗃",
+            "name":   "WPI Database",
+            "desc":   (
+                "Manage the Wholesale Price Index (WPI) database used for cost escalation.\n"
+                "Add, edit, or delete WPI entries, recompute hashes, and save wpi_db.json. "
+                "Changes here affect how project costs are adjusted over time."
             ),
             "accent": _GREEN,
-            "open":  lambda parent: _open_dialog(WpiDatabaseDialog, parent),
+            "open":   lambda parent: _open_dialog(WpiDatabaseDialog, parent),
         })
     except ImportError as e:
         tools.append(_error_card("WPI Database", str(e)))
 
-    # ── SOR Generator ──────────────────────────────────────────────────────
+    # ── Country Manager ────────────────────────────────────────────────────
+    try:
+        from country_manager_gui import CountryManagerDialog
+        tools.append({
+            "key":    "country_manager",
+            "icon":   "🌍",
+            "name":   "Country Manager",
+            "desc":   (
+                "Manage top-level country folders inside material_database/.\n"
+                "Add a folder for a new country so its material data can be stored and "
+                "discovered. Remove empty or orphaned folders that are no longer needed. "
+                "Start here before importing material data for a new country."
+            ),
+            "accent": _PEACH,
+            "open":   lambda parent: _open_dialog(CountryManagerDialog, parent),
+        })
+    except ImportError as e:
+        tools.append(_error_card("Country Manager", str(e)))
+
+    # ── Material Importer ──────────────────────────────────────────────────
     try:
         from sor_generator_gui import SorGeneratorDialog
         tools.append({
-            "key":   "sor_generator",
-            "icon":  "📋",
-            "name":  "SOR Generator",
-            "desc":  (
-                "Convert CID#-formatted SOR Excel files (.xlsx) to\n"
-                "the MumbaiSOR.json schema used by the material\n"
-                "database. Preview sections before writing."
+            "key":    "material_importer",
+            "icon":   "📥",
+            "name":   "Material Importer",
+            "desc":   (
+                "Import material data from a CID#-formatted Excel file into the database.\n"
+                "Parses rate, carbon emission, and recyclability columns, previews the "
+                "sections found, then writes a JSON file into the chosen country folder. "
+                "Rebuild the catalog afterward so the data appears in material suggestions."
             ),
             "accent": _MAUVE,
-            "open":  lambda parent: _open_dialog(SorGeneratorDialog, parent),
+            "open":   lambda parent: _open_dialog(SorGeneratorDialog, parent),
         })
     except ImportError as e:
-        tools.append(_error_card("SOR Generator", str(e)))
+        tools.append(_error_card("Material Importer", str(e)))
 
-    # ── Registry Builder ───────────────────────────────────────────────────
+    # ── Catalog Builder ────────────────────────────────────────────────────
     try:
-        from registry_builder_gui import RegistryBuilderDialog
+        from catalog_builder_gui import CatalogBuilderDialog
         tools.append({
-            "key":   "registry_builder",
-            "icon":  "🗂",
-            "name":  "Registry Builder",
-            "desc":  (
-                "Inspect, validate, and rebuild db_registry.json.\n"
-                "Crawls the material_database/ folder, runs integrity\n"
-                "checks, and refreshes the search-engine index."
+            "key":    "catalog_builder",
+            "icon":   "🗂",
+            "name":   "Catalog Builder",
+            "desc":   (
+                "Build and maintain the material catalog index (material_catalog.json).\n"
+                "Crawls material_database/, validates every JSON file for schema correctness, "
+                "and writes the index used by the material suggestion engine. "
+                "Run this after adding or modifying any material database file."
             ),
             "accent": _TEAL,
-            "open":  lambda parent: _open_dialog(RegistryBuilderDialog, parent),
+            "open":   lambda parent: _open_dialog(CatalogBuilderDialog, parent),
         })
     except ImportError as e:
-        tools.append(_error_card("Registry Builder", str(e)))
+        tools.append(_error_card("Catalog Builder", str(e)))
 
     return tools
 
@@ -179,22 +200,23 @@ def _open_dialog(cls, parent):
 
 class ToolCard(QFrame):
     """
-    A single tool card: coloured left accent bar, icon + name + description,
-    and an Open button.
+    Full-width row card: accent bar | icon | name + description | Open button.
+    Stretches horizontally so the launcher works at any window width.
     """
 
-    _CARD_BG      = "#252535"
-    _CARD_BG_HOV  = "#2a2a45"
-    _CARD_RADIUS  = 8
-    _ACCENT_W     = 4
+    _CARD_BG     = "#252535"
+    _CARD_BG_HOV = "#2a2a45"
+    _CARD_RADIUS = 8
+    _ACCENT_W    = 4
 
     def __init__(self, descriptor: dict, parent=None):
         super().__init__(parent)
-        self._desc   = descriptor
-        self._accent = descriptor.get("accent", _BLUE)
+        self._desc     = descriptor
+        self._accent   = descriptor.get("accent", _BLUE)
         self._can_open = descriptor.get("open") is not None
 
-        self.setFixedSize(310, 170)
+        self.setMinimumWidth(500)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.setCursor(Qt.PointingHandCursor if self._can_open else Qt.ArrowCursor)
         self._apply_style(hovered=False)
         self._build()
@@ -209,67 +231,57 @@ class ToolCard(QFrame):
         # Coloured left accent bar
         accent_bar = QWidget()
         accent_bar.setFixedWidth(self._ACCENT_W)
-        accent_bar.setStyleSheet(
-            f"background:{self._accent}; border-radius:{self._ACCENT_W // 2}px;"
-        )
+        accent_bar.setStyleSheet(f"background:{self._accent};")
         outer.addWidget(accent_bar)
 
-        # Content area
-        content = QWidget()
-        cl = QVBoxLayout(content)
-        cl.setContentsMargins(14, 12, 14, 12)
-        cl.setSpacing(6)
-        outer.addWidget(content, stretch=1)
-
-        # Icon + name row
-        name_row = QHBoxLayout()
-        name_row.setSpacing(8)
-
+        # Icon
         icon_lbl = QLabel(self._desc.get("icon", ""))
-        icon_lbl.setStyleSheet("font-size:22px;")
-        icon_lbl.setFixedWidth(32)
-        name_row.addWidget(icon_lbl)
+        icon_lbl.setFixedWidth(52)
+        icon_lbl.setAlignment(Qt.AlignCenter)
+        icon_lbl.setStyleSheet("font-size:22px; background:transparent;")
+        outer.addWidget(icon_lbl)
+
+        # Name + description (takes all remaining space)
+        text_block = QWidget()
+        text_block.setStyleSheet("background:transparent;")
+        tl = QVBoxLayout(text_block)
+        tl.setContentsMargins(0, 10, 12, 10)
+        tl.setSpacing(3)
 
         name_lbl = QLabel(self._desc["name"])
-        nf = QFont(); nf.setPointSize(11); nf.setBold(True)
+        nf = QFont(); nf.setPointSize(10); nf.setBold(True)
         name_lbl.setFont(nf)
         name_lbl.setStyleSheet(f"color:{_TEXT};")
-        name_row.addWidget(name_lbl, stretch=1)
+        tl.addWidget(name_lbl)
 
-        cl.addLayout(name_row)
-
-        # Description
         desc_lbl = QLabel(self._desc["desc"])
         desc_lbl.setWordWrap(True)
-        desc_lbl.setStyleSheet(f"color:{_DIM}; font-size:11px;")
-        desc_lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        cl.addWidget(desc_lbl, stretch=1)
+        desc_lbl.setStyleSheet(f"color:{_DIM}; font-size:10px;")
+        desc_lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        tl.addWidget(desc_lbl)
 
-        # Open button
-        btn_row = QHBoxLayout()
-        btn_row.addStretch()
+        outer.addWidget(text_block, stretch=1)
+
+        # Open button — pinned to the right
         self._btn = QPushButton("Open")
-        self._btn.setFixedHeight(28)
-        self._btn.setFixedWidth(80)
+        self._btn.setFixedHeight(30)
+        self._btn.setFixedWidth(76)
         self._btn.setEnabled(self._can_open)
         self._btn.setStyleSheet(
             f"QPushButton {{ background:{self._accent}; color:{_SURFACE}; border:none;"
-            f" border-radius:4px; font-weight:bold; font-size:11px; }}"
-            f"QPushButton:hover:enabled {{ opacity:0.85; }}"
-            f"QPushButton:disabled {{ background:{_BG3}; color:{_DIM}; }}"
+            f" border-radius:4px; font-weight:bold; font-size:11px; margin-right:16px; }}"
+            f"QPushButton:hover:enabled {{ background: rgba(255,255,255,0.15); }}"
+            f"QPushButton:disabled {{ background:{_BG3}; color:{_DIM}; margin-right:16px; }}"
         )
         self._btn.clicked.connect(self._on_open)
-        btn_row.addWidget(self._btn)
-        cl.addLayout(btn_row)
+        outer.addWidget(self._btn, alignment=Qt.AlignVCenter)
 
     # -- interaction ----------------------------------------------------------
 
     def _on_open(self):
         opener = self._desc.get("open")
         if opener:
-            # Find the launcher window to pass as parent
-            w = self.window()
-            opener(w)
+            opener(self.window())
 
     def enterEvent(self, event):
         if self._can_open:
@@ -298,7 +310,7 @@ class LauncherWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("3psLCCA Developer Tools")
-        self.setMinimumSize(700, 400)
+        self.setMinimumSize(700, 380)
         self.setStyleSheet(f"QMainWindow {{ background:{_BG}; }}")
         self._open_dialogs: list = []
         self._build_ui()
@@ -358,6 +370,7 @@ class LauncherWindow(QMainWindow):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setStyleSheet(
             f"QScrollArea {{ background:{_BG}; border:none; }}"
             f"QScrollBar:vertical {{ background:{_BG2}; width:8px; border:none; }}"
@@ -367,40 +380,17 @@ class LauncherWindow(QMainWindow):
         container = QWidget()
         container.setStyleSheet(f"background:{_BG};")
         cl = QVBoxLayout(container)
-        cl.setContentsMargins(24, 24, 24, 24)
-        cl.setSpacing(20)
+        cl.setContentsMargins(24, 20, 24, 20)
+        cl.setSpacing(8)
 
-        tools = _get_tools()
-
-        # Section label
-        section_lbl = QLabel("Available Tools")
+        section_lbl = QLabel("AVAILABLE TOOLS")
         section_lbl.setStyleSheet(
             f"color:{_DIM}; font-size:10px; font-weight:bold; letter-spacing:1px;"
         )
         cl.addWidget(section_lbl)
 
-        # Cards in rows of up to 3
-        ROW_SIZE = 3
-        for i in range(0, len(tools), ROW_SIZE):
-            row_w = QWidget()
-            row_w.setStyleSheet("background:transparent;")
-            rl = QHBoxLayout(row_w)
-            rl.setContentsMargins(0, 0, 0, 0)
-            rl.setSpacing(16)
-
-            for tool in tools[i : i + ROW_SIZE]:
-                rl.addWidget(ToolCard(tool))
-
-            # Pad remaining slots so cards don't stretch
-            remaining = ROW_SIZE - len(tools[i : i + ROW_SIZE])
-            for _ in range(remaining):
-                spacer = QWidget()
-                spacer.setFixedSize(310, 170)
-                spacer.setStyleSheet("background:transparent;")
-                rl.addWidget(spacer)
-
-            rl.addStretch()
-            cl.addWidget(row_w)
+        for tool in _get_tools():
+            cl.addWidget(ToolCard(tool))
 
         cl.addStretch()
         scroll.setWidget(container)

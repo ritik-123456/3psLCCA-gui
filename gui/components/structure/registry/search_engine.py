@@ -1,7 +1,7 @@
 """
 search_engine.py
 ================
-Loads material databases from the registry (db_registry.json) and
+Loads material databases from the catalog (material_catalog.json) and
 provides category-wise listing and full-text search across one or
 more regional SOR files.
 
@@ -21,7 +21,7 @@ engine.search("PVC", region="Delhi")
 
 import json
 import re
-from db_registry import get_registry, get_path, list_databases
+from material_catalog import get_registry, get_path, list_databases
 
 
 # ─────────────────────────────────────────────────────────────────────────────

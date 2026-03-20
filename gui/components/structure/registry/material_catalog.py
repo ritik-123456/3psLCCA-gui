@@ -1,26 +1,31 @@
 """
-db_registry.py
-==============
-Auto-discovers every SOR JSON file under a configurable root folder
-(default: material_database/), validates each file's integrity, and
-writes a single registry manifest (db_registry.json) that downstream
-tools (search_engine.py, etc.) use to locate and filter databases by
-region / city.
+material_catalog.py
+===================
+Auto-discovers every material database JSON file under a configurable
+root folder (default: material_database/), validates each file's
+integrity, and writes a single catalog manifest (material_catalog.json)
+that downstream tools (search_engine.py, etc.) use to locate and filter
+databases by region / city.
 
 Folder convention expected
 --------------------------
 material_database/
-└── <COUNTRY>/              e.g. INDIA
-    └── <STATE/REGION>/     e.g. Maharashtra, Delhi
-        └── <City>SOR.json  e.g. MumbaiSOR.json
+└── <COUNTRY>/                        e.g. INDIA
+    ├── <File>.json                   e.g. MumbaiSOR.json        → db_key: INDIA/MumbaiSOR
+    └── <REGION>/[<SUB>/...]          e.g. Maharashtra/PWD/
+        └── <File>.json               e.g. PWD_SOR.json          → db_key: INDIA/Maharashtra/PWD/PWD_SOR
+
+db_key is the full relative path from the material_database root, without the
+.json extension, using forward slashes.  This guarantees uniqueness even when
+multiple regions use identically-named JSON files.
 
 Usage
 -----
 # Build / refresh the registry manifest
-python db_registry.py
+python material_catalog.py
 
 # In other modules
-from db_registry import get_registry, get_path, load, check_integrity
+from material_catalog import get_registry, get_path, load, check_integrity
 """
 
 import json
@@ -38,8 +43,8 @@ MATERIAL_DB_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 "material_database")
 
 # Output manifest written by build_registry()
-REGISTRY_MANIFEST_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                      "db_registry.json")
+CATALOG_MANIFEST_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                      "material_catalog.json")
 
 # Schema every SOR JSON file must satisfy
 EXPECTED_SCHEMA = {
@@ -77,16 +82,22 @@ def _file_meta(file_path: str) -> dict:
 def _derive_region_info(json_path: str, root: str) -> dict:
     """
     Walk up the path relative to root and extract:
-      country  ← top-level folder under root   (e.g. INDIA)
-      region   ← next folder                   (e.g. Maharashtra)
-      db_key   ← stem of the JSON filename      (e.g. MumbaiSOR)
-    """
-    rel   = Path(json_path).relative_to(root)
-    parts = rel.parts          # ('INDIA', 'Maharashtra', 'MumbaiSOR.json')
+      country  ← top-level folder under root          (e.g. INDIA)
+      region   ← everything between country and file  (e.g. Maharashtra/PWD)
+      db_key   ← full relative path without extension   (e.g. INDIA/Maharashtra/PWD/PWD_SOR)
 
-    country = parts[0]                       if len(parts) >= 1 else "UNKNOWN"
-    region  = "/".join(parts[1:-1])          if len(parts) >= 3 else "UNKNOWN"
-    db_key  = Path(parts[-1]).stem           # drop .json extension
+    Using region as a db_key prefix guarantees uniqueness across sub-folders
+    even when multiple regions use identically-named JSON files.
+    """
+    rel          = Path(json_path).relative_to(root)
+    parts        = rel.parts   # ('INDIA', 'Maharashtra', 'PWD', 'PWD_SOR.json')
+
+    country      = parts[0]              if len(parts) >= 1 else "UNKNOWN"
+    region_parts = list(parts[1:-1])     # everything between country and filename
+    stem         = Path(parts[-1]).stem  # drop .json extension
+
+    region = "/".join(region_parts)      # '' when file is directly in country folder
+    db_key = "/".join([country] + region_parts + [stem])
 
     return {"country": country, "region": region, "db_key": db_key}
 
@@ -210,7 +221,7 @@ def check_integrity(db_key: str) -> dict:
             "checked_at": datetime.datetime.now().isoformat(),
         }
     entry    = registry[db_key]
-    abs_path = str((Path(REGISTRY_MANIFEST_PATH).parent / entry["path"]).resolve())
+    abs_path = str((Path(CATALOG_MANIFEST_PATH).parent / entry["path"]).resolve())
     report   = check_integrity_by_path(abs_path)
     report["db_key"]  = db_key
     report["country"] = entry.get("country")
@@ -223,17 +234,17 @@ def check_integrity(db_key: str) -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def build_registry(root: str = MATERIAL_DB_ROOT,
-                   manifest_path: str = REGISTRY_MANIFEST_PATH) -> dict:
+                   manifest_path: str = CATALOG_MANIFEST_PATH) -> dict:
     """
     Crawl `root` recursively, validate every *.json file, and write
-    `manifest_path` (db_registry.json).
+    `manifest_path` (material_catalog.json).
 
     Manifest structure
     ------------------
     {
       "_meta": { "built_at": "...", "root": "...", "total": N, "ok": N, "failed": N },
-      "MumbaiSOR": {
-          "db_key":   "MumbaiSOR",
+      "INDIA/Maharashtra/PWD/PWD_SOR": {
+          "db_key":   "INDIA/Maharashtra/PWD/PWD_SOR",
           "path":     "/abs/path/to/MumbaiSOR.json",
           "country":  "INDIA",
           "region":   "Maharashtra",
@@ -306,8 +317,8 @@ def build_registry(root: str = MATERIAL_DB_ROOT,
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    print(f"[db_registry] Registry written → {manifest_path}")
-    print(f"[db_registry] Scanned {len(json_files)} file(s): "
+    print(f"[material_catalog] Registry written → {manifest_path}")
+    print(f"[material_catalog] Scanned {len(json_files)} file(s): "
           f"{ok_count} OK, {failed_count} FAILED")
     return manifest
 
@@ -316,13 +327,13 @@ def build_registry(root: str = MATERIAL_DB_ROOT,
 #  PUBLIC – REGISTRY ACCESSORS
 # ─────────────────────────────────────────────────────────────────────────────
 
-def get_registry(manifest_path: str = REGISTRY_MANIFEST_PATH) -> dict:
+def get_registry(manifest_path: str = CATALOG_MANIFEST_PATH) -> dict:
     """
     Load and return the registry manifest (minus the _meta key).
     Auto-builds the registry if the manifest file does not exist.
     """
     if not os.path.isfile(manifest_path):
-        print("[db_registry] Manifest not found – building now …")
+        print("[material_catalog] Manifest not found – building now …")
         build_registry()
 
     with open(manifest_path, "r", encoding="utf-8") as f:
@@ -331,7 +342,7 @@ def get_registry(manifest_path: str = REGISTRY_MANIFEST_PATH) -> dict:
     return {k: v for k, v in full.items() if k != "_meta"}
 
 
-def get_path(db_key: str, manifest_path: str = REGISTRY_MANIFEST_PATH) -> str:
+def get_path(db_key: str, manifest_path: str = CATALOG_MANIFEST_PATH) -> str:
     """Return absolute path for a registered db_key."""
     registry = get_registry(manifest_path)
     if db_key not in registry:
@@ -372,10 +383,10 @@ def load(db_key: str, strict: bool = True) -> list[dict]:
                + "\n".join(f"  ✗ {e}" for e in report["errors"]))
         if strict:
             raise RuntimeError(msg)
-        print(f"[db_registry WARNING] {msg}")
+        print(f"[material_catalog WARNING] {msg}")
 
     for w in report.get("warnings", []):
-        print(f"[db_registry WARNING] {w}")
+        print(f"[material_catalog WARNING] {w}")
 
     path = get_path(db_key)
     with open(path, "r", encoding="utf-8") as f:
@@ -383,7 +394,7 @@ def load(db_key: str, strict: bool = True) -> list[dict]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CLI  – python db_registry.py
+#  CLI  – python material_catalog.py
 # ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

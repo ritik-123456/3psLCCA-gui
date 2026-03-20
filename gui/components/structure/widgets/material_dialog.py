@@ -445,14 +445,13 @@ def _list_sor_options(country: str = None) -> list[dict]:
     _ensure_registry_on_path()
     result = []
     try:
-        from db_registry import list_databases
+        from material_catalog import list_databases
         raw = list_databases(country=country.strip() if country else None)
         for e in raw:
             if e.get("status") != "OK":
                 continue
             region = e.get("region", "")
-            label = f"{e['db_key']}  ({region})" if region else e["db_key"]
-            result.append({"db_key": e["db_key"], "region": region, "label": label})
+            result.append({"db_key": e["db_key"], "region": region, "label": e["db_key"]})
     except Exception as ex:
         print(f"[MaterialDialog] Could not list SOR options: {ex}")
 
@@ -474,7 +473,7 @@ def _list_sor_options(country: str = None) -> list[dict]:
 def _list_sor_types(db_keys: list = None) -> list[str]:
     _ensure_registry_on_path()
     try:
-        from db_registry import list_databases as _list_dbs
+        from material_catalog import list_databases as _list_dbs
         available = [
             e["db_key"] for e in _list_dbs()
             if e.get("status") == "OK"
@@ -522,7 +521,7 @@ def _load_material_suggestions(db_keys: list = None, comp_name: str = None) -> d
     skip_regular = (db_keys is not None and not regular_keys)
     if not skip_regular:
         try:
-            from db_registry import list_databases as _list_dbs
+            from material_catalog import list_databases as _list_dbs
             _available = [
                 e["db_key"] for e in _list_dbs()
                 if e.get("status") == "OK"
@@ -1289,11 +1288,22 @@ class MaterialDialog(QDialog):
         best_idx = 0
         if preselect:
             pre_lower = preselect.strip().lower()
+            best_score = -1
             for i in range(1, self.type_filter_cb.count()):
                 t = (self.type_filter_cb.itemData(i) or "").lower()
-                if t == pre_lower or pre_lower in t or t in pre_lower:
+                if t == pre_lower:
                     best_idx = i
-                    break
+                    break                          # exact match — nothing better
+                elif pre_lower in t:
+                    score = 2 + len(t)            # comp fits into type; prefer shorter
+                    if score > best_score:
+                        best_score = score
+                        best_idx = i
+                elif t in pre_lower:
+                    score = 1 + len(t)            # type fits into comp; prefer longer
+                    if score > best_score:
+                        best_score = score
+                        best_idx = i
 
         self.type_filter_cb.setCurrentIndex(best_idx)
         self.type_filter_cb.blockSignals(False)

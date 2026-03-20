@@ -1,6 +1,6 @@
 {
-  "Darbhanga-2025": {
-    "db_key": "Darbhanga-2025",
+  "INDIA/Bihar/Darbhanga-2025": {
+    "db_key": "INDIA/Bihar/Darbhanga-2025",
     "path": "material_database\\INDIA\\Bihar\\Darbhanga-2025.json",
     "country": "INDIA",
     "region": "Bihar",
@@ -127,8 +127,8 @@
       "md5": "02abad95351147693d6083c7043c8d1b"
     }
   },
-  "Mumbai-2023": {
-    "db_key": "Mumbai-2023",
+  "INDIA/Maharashtra/Mumbai-2023": {
+    "db_key": "INDIA/Maharashtra/Mumbai-2023",
     "path": "material_database\\INDIA\\Maharashtra\\Mumbai-2023.json",
     "country": "INDIA",
     "region": "Maharashtra",
@@ -212,7 +212,7 @@
     }
   },
   "_meta": {
-    "built_at": "2026-03-19T08:08:09.036539",
+    "built_at": "2026-03-20T15:49:06.892145",
     "root": "material_database",
     "total_files": 2,
     "ok": 2,

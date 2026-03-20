@@ -8,10 +8,10 @@ Opens from the DevToolsWindow toolbar.  Lets the user:
   2. Preview the sections that will be generated
   3. Choose (or confirm) the output JSON path
   4. Write the JSON file
-  5. Auto-run integrity check (via db_registry.check_integrity_by_path)
-  6. Rebuild the registry manifest (via db_registry.build_registry)
+  5. Auto-run integrity check (via material_catalog.check_integrity_by_path)
+  6. Rebuild the registry manifest (via material_catalog.build_registry)
 
-db_registry.py is located automatically by walking up from the output
+material_catalog.py is located automatically by walking up from the output
 path until the parent of the 'material_database' folder is found.
 """
 
@@ -107,39 +107,39 @@ _LOG_STYLE = (
 
 
 # ---------------------------------------------------------------------------
-# db_registry loader
+# material_catalog loader
 # ---------------------------------------------------------------------------
 
 
-def _find_db_registry_path(output_json: str) -> Path | None:
+def _find_catalog_path(output_json: str) -> Path | None:
     """
     Walk up from output_json looking for a 'material_database' folder.
-    db_registry.py is expected to live in material_database's parent directory.
+    material_catalog.py is expected to live in material_database's parent directory.
 
     Example:
         output  : .../registry/material_database/INDIA/Bihar/Darbhanga.json
         walks to: .../registry/material_database/
-        finds   : .../registry/db_registry.py   ← sibling of material_database/
+        finds   : .../registry/material_catalog.py   ← sibling of material_database/
     """
     p = Path(output_json).resolve()
     for parent in p.parents:
         if parent.name == "material_database":
-            candidate = parent.parent / "db_registry.py"
+            candidate = parent.parent / "material_catalog.py"
             if candidate.exists():
                 return candidate
     return None
 
 
-def _load_db_registry(output_json: str) -> ModuleType | None:
+def _load_catalog(output_json: str) -> ModuleType | None:
     """
-    Dynamically import db_registry from the project tree.
+    Dynamically import material_catalog from the project tree.
     Returns the module, or None if not found / failed to import.
     """
-    reg_path = _find_db_registry_path(output_json)
+    reg_path = _find_catalog_path(output_json)
     if reg_path is None:
         return None
     try:
-        spec = importlib.util.spec_from_file_location("_db_registry_dev", str(reg_path))
+        spec = importlib.util.spec_from_file_location("_material_catalog_dev", str(reg_path))
         mod  = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         return mod
@@ -212,10 +212,20 @@ class SorGeneratorDialog(QDialog):
       2. Click Parse    → preview table fills with section summary
       3. Confirm / change output path
       4. Click Generate → file written, integrity check runs automatically
-      5. Click Rebuild Registry → db_registry.json refreshed
+      5. Click Rebuild Registry → material_catalog.json refreshed
+                                  (standalone mode only)
+
+    Parameters
+    ----------
+    parent : QWidget, optional
+    mod    : ModuleType, optional
+        Pre-loaded material_catalog module from RegistryBuilderDialog.
+        If None, located automatically from the output JSON path (standalone).
     """
 
-    def __init__(self, parent=None):
+    sor_generated = Signal()   # emitted after a JSON file is successfully written
+
+    def __init__(self, parent=None, mod: ModuleType | None = None):
         super().__init__(parent)
         self.setWindowTitle("SOR JSON Generator")
         self.setMinimumSize(780, 640)
@@ -230,6 +240,8 @@ class SorGeneratorDialog(QDialog):
         self._sor: list[dict] = []
         self._last_written: str = ""          # path of the last successfully written file
         self._worker: QThread | None = None
+        self._reg_mod: ModuleType | None = mod
+        self._standalone: bool = mod is None
 
         self._build_ui()
 
@@ -345,16 +357,20 @@ class SorGeneratorDialog(QDialog):
         close_btn.clicked.connect(self.reject)
         btn_row.addWidget(close_btn)
 
-        self._rebuild_btn = QPushButton("Rebuild Registry")
-        self._rebuild_btn.setFixedHeight(34)
-        self._rebuild_btn.setEnabled(False)
-        self._rebuild_btn.setToolTip(
-            "Rebuild db_registry.json so the new file appears in the search index.\n"
-            "Runs db_registry.build_registry() on the material_database/ folder."
-        )
-        self._rebuild_btn.setStyleSheet(_REGISTRY_BTN_STYLE)
-        self._rebuild_btn.clicked.connect(self._rebuild_registry)
-        btn_row.addWidget(self._rebuild_btn)
+        # Rebuild only in standalone mode — Registry Builder handles it when used as sub-dialog
+        if self._standalone:
+            self._rebuild_btn = QPushButton("Rebuild Registry")
+            self._rebuild_btn.setFixedHeight(34)
+            self._rebuild_btn.setEnabled(False)
+            self._rebuild_btn.setToolTip(
+                "Rebuild material_catalog.json so the new file appears in the search index.\n"
+                "Runs material_catalog.build_registry() on the material_database/ folder."
+            )
+            self._rebuild_btn.setStyleSheet(_REGISTRY_BTN_STYLE)
+            self._rebuild_btn.clicked.connect(self._rebuild_registry)
+            btn_row.addWidget(self._rebuild_btn)
+        else:
+            self._rebuild_btn = None
 
         self._generate_btn = QPushButton("Generate JSON")
         self._generate_btn.setFixedHeight(34)
@@ -590,24 +606,29 @@ class SorGeneratorDialog(QDialog):
         # --- Integrity check -------------------------------------------------
         self._run_integrity_check(str(dest))
 
-        # --- Enable registry rebuild if db_registry is findable ---------------
-        reg_mod = _load_db_registry(str(dest))
-        if reg_mod is not None:
-            self._rebuild_btn.setEnabled(True)
-        else:
-            self._log_line(
-                "Note: db_registry.py not found relative to output path — "
-                "Rebuild Registry unavailable.",
-                color=_DIM,
-            )
+        # --- Signal parent / enable rebuild ----------------------------------
+        self.sor_generated.emit()
+
+        if self._standalone:
+            # In standalone mode locate material_catalog from the output path
+            reg_mod = _load_catalog(str(dest))
+            if reg_mod is not None:
+                self._reg_mod = reg_mod
+                self._rebuild_btn.setEnabled(True)
+            else:
+                self._log_line(
+                    "Note: material_catalog.py not found relative to output path — "
+                    "Rebuild Registry unavailable.",
+                    color=_DIM,
+                )
 
     # ── Integrity check ────────────────────────────────────────────────────────
 
     def _run_integrity_check(self, file_path: str):
-        """Run db_registry.check_integrity_by_path and display results in the log."""
-        reg_mod = _load_db_registry(file_path)
+        """Run material_catalog.check_integrity_by_path and display results in the log."""
+        reg_mod = _load_catalog(file_path)
         if reg_mod is None:
-            self._log_line("Integrity check skipped — db_registry.py not found.", color=_DIM)
+            self._log_line("Integrity check skipped — material_catalog.py not found.", color=_DIM)
             return
 
         self._log_line("--- Integrity check ---", color=_DIM)
@@ -641,16 +662,10 @@ class SorGeneratorDialog(QDialog):
     # ── Rebuild registry ───────────────────────────────────────────────────────
 
     def _rebuild_registry(self):
-        out_path = self._last_written or self._output_edit.text().strip()
-        if not out_path:
-            QMessageBox.warning(self, "No Output Path", "Generate a file first.")
-            return
-
-        reg_mod = _load_db_registry(out_path)
-        if reg_mod is None:
+        if self._reg_mod is None:
             QMessageBox.warning(
-                self, "db_registry Not Found",
-                "Could not locate db_registry.py relative to the output path.\n"
+                self, "material_catalog Not Found",
+                "Could not locate material_catalog.py relative to the output path.\n"
                 "Make sure the JSON is inside a material_database/ subfolder."
             )
             return
@@ -659,7 +674,7 @@ class SorGeneratorDialog(QDialog):
         self._rebuild_btn.setText("Rebuilding…")
         self._log_line("--- Rebuilding registry ---", color=_DIM)
 
-        self._worker = _RegistryWorker(reg_mod)
+        self._worker = _RegistryWorker(self._reg_mod)
         self._worker.finished.connect(self._on_registry_done)
         self._worker.error.connect(self._on_registry_error)
         self._worker.start()

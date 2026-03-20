@@ -1,7 +1,7 @@
 """
-devtools/registry_builder_gui.py
+devtools/catalog_builder_gui.py
 
-Registry Builder — inspect, validate, and rebuild db_registry.json.
+Catalog Builder — inspect, validate, and rebuild material_catalog.json.
 
 Features:
   - Auto-detect material_database root from the project tree
@@ -11,8 +11,9 @@ Features:
   - Run integrity check on any selected database entry
   - Show per-entry errors and warnings in the log
 
-db_registry.py is located by walking up from a known anchor
+material_catalog.py is located by walking up from a known anchor
 (devtools/ → project root → registry/).
+
 """
 
 from __future__ import annotations
@@ -118,30 +119,30 @@ _NCOLS       = 7
 
 
 # ---------------------------------------------------------------------------
-# Helpers — locate db_registry.py
+# Helpers — locate material_catalog.py
 # ---------------------------------------------------------------------------
 
 
-def _auto_detect_registry_py() -> Path | None:
+def _auto_detect_catalog_py() -> Path | None:
     """
-    Try to find db_registry.py relative to this devtools file's location.
+    Try to find material_catalog.py relative to this devtools file's location.
     Expected structure:
-        <project>/devtools/registry_builder_gui.py  ← this file
-        <project>/gui/components/structure/registry/db_registry.py
+        <project>/devtools/catalog_builder_gui.py  ← this file
+        <project>/gui/components/structure/registry/material_catalog.py
     """
     here = Path(__file__).resolve().parent          # devtools/
     project_root = here.parent                      # <project>/
     candidate = (
         project_root
         / "gui" / "components" / "structure" / "registry"
-        / "db_registry.py"
+        / "material_catalog.py"
     )
     return candidate if candidate.exists() else None
 
 
-def _load_registry_module(reg_py: Path) -> ModuleType | None:
+def _load_catalog_module(reg_py: Path) -> ModuleType | None:
     try:
-        spec = importlib.util.spec_from_file_location("_db_registry_tool", str(reg_py))
+        spec = importlib.util.spec_from_file_location("_material_catalog_tool", str(reg_py))
         mod  = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         return mod
@@ -196,13 +197,13 @@ class _IntegrityWorker(QThread):
 # ---------------------------------------------------------------------------
 
 
-class RegistryBuilderDialog(QDialog):
+class CatalogBuilderDialog(QDialog):
     """
     Registry Builder dialog.
 
     Workflow:
       1. Root auto-detected (or browse to a material_database/ folder)
-      2. Click Load  → reads existing db_registry.json into the table
+      2. Click Load  → reads existing material_catalog.json into the table
       3. Select a row and click Check Integrity for a single-entry report
       4. Click Rebuild Registry → re-crawls all *.json files, refreshes table
     """
@@ -219,7 +220,7 @@ class RegistryBuilderDialog(QDialog):
         )
         self.setStyleSheet(f"QDialog {{ background:{_BG}; color:{_TEXT}; }}")
 
-        self._mod: ModuleType | None = None       # loaded db_registry module
+        self._mod: ModuleType | None = None       # loaded material_catalog module
         self._manifest: dict = {}                 # last loaded / built manifest
         self._worker: QThread | None = None
 
@@ -242,7 +243,7 @@ class RegistryBuilderDialog(QDialog):
 
         desc = QLabel(
             "Crawls the material_database/ folder, validates every SOR JSON file,\n"
-            "and writes db_registry.json for use by the search engine."
+            "and writes material_catalog.json used by the search engine and material dialog."
         )
         desc.setWordWrap(True)
         desc.setStyleSheet(f"color:{_DIM}; font-size:11px;")
@@ -358,10 +359,30 @@ class RegistryBuilderDialog(QDialog):
         self._rebuild_btn = QPushButton("Rebuild Registry")
         self._rebuild_btn.setFixedHeight(34)
         self._rebuild_btn.setEnabled(False)
-        self._rebuild_btn.setToolTip("Re-crawl material_database/ and rewrite db_registry.json")
+        self._rebuild_btn.setToolTip("Re-crawl material_database/ and rewrite material_catalog.json")
         self._rebuild_btn.setStyleSheet(_BTN_MAUVE)
         self._rebuild_btn.clicked.connect(self._rebuild_registry)
         btn_row.addWidget(self._rebuild_btn)
+
+        self._manage_countries_btn = QPushButton("Manage Country Folders…")
+        self._manage_countries_btn.setFixedHeight(34)
+        self._manage_countries_btn.setEnabled(False)
+        self._manage_countries_btn.setToolTip(
+            "Add or remove country folders in material_database/"
+        )
+        self._manage_countries_btn.setStyleSheet(_BTN_BLUE)
+        self._manage_countries_btn.clicked.connect(self._open_country_manager)
+        btn_row.addWidget(self._manage_countries_btn)
+
+        self._sor_generator_btn = QPushButton("Open SOR Generator…")
+        self._sor_generator_btn.setFixedHeight(34)
+        self._sor_generator_btn.setEnabled(False)
+        self._sor_generator_btn.setToolTip(
+            "Convert an SOR Excel file to JSON and place it in a country folder"
+        )
+        self._sor_generator_btn.setStyleSheet(_BTN_BLUE)
+        self._sor_generator_btn.clicked.connect(self._open_sor_generator)
+        btn_row.addWidget(self._sor_generator_btn)
 
         root_layout.addLayout(btn_row)
 
@@ -399,20 +420,50 @@ class RegistryBuilderDialog(QDialog):
     def _set_busy(self, busy: bool):
         self._rebuild_btn.setEnabled(not busy)
         self._load_btn.setEnabled(not busy and bool(self._root_edit.text().strip()))
+        self._manage_countries_btn.setEnabled(not busy and self._mod is not None)
+        self._sor_generator_btn.setEnabled(not busy and self._mod is not None)
         if not busy:
             self._on_selection_changed()   # restore check_btn based on selection
+
+    def _open_country_manager(self):
+        if self._mod is None:
+            return
+        try:
+            from country_manager_gui import CountryManagerDialog
+        except ImportError as exc:
+            QMessageBox.critical(self, "Import Error", str(exc))
+            return
+
+        db_root = Path(self._mod.MATERIAL_DB_ROOT)
+        dlg = CountryManagerDialog(parent=self, mod=self._mod, db_root=db_root)
+        dlg.folders_changed.connect(self._load_registry)
+        dlg.rebuild_needed.connect(self._rebuild_registry)
+        dlg.exec()
+
+    def _open_sor_generator(self):
+        if self._mod is None:
+            return
+        try:
+            from sor_generator_gui import SorGeneratorDialog
+        except ImportError as exc:
+            QMessageBox.critical(self, "Import Error", str(exc))
+            return
+
+        dlg = SorGeneratorDialog(parent=self, mod=self._mod)
+        dlg.sor_generated.connect(self._load_registry)
+        dlg.exec()
 
     # ── Auto-load ──────────────────────────────────────────────────────────────
 
     def _auto_load(self):
-        reg_py = _auto_detect_registry_py()
+        reg_py = _auto_detect_catalog_py()
         if reg_py is None:
-            self._log_line("db_registry.py not found in expected project location.", color=_ORANGE)
+            self._log_line("material_catalog.py not found in expected project location.", color=_ORANGE)
             return
 
-        mod = _load_registry_module(reg_py)
+        mod = _load_catalog_module(reg_py)
         if mod is None:
-            self._log_line(f"Failed to import db_registry from:\n  {reg_py}", color=_RED)
+            self._log_line(f"Failed to import material_catalog from:\n  {reg_py}", color=_RED)
             return
 
         self._mod = mod
@@ -421,13 +472,15 @@ class RegistryBuilderDialog(QDialog):
         self._log_line(f"Auto-detected root: {db_root}", color=_DIM)
         self._rebuild_btn.setEnabled(True)
         self._load_btn.setEnabled(True)
+        self._manage_countries_btn.setEnabled(True)
+        self._sor_generator_btn.setEnabled(True)
 
         # Load manifest if it exists
-        manifest_path = Path(mod.REGISTRY_MANIFEST_PATH)
+        manifest_path = Path(mod.CATALOG_MANIFEST_PATH)
         if manifest_path.exists():
             self._load_registry()
         else:
-            self._log_line("No db_registry.json found — click Rebuild Registry to create it.", color=_YELLOW)
+            self._log_line("No material_catalog.json found — click Rebuild Registry to create it.", color=_YELLOW)
 
     # ── Browse root ────────────────────────────────────────────────────────────
 
@@ -439,18 +492,18 @@ class RegistryBuilderDialog(QDialog):
         if not folder:
             return
 
-        # Try to find db_registry.py as a sibling of the chosen folder
+        # Try to find material_catalog.py as a sibling of the chosen folder
         chosen   = Path(folder).resolve()
-        reg_py   = chosen.parent / "db_registry.py"
+        reg_py   = chosen.parent / "material_catalog.py"
         if not reg_py.exists():
             QMessageBox.warning(
-                self, "db_registry.py Not Found",
-                f"Could not find db_registry.py at:\n{reg_py}\n\n"
+                self, "material_catalog.py Not Found",
+                f"Could not find material_catalog.py at:\n{reg_py}\n\n"
                 "Select the material_database/ folder directly inside the registry/ directory."
             )
             return
 
-        mod = _load_registry_module(reg_py)
+        mod = _load_catalog_module(reg_py)
         if mod is None:
             QMessageBox.critical(self, "Import Error", f"Failed to import:\n{reg_py}")
             return
@@ -459,6 +512,8 @@ class RegistryBuilderDialog(QDialog):
         self._root_edit.setText(str(chosen))
         self._rebuild_btn.setEnabled(True)
         self._load_btn.setEnabled(True)
+        self._manage_countries_btn.setEnabled(True)
+        self._sor_generator_btn.setEnabled(True)
         self._log_line(f"Root set to: {chosen}", color=_DIM)
 
     def _on_root_changed(self, text: str):
@@ -471,9 +526,9 @@ class RegistryBuilderDialog(QDialog):
     def _load_registry(self):
         if self._mod is None:
             return
-        manifest_path = Path(self._mod.REGISTRY_MANIFEST_PATH)
+        manifest_path = Path(self._mod.CATALOG_MANIFEST_PATH)
         if not manifest_path.exists():
-            self._log_line("db_registry.json not found — rebuild first.", color=_YELLOW)
+            self._log_line("material_catalog.json not found — rebuild first.", color=_YELLOW)
             return
 
         try:
@@ -596,7 +651,7 @@ class RegistryBuilderDialog(QDialog):
             return
 
         # Resolve absolute path
-        manifest_dir = Path(self._mod.REGISTRY_MANIFEST_PATH).parent
+        manifest_dir = Path(self._mod.CATALOG_MANIFEST_PATH).parent
         rel_path     = entry.get("path", "")
         abs_path     = str((manifest_dir / rel_path).resolve())
 
@@ -650,11 +705,11 @@ class RegistryBuilderDialog(QDialog):
 
     def _rebuild_registry(self):
         if self._mod is None:
-            QMessageBox.warning(self, "Not Ready", "No db_registry module loaded.")
+            QMessageBox.warning(self, "Not Ready", "No material_catalog module loaded.")
             return
 
         root_path     = self._root_edit.text().strip() or str(self._mod.MATERIAL_DB_ROOT)
-        manifest_path = str(self._mod.REGISTRY_MANIFEST_PATH)
+        manifest_path = str(self._mod.CATALOG_MANIFEST_PATH)
 
         if not Path(root_path).is_dir():
             QMessageBox.warning(self, "Invalid Path", f"Not a directory:\n{root_path}")
