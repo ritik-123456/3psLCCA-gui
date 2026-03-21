@@ -262,10 +262,8 @@ class GeneralInfo(ScrollableForm):
             cb.addItem(opt["label"], opt["db_key"])
         cb.addItem("— No suggestions —", "")
 
-        if saved_key:
-            idx = cb.findData(saved_key)
-            if idx >= 0:
-                cb.setCurrentIndex(idx)
+        idx = cb.findData(saved_key) if saved_key else -1
+        cb.setCurrentIndex(idx if idx >= 0 else cb.count() - 1)  # default → "— No suggestions —"
 
         cb.setEnabled(bool(options))
         cb.blockSignals(False)
