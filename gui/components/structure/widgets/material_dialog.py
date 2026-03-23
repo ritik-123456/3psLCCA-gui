@@ -247,7 +247,7 @@ class CustomUnitDialog(QDialog):
         self.si_sym_lbl = QLabel("kg")
         self.si_sym_lbl.setStyleSheet(
             "background: #f5f5f5; color: #595959; padding: 4px 8px; "
-            "border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"
+            "border: 1px solid #ccc; border-radius: 4px; font-size: 12px;"
         )
         self.si_sym_lbl.setMinimumHeight(32)
         self.si_sym_lbl.setMinimumWidth(48)

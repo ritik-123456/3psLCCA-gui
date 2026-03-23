@@ -232,8 +232,7 @@ QTreeView::item {
 }
 
 QTreeView::branch {
-    image: none;
-    background: $body-bg;
+    background: transparent;
 }
 
 /* ── Table view ─────────────────────────────────────────────────────────── */

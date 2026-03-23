@@ -58,7 +58,6 @@ from gui.theme import (
     RADIUS_SM,
     RADIUS_MD,
     RADIUS_LG,
-    RADIUS_XL,
     BTN_SM,
     BTN_MD,
     BTN_LG,
@@ -219,23 +218,19 @@ class _NavButton(QWidget):
     @staticmethod
     def _draw_home(p: QPainter, cx: int, cy: int):
         # Roof
-        p.drawPolyline(
-            QPolygonF(
-                [
-                    QPointF(cx - 11, cy + 1),
-                    QPointF(cx, cy - 9),
-                    QPointF(cx + 11, cy + 1),
-                ]
-            )
-        )
+        p.drawPolyline(QPolygonF([
+            QPointF(cx - 11, cy + 1),
+            QPointF(cx,       cy - 10),
+            QPointF(cx + 11, cy + 1),
+        ]))
         # Left wall
-        p.drawLine(QPointF(cx - 9, cy + 1), QPointF(cx - 9, cy + 11))
+        p.drawLine(QPointF(cx - 9, cy + 1), QPointF(cx - 9, cy + 12))
         # Right wall
-        p.drawLine(QPointF(cx + 9, cy + 1), QPointF(cx + 9, cy + 11))
+        p.drawLine(QPointF(cx + 9, cy + 1), QPointF(cx + 9, cy + 12))
         # Floor
-        p.drawLine(QPointF(cx - 9, cy + 11), QPointF(cx + 9, cy + 11))
+        p.drawLine(QPointF(cx - 9, cy + 12), QPointF(cx + 9, cy + 12))
         # Door
-        p.drawRect(QRectF(cx - 3.5, cy + 5, 7, 6))
+        p.drawRect(QRectF(cx - 3.5, cy + 5, 7, 7))
 
     @staticmethod
     def _draw_new(p: QPainter, cx: int, cy: int):
@@ -307,7 +302,7 @@ class _NavButton(QWidget):
 
 
 class _GridCardDelegate(QStyledItemDelegate):
-    RADIUS = RADIUS_SM
+    RADIUS = RADIUS_LG
 
     # Status semantic tint colors (ARGB alpha applied at paint time)
     _STATUS_TINT = {
@@ -692,7 +687,7 @@ class HomePage(QWidget):
         layout.setSpacing(0)
 
         # ── Home (always selected) ─────────────────────────────────────────
-        home_btn = _NavButton(_NavButton.HOME, selected=True)
+        home_btn = _NavButton(_NavButton.HOME, "Home", selected=True)
         home_btn.setToolTip("Home")
         layout.addWidget(home_btn)
 

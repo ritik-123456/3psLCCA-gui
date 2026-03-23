@@ -10,16 +10,19 @@ from PySide6.QtWidgets import (
     QStyleOptionHeader,
 )
 from PySide6.QtCore import Qt, QSize, QRect
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QFont
 from ...utils.definitions import UNIT_DISPLAY
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon, make_icon_btn
 from ...utils.validation_helpers import freeze_widgets
+from gui.theme import FS_SM, FW_SEMIBOLD, SECONDARY
 
 
 # ---------------------------------------------------------------------------
 # Two-tier grouped header (shared pattern with CarbonTable)
 # ---------------------------------------------------------------------------
+
+_HDR_FONT = QFont("Ubuntu", FS_SM, FW_SEMIBOLD)
 
 
 class _GroupedHeader(QHeaderView):
@@ -43,6 +46,7 @@ class _GroupedHeader(QHeaderView):
         return QSize(s.width(), s.height() * 2) if self._groups else s
 
     def paintSection(self, painter, rect, logical_index):
+        painter.setFont(_HDR_FONT)
         if not self._groups or logical_index not in self._col_group:
             super().paintSection(painter, rect, logical_index)
             return
@@ -61,6 +65,7 @@ class _GroupedHeader(QHeaderView):
             return
 
         painter = QPainter(self.viewport())
+        painter.setFont(_HDR_FONT)
         h2 = self.height() // 2
 
         for start, span, label in self._groups:
@@ -84,6 +89,8 @@ class _GroupedHeader(QHeaderView):
 # ---------------------------------------------------------------------------
 # Structure table
 # ---------------------------------------------------------------------------
+
+_ACTION_W = 72   # fixed Action column width
 
 
 class StructureTableWidget(QTableWidget):
@@ -119,24 +126,25 @@ class StructureTableWidget(QTableWidget):
             item.setTextAlignment(align)
             self.setHorizontalHeaderItem(col, item)
 
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        self.horizontalHeader().setStretchLastSection(False)
-        self.horizontalHeader().setMinimumSectionSize(40)
+        hdr = self.horizontalHeader()
+        hdr.setSectionResizeMode(QHeaderView.Interactive)
+        hdr.setStretchLastSection(False)
+        hdr.setMinimumSectionSize(40)
+        # Action column fixed width, always at right edge; Total stretches to fill
+        hdr.setSectionResizeMode(5, QHeaderView.Stretch)
+        hdr.setSectionResizeMode(6, QHeaderView.Fixed)
+        self.setColumnWidth(6, _ACTION_W)
 
-        # Default widths (overridden by resizeEvent once rendered)
-        self.setColumnWidth(0, 240)  # Work Name
-        self.setColumnWidth(1, 90)   # Rate
-        self.setColumnWidth(2, 58)   # Qty › Value
-        self.setColumnWidth(3, 58)   # Qty › Unit
-        self.setColumnWidth(4, 90)   # Source
-        self.setColumnWidth(5, 110)  # Total
-        self.setColumnWidth(6, 80)   # Actions
+        # Row selection & appearance
+        self.setSelectionBehavior(QTableWidget.SelectRows)
+        self.setSelectionMode(QTableWidget.SingleSelection)
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.verticalHeader().setDefaultSectionSize(35)
+        self.verticalHeader().setDefaultSectionSize(36)
+        self.verticalHeader().setVisible(False)
 
         if not self.is_trash_view:
             self.cellDoubleClicked.connect(self._on_cell_double_clicked)
@@ -168,9 +176,9 @@ class StructureTableWidget(QTableWidget):
                 item.setText(base + suffix)
 
     def sizeHint(self):
-        header_h = self.horizontalHeader().height() or 35
+        header_h = self.horizontalHeader().height() or 56
         rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
-        return QSize(super().sizeHint().width(), max(150, header_h + rows_h + 15))
+        return QSize(super().sizeHint().width(), header_h + rows_h + 2)
 
     def minimumSizeHint(self):
         return self.sizeHint()
@@ -224,11 +232,12 @@ class StructureTableWidget(QTableWidget):
         total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.setItem(row, 5, total_item)
 
-        # 6. Actions
+        # 6. Actions — right-aligned, compact margins
         actions_widget = QWidget()
         actions_layout = QHBoxLayout(actions_widget)
-        actions_layout.setContentsMargins(2, 2, 2, 2)
+        actions_layout.setContentsMargins(0, 0, 6, 0)
         actions_layout.setSpacing(4)
+        actions_layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         if not self.is_trash_view:
             edit_btn = make_icon_btn("edit", "Edit")
@@ -279,20 +288,17 @@ class StructureTableWidget(QTableWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         total = self.viewport().width()
-        action_w = 80
-        rest = max(1, total - action_w)
+        rest = max(1, total - _ACTION_W)
 
-        # Qty sub-columns are equal width so the "Qty" spanning label is centred
         qty_sub = max(45, int(rest * 0.08))
 
         widths = {
-            0: max(150, int(rest * 0.35)),  # Work Name
+            0: max(150, int(rest * 0.36)),  # Work Name
             1: max(70,  int(rest * 0.13)),  # Rate
             2: qty_sub,                     # Qty › Value
             3: qty_sub,                     # Qty › Unit
             4: max(70,  int(rest * 0.15)),  # Source
-            5: max(75,  int(rest * 0.19)),  # Total
-            6: action_w,                    # Actions — fixed
+            # col 5 (Total) stretches automatically via QHeaderView.Stretch
         }
 
         for col, width in widths.items():

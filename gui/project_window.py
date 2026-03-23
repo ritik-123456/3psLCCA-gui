@@ -23,10 +23,16 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPalette, QFont
+from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPalette
 
 from gui.components.utils.icons import make_icon, make_icon_btn
-from gui.theme import PRIMARY, SIDEBAR_HOVER, SIDEBAR_SEL
+from gui.theme import (
+    PRIMARY,
+    FS_SM, FS_BASE, FS_MD,
+    FW_NORMAL, FW_MEDIUM, FW_SEMIBOLD,
+    SP4,
+)
+from gui.styles import font as _f
 from PySide6.QtWidgets import QToolTip
 
 from gui.components.save_status_bar import SaveStatusBar
@@ -78,11 +84,11 @@ SIDEBAR_TREE = {
 
 # ── Sidebar tree ──────────────────────────────────────────────────────────────
 
-_V_PAD = 3    # vertical padding per side (increases row height)
-_H_PAD = 6    # left text indent (pushes text away from accent bar)
-_ACCENT_W = 3 # width of the green left bar in px
-_ICON_SIZE = 16  # sidebar icon size in pixels
-_ICON_GAP = 5   # gap between icon and label text
+_V_PAD    = 2   # vertical padding per side
+_H_PAD    = 10  # left text indent
+_ACCENT_W = 3   # width of the left accent bar in px
+_ICON_SIZE = 16
+_ICON_GAP  = 6
 
 # Material icon name for each sidebar item (top-level and section-level only)
 _SIDEBAR_ICONS: dict[str, str] = {
@@ -106,43 +112,62 @@ class _SidebarDelegate(QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         base = super().sizeHint(option, index)
-        return QSize(base.width(), base.height() + _V_PAD * 2)
+        depth = 0
+        p = index.parent()
+        while p.isValid():
+            depth += 1
+            p = p.parent()
+        pad = _V_PAD if depth < 2 else _V_PAD + 3
+        return QSize(base.width(), base.height() + pad * 2)
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
-        # Strip ALL native state so Qt draws zero background/highlight
+        # Query tree directly — option.state may be stripped by drawRow
+        tree = self.parent()
+        item = tree.itemFromIndex(index) if tree else None
+        is_sel = bool(item and item in tree.selectedItems())
+
         option.state &= ~(
             QStyle.State_Selected | QStyle.State_MouseOver | QStyle.State_HasFocus
         )
 
-        # Highlight top level items by checking if it has no parents
-        if not index.parent().isValid(): # root level highlight
-            option.font.setWeight(QFont.Weight.DemiBold)
-        if index.parent().isValid() and index.model().hasChildren(index): # second level highlight
-            option.font.setWeight(QFont.Weight.Medium)
-        if index.parent().isValid() and index.parent().parent().isValid(): # third level highlight
-            option.font.setItalic(True)
-
         painter.save()
-        is_sel = bool(option.state & QStyle.State_Selected)
-        x = option.rect.left() + _H_PAD + (_ACCENT_W if is_sel else 0)
 
-        # Draw icon (DecorationRole) if present
+        depth = 0
+        p = index.parent()
+        while p.isValid():
+            depth += 1
+            p = p.parent()
+
+        # Font by depth — size stays at FS_BASE; weight carries the hierarchy
+        if depth == 0:
+            painter.setFont(_f(FS_BASE, FW_MEDIUM))
+        elif depth == 1:
+            painter.setFont(_f(FS_BASE, FW_MEDIUM))
+        else:
+            painter.setFont(_f(FS_SM, FW_NORMAL))
+
+        # Text colour — PRIMARY on selected, normal otherwise
+        text_col = QColor(PRIMARY) if is_sel else option.palette.windowText().color()
+        painter.setPen(text_col)
+
+        extra = 28 if depth >= 2 else 0
+        x = option.rect.left() + _H_PAD + extra + (_ACCENT_W if is_sel else 0)
+
+        # Icon
         icon: QIcon = index.data(Qt.DecorationRole)
         if icon and not icon.isNull():
             iy = option.rect.top() + (option.rect.height() - _ICON_SIZE) // 2
-            icon_rect = QRect(x, iy, _ICON_SIZE, _ICON_SIZE)
-            icon.paint(painter, icon_rect, Qt.AlignCenter)
+            icon.paint(painter, QRect(x, iy, _ICON_SIZE, _ICON_SIZE), Qt.AlignCenter)
             x += _ICON_SIZE + _ICON_GAP
 
-        # Draw text
+        # Text
         text = index.data(Qt.DisplayRole)
         if text:
             text_rect = QRect(x, option.rect.top() + _V_PAD,
-                              option.rect.right() - x - 4,
+                              option.rect.right() - x - SP4,
                               option.rect.height() - _V_PAD * 2)
-            painter.setPen(option.palette.windowText().color())
-            painter.setFont(option.font)
             painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, text)
+
         painter.restore()
 
 
@@ -160,6 +185,8 @@ class _SidebarTree(QTreeWidget):
         self.setMouseTracking(True)
         self.viewport().setMouseTracking(True)
         self.setItemDelegate(_SidebarDelegate(self))
+        self.setRootIsDecorated(True)
+        self.setIndentation(16)
 
         # Sync Base/AlternateBase → Window so the viewport background matches
         p = self.palette()
@@ -180,55 +207,36 @@ class _SidebarTree(QTreeWidget):
         return is_sel, is_hovered
 
     def drawRow(self, painter: QPainter, option, index):
-        """Paint the full-width row background before the delegate runs."""
+        """Pre-paint full-width background, strip Qt states, then let Qt draw
+        content on top. Accent bar is drawn last so it's never overwritten."""
         is_sel, is_hovered = self._row_state(index)
-        full = option.rect  # spans full widget width
+        full = option.rect
 
         painter.save()
         painter.setPen(Qt.NoPen)
-
-        # Base fill — always paint Window color first to erase everything
         painter.setBrush(self.palette().window())
         painter.drawRect(full)
-
         if is_hovered and not is_sel:
-            painter.setBrush(QColor(SIDEBAR_HOVER))
-            painter.drawRect(full)
-
+            tint = QColor(PRIMARY); tint.setAlpha(22)
+            painter.setBrush(tint); painter.drawRect(full)
         if is_sel:
-            painter.setBrush(QColor(SIDEBAR_SEL))
-            painter.drawRect(full)
-            # Left accent bar — flush to viewport left edge
-            painter.setBrush(QColor(PRIMARY))
-            painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
-
+            tint = QColor(PRIMARY); tint.setAlpha(55)
+            painter.setBrush(tint); painter.drawRect(full)
         painter.restore()
 
-        # Now let Qt draw the branch arrows + delegate text on top
+        # Strip selection/hover so Qt doesn't repaint with its own highlight
+        option.state &= ~(QStyle.State_Selected | QStyle.State_MouseOver | QStyle.State_HasFocus)
         super().drawRow(painter, option, index)
 
-    def drawBranches(self, painter: QPainter, rect: QRect, index):
-        """Fill the branch/indentation zone with the same background as drawRow
-        so there is never a differently-colored strip on the left."""
-        is_sel, is_hovered = self._row_state(index)
-
-        painter.save()
-        painter.setPen(Qt.NoPen)
-
-        painter.setBrush(self.palette().window())
-        painter.drawRect(rect)
-
-        if is_hovered and not is_sel:
-            painter.setBrush(QColor(SIDEBAR_HOVER))
-            painter.drawRect(rect)
-
         if is_sel:
-            painter.setBrush(QColor(SIDEBAR_SEL))
-            painter.drawRect(rect)
+            painter.save()
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor(PRIMARY))
+            painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
+            painter.restore()
 
-        painter.restore()
-
-        # Let Qt draw the expand/collapse arrows on top
+    def drawBranches(self, painter: QPainter, rect: QRect, index):
+        """Background already painted by drawRow; just draw the expand arrows."""
         super().drawBranches(painter, rect, index)
 
 
@@ -442,11 +450,11 @@ class ProjectWindow(QMainWindow):
         self._lock_tooltip = "Click to lock this project and prevent accidental edits."
         self.btn_lock = make_icon_btn("lock-open", tooltip=self._lock_tooltip, size=30)
         self.btn_lock.setStyleSheet(
-            f"QPushButton               {{ border-radius:15px; padding:0px; border:none; background:transparent; }}"
-            f"QPushButton:hover         {{ border-radius:15px; padding:0px; background:{SIDEBAR_HOVER}; }}"
-            f"QPushButton:pressed       {{ border-radius:15px; padding:0px; background:{SIDEBAR_SEL}; }}"
-            f"QPushButton:checked       {{ border-radius:15px; padding:0px; background:rgba(241,196,15,180); }}"
-            f"QPushButton:checked:hover {{ border-radius:15px; padding:0px; background:rgba(241,196,15,220); }}"
+            "QPushButton               { border-radius:15px; padding:0px; border:none; background:transparent; }"
+            "QPushButton:hover         { border-radius:15px; padding:0px; background:palette(midlight); }"
+            "QPushButton:pressed       { border-radius:15px; padding:0px; background:palette(mid); }"
+            "QPushButton:checked       { border-radius:15px; padding:0px; background:rgba(241,196,15,180); }"
+            "QPushButton:checked:hover { border-radius:15px; padding:0px; background:rgba(241,196,15,220); }"
         )
         self.btn_lock.setCheckable(True)
         self.btn_lock.installEventFilter(self)
@@ -481,7 +489,7 @@ class ProjectWindow(QMainWindow):
         self.sidebar.resizeColumnToContents(0)
         self.sidebar.header().setStretchLastSection(False)
 
-        min_width = self.sidebar.header().sectionSize(0) + _H_PAD + _ACCENT_W
+        min_width = int((self.sidebar.header().sectionSize(0) + _H_PAD + _ACCENT_W) * 0.7)
         self.sidebar.header().setStretchLastSection(True)
         self.sidebar.setMinimumWidth(min_width)
 
@@ -538,7 +546,6 @@ class ProjectWindow(QMainWindow):
     def _select_sidebar(self, item: QTreeWidgetItem):
         header = item.text(0)
         parent = item.parent()
-        item.setExpanded(True)
 
         if header in self.widget_map:
             self.content_stack.setCurrentWidget(self.widget_map[header])
