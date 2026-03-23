@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPalette
+from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPalette, QFont
 
 from gui.components.utils.icons import make_icon, make_icon_btn
 from PySide6.QtWidgets import QToolTip
@@ -77,12 +77,11 @@ SIDEBAR_TREE = {
 
 # ── Sidebar tree ──────────────────────────────────────────────────────────────
 
-_ACCENT = QColor("#2ecc71")
-_HOVER_ALPHA = 30
+_HOVER_ALPHA = 50
 _V_PAD = 3  # vertical padding per side (increases row height)
 _H_PAD = 6  # left text indent (pushes text away from accent bar)
 _ACCENT_W = 3  # width of the green left bar in px
-_SEL_ALPHA = 55  # not padding but affects how "heavy" selection feels
+_SEL_ALPHA = 100  # not padding but affects how "heavy" selection feels
 _ICON_SIZE = 16  # sidebar icon size in pixels
 _ICON_GAP = 5   # gap between icon and label text
 
@@ -115,6 +114,15 @@ class _SidebarDelegate(QStyledItemDelegate):
         option.state &= ~(
             QStyle.State_Selected | QStyle.State_MouseOver | QStyle.State_HasFocus
         )
+
+        # Highlight top level items by checking if it has no parents
+        if not index.parent().isValid(): # root level highlight
+            option.font.setWeight(QFont.Weight.DemiBold)
+        if index.parent().isValid() and index.model().hasChildren(index): # second level highlight
+            option.font.setWeight(QFont.Weight.Medium)
+        if index.parent().isValid() and index.parent().parent().isValid(): # third level highlight
+            option.font.setItalic(True)
+
         painter.save()
         is_sel = bool(option.state & QStyle.State_Selected)
         x = option.rect.left() + _H_PAD + (_ACCENT_W if is_sel else 0)
@@ -176,7 +184,8 @@ class _SidebarTree(QTreeWidget):
         """Paint the full-width row background before the delegate runs."""
         is_sel, is_hovered = self._row_state(index)
         full = option.rect  # spans full widget width
-
+        accent = self.palette().color(QPalette.Accent) # get the accent from the theme-specific palette
+        
         painter.save()
         painter.setPen(Qt.NoPen)
 
@@ -185,18 +194,18 @@ class _SidebarTree(QTreeWidget):
         painter.drawRect(full)
 
         if is_hovered and not is_sel:
-            tint = QColor(_ACCENT)
+            tint = QColor(accent)
             tint.setAlpha(_HOVER_ALPHA)
             painter.setBrush(tint)
             painter.drawRect(full)
 
         if is_sel:
-            fill = QColor(_ACCENT)
+            fill = QColor(accent)
             fill.setAlpha(_SEL_ALPHA)
             painter.setBrush(fill)
             painter.drawRect(full)
             # Left accent bar — flush to viewport left edge
-            painter.setBrush(_ACCENT)
+            painter.setBrush(accent)
             painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
 
         painter.restore()
@@ -208,6 +217,7 @@ class _SidebarTree(QTreeWidget):
         """Fill the branch/indentation zone with the same background as drawRow
         so there is never a differently-colored strip on the left."""
         is_sel, is_hovered = self._row_state(index)
+        accent = self.palette().color(QPalette.Accent) # get the accent from the theme-specific palette
 
         painter.save()
         painter.setPen(Qt.NoPen)
@@ -216,13 +226,13 @@ class _SidebarTree(QTreeWidget):
         painter.drawRect(rect)
 
         if is_hovered and not is_sel:
-            tint = QColor(_ACCENT)
+            tint = QColor(accent)
             tint.setAlpha(_HOVER_ALPHA)
             painter.setBrush(tint)
             painter.drawRect(rect)
 
         if is_sel:
-            fill = QColor(_ACCENT)
+            fill = QColor(accent)
             fill.setAlpha(_SEL_ALPHA)
             painter.setBrush(fill)
             painter.drawRect(rect)
@@ -242,8 +252,6 @@ class _HoverHandle(QSplitterHandle):
     identical visual language to VS Code's panel resize handles.
     No QSS used; painting is done entirely via QPainter + QPalette.
     """
-
-    _ACCENT = QColor("#2ecc71")
 
     def __init__(self, orientation, parent):
         super().__init__(orientation, parent)
@@ -267,11 +275,11 @@ class _HoverHandle(QSplitterHandle):
             return
         painter = QPainter(self)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(self._ACCENT)
+        painter.setBrush(self.palette().color(QPalette.Accent))
         r = self.rect()
         if self.orientation() == Qt.Horizontal:
-            x = (r.width() - 3) // 2
-            painter.drawRect(x, 0, 3, r.height())
+            x = (r.width() - 6) // 2
+            painter.drawRect(x, 0, 6, r.height())
         else:
             y = (r.height() - 3) // 2
             painter.drawRect(0, y, r.width(), 3)
@@ -346,6 +354,7 @@ class ProjectWindow(QMainWindow):
         top_bar_layout = QHBoxLayout(top_bar)
         top_bar_layout.setContentsMargins(8, 4, 8, 4)
         top_bar_layout.setSpacing(8)
+        top_bar.setObjectName("top_bar")
 
         self.menubar = QMenuBar()
 
@@ -478,6 +487,15 @@ class ProjectWindow(QMainWindow):
                         leaf.setIcon(0, make_icon(_SIDEBAR_ICONS[subitem]))
 
         self.sidebar.expandAll()
+
+        # Find out the minimum width of the sidebar
+        self.sidebar.resizeColumnToContents(0)
+        self.sidebar.header().setStretchLastSection(False)
+
+        min_width = self.sidebar.header().sectionSize(0) + _H_PAD + _ACCENT_W
+        self.sidebar.header().setStretchLastSection(True)
+        self.sidebar.setMinimumWidth(min_width)
+
         self.sidebar.itemPressed.connect(self._select_sidebar)
 
         # ── Content stack ─────────────────────────────────────────────────
@@ -523,7 +541,7 @@ class ProjectWindow(QMainWindow):
         self.splitter.addWidget(self.sidebar)
         self.splitter.setHandleWidth(8)
         self.splitter.addWidget(self.content_stack)
-        self.splitter.setSizes([220, 880])
+        self.splitter.setSizes([min_width, 880])
 
         master_layout.addWidget(self.splitter, stretch=1)
         self.main_stack.addWidget(self.project_widget)  # index 1

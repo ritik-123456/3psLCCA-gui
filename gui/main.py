@@ -1,37 +1,24 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QSpinBox, QDoubleSpinBox, QComboBox
-from PySide6.QtCore import QObject, QEvent
-from PySide6.QtGui import QPalette, QColor
+from PySide6.QtWidgets import QApplication, QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit
+from PySide6.QtCore import QObject, QEvent, Qt
+from PySide6.QtGui import QFocusEvent, QMouseEvent
 from gui.project_manager import ProjectManager
+from gui.palette_manager import dark, light
 
 
-# ── Accent ────────────────────────────────────────────────────────────────────
-_ACCENT         = QColor("#2ecc71")
-_ACCENT_TEXT    = QColor("#0f1f14")   # dark text on green — green is a light colour
-_ACCENT_VISITED = QColor("#1e8449")
-_ACCENT_DIM     = QColor("#4a7a58")   # desaturated, for disabled state
-
-
-def _apply_accent(app: QApplication) -> None:
+def _apply_theme(scheme: Qt.ColorScheme, app: QApplication) -> None:
     """
     Take the current OS palette exactly as-is and only override the
     interaction roles with the green accent. Nothing else is touched —
     surfaces, text, borders all stay native.
     """
-    p = app.palette()
-
-    for group in (QPalette.Active, QPalette.Inactive):
-        p.setColor(group, QPalette.Highlight,       _ACCENT)
-        p.setColor(group, QPalette.HighlightedText, _ACCENT_TEXT)
-
-    p.setColor(QPalette.Disabled, QPalette.Highlight,       _ACCENT_DIM)
-    p.setColor(QPalette.Disabled, QPalette.HighlightedText, p.color(QPalette.Disabled, QPalette.Text))
-
-    p.setColor(QPalette.Link,        _ACCENT)
-    p.setColor(QPalette.LinkVisited, _ACCENT_VISITED)
-
-    app.setPalette(p)
+    if scheme == Qt.ColorScheme.Light:
+        app.setPalette(light)
+    else:
+        app.setPalette(dark)
+    app.setStyleSheet(app.styleSheet())
+    
 
 
 # ── Wheel blocker ─────────────────────────────────────────────────────────────
@@ -42,6 +29,16 @@ class DisableSpinBoxScroll(QObject):
                 if obj.parent():
                     QApplication.instance().sendEvent(obj.parent(), event)
                 return True
+        return super().eventFilter(obj, event)
+
+# Select text when a QLineEdit is pressed
+class SelectTextOnFocus(QObject):
+    watching = None
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonRelease and isinstance(obj, QLineEdit):
+            if self.watching != obj:
+                self.watching = obj
+                obj.selectAll()
         return super().eventFilter(obj, event)
 
 
@@ -61,11 +58,14 @@ def main():
 
     wheel_filter = DisableSpinBoxScroll()
     app.installEventFilter(wheel_filter)
+    
+    focus_filter = SelectTextOnFocus()
+    app.installEventFilter(focus_filter)
 
     app.setApplicationName("OS Bridge LCCA")
     app.setOrganizationName("OSBridge")
 
-    qss_path = os.path.join("gui", "assets", "themes", "lightstyle.qss")
+    qss_path = os.path.join("gui", "assets", "themes", "main.qss")
     if os.path.exists(qss_path):
         try:
             with open(qss_path, "r") as f:
@@ -74,11 +74,12 @@ def main():
             print(f"Warning: Could not load stylesheet: {e}")
 
     # Stamp accent onto whatever palette the OS is currently using
-    _apply_accent(app)
+    _apply_theme(app.styleHints().colorScheme, app)
+    app.setStyle("Fusion")
 
     # Re-apply when OS switches dark ↔ light (Qt 6.5+)
     try:
-        app.styleHints().colorSchemeChanged.connect(lambda _: _apply_accent(app))
+        app.styleHints().colorSchemeChanged.connect(lambda scheme: _apply_theme(scheme, app))
     except AttributeError:
         pass
 

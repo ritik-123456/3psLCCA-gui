@@ -49,7 +49,7 @@ def _make_section_header(title: str) -> list[QWidget]:
     """Return [header QLabel, divider QWidget] ready to add to a QFormLayout."""
     header = QLabel(title)
     header.setStyleSheet(
-        "font-size: 13px; font-weight: 700;" "padding-top: 14px; padding-bottom: 2px;"
+        "font-size: 20px; font-weight: 800;" "padding-top: 14px; padding-bottom: 2px;"
     )
 
     divider = QWidget()

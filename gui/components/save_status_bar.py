@@ -14,7 +14,6 @@ class SaveStatusBar(QWidget):
     def __init__(self, controller, parent=None):
         super().__init__(parent)
         self.controller = controller
-        self.setFixedHeight(36)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 0, 12, 0)

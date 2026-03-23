@@ -95,7 +95,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
         if is_selected:
             bg = palette.highlight().color()
         elif is_hovered:
-            bg = palette.midlight().color()
+            bg = palette.light().color()
         else:
             bg = palette.base().color()
 

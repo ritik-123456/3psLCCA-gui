@@ -1,0 +1,76 @@
+* {
+    font-family: "Ubuntu", Arial;
+    border-color: palette(mid);
+}
+QTreeWidget {
+    background-color: palette(alternate-base);
+}
+QTreeView::item {
+    padding: 10px;
+}
+QLineEdit,
+QTextEdit {
+    background-color: palette(alternate-base);
+    border: 1px solid palette(light);
+}
+QMenuBar {
+    background-color: palette(window);
+    color: palette(text);
+}
+QTabWidget::pane {
+    background-color: palette(alternate-base);
+    border: 0px;
+}
+QTabBar::tab {
+    background-color: palette(alternate-base);
+    border-right: 1px solid palette(light);
+    border-bottom: 0px solid palette(light);
+    padding: 10px;
+}
+QTabBar::tab:selected {
+    background-color: palette(highlight);
+    border-bottom: 1px solid palette(highlight);
+}
+QTableView {
+    gridline-color: transparent;
+}
+QTableView::item {
+    border: 1px solid palette(light);
+}
+QTableView ,
+QHeaderView ,
+QTableView QTableCornerButton ,
+QScrollBar{
+    background-color: palette(alternate-base);
+    color: palette(text);
+}
+QScrollBar{
+    margin: 15px 0 15px 0; /* Margin ensures space for buttons */
+}
+QScrollBar::handle{
+    background-color: palette(light);
+    margin: 0 2px 0 2px; /* Gap between handle and scrollbar edge */
+}
+QScrollBar::add-line:vertical {
+    height: 15px;
+    subcontrol-position: bottom; /* Or bottom for add-line */
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    height: 15px;
+    subcontrol-position: top; /* Or top for sub-line */
+    subcontrol-origin: margin;
+}
+
+#top_bar {
+    border-bottom: 1px solid palette(light);
+}
+
+QPushButton:hover {
+    background-color: palette(highlight);
+    color: palette(highlighted-text)
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid palette(highlight)
+}
