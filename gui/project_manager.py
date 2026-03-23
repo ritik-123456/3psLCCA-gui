@@ -1,6 +1,7 @@
 import os
 from PySide6.QtWidgets import QApplication
 from gui.project_controller import ProjectController
+import core.start_manager as sm
 
 
 class ProjectManager:
@@ -107,6 +108,7 @@ class ProjectManager:
 
         if success:
             target.project_id = target.controller.active_project_id
+            sm.record_open(target.project_id)
             target.show_project_view()
             self.refresh_all_home_screens()
         else:
