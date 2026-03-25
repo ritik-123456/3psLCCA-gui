@@ -299,10 +299,10 @@ class OutputsPage(ScrollableForm):
         banner_row = QHBoxLayout(banner)
         banner_row.addWidget(QLabel("✅  Calculation completed successfully."), stretch=1)
 
-        dl_btn = QPushButton("⬇  Export Report (.3psLCCA)")
+        dl_btn = QPushButton("⬇  Export Report (.3psLCCAFile)")
         dl_btn.setFixedHeight(30)
         dl_btn.setFixedWidth(210)
-        dl_btn.setToolTip("Export all inputs and LCC results as a .3psLCCA file")
+        dl_btn.setToolTip("Export all inputs and LCC results as a .3psLCCAFile file")
         dl_btn.clicked.connect(self._download_report)
         banner_row.addWidget(dl_btn)
 
@@ -405,7 +405,7 @@ class OutputsPage(ScrollableForm):
     def _prepare_data_object(self, data: dict):
         """
         This function creates Core Data Object using the data from saved chunks.
-        To be passed to 3psLCCA-core for calculation.
+        To be passed to 3psLCCAFile-core for calculation.
         """
         from three_ps_lcca_core.inputs.input import (
             InputMetaData,
@@ -715,13 +715,13 @@ class OutputsPage(ScrollableForm):
 
     def _download_report(self):
         path, _ = QFileDialog.getSaveFileName(
-            self, "Save Report", "LCC_Report.3psLCCA", "3psLCCA Files (*.3psLCCA)"
+            self, "Save Report", "LCC_Report.3psLCCAFile", "3psLCCAFile Files (*.3psLCCAFile)"
         )
         if not path:
             return
         # Ensure correct extension even if user typed something else
-        if not path.endswith(".3psLCCA"):
-            path += ".3psLCCA"
+        if not path.endswith(".3psLCCAFile"):
+            path += ".3psLCCAFile"
         try:
             import json
             export = self._build_export_dict(
@@ -740,12 +740,12 @@ class OutputsPage(ScrollableForm):
 
     def _build_export_dict(self, all_data: dict, lcc_breakdown: dict, results: dict) -> dict:
         """
-        Build the full export dict written to a .3psLCCA file.
+        Build the full export dict written to a .3psLCCAFile file.
 
         Structure
         ---------
         {
-          "format":      "3psLCCA",
+          "format":      "3psLCCAFile",
           "version":     "1.0",
           "exported_at": "<ISO timestamp>",
           "inputs": {
@@ -797,7 +797,7 @@ class OutputsPage(ScrollableForm):
             return str(obj)
 
         return {
-            "format":      "3psLCCA",
+            "format":      "3psLCCAFile",
             "version":     "1.0",
             "exported_at": datetime.datetime.now().isoformat(),
             "inputs":      _sanitize(all_data),
