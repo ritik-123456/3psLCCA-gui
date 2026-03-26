@@ -616,28 +616,30 @@ class ProjectWindow(QMainWindow):
         if items:
             self.sidebar.setCurrentItem(items[0])
 
-        # Silently preload remaining pages after GeneralInfo is rendered.
-        # Light pages first, heavy last. Each builds in its own event loop tick.
-        QTimer.singleShot(100, self._preload_next_widget)
-
-    def _preload_next_widget(self, _index: int = 0):
-        """Build one unbuilt page per call, scheduled via QTimer so the event
-        loop stays free between each. Silently skips already-built pages."""
-        # Heavy/tab-heavy pages first so sidebar leaf clicks are lag-free early
-        _preload_order = [
+    def preload_all(self, on_complete):
+        """Setup project UI if needed, then build every page widget one per
+        event-loop tick (non-blocking), then call on_complete."""
+        if not self._project_ui_ready:
+            self._setup_project_ui()
+            self._project_ui_ready = True
+        _order = [
+            "General Information",
             "Construction Work Data", "Carbon Emission Data",
             "Bridge Data", "Traffic Data", "Financial Data",
             "Maintenance and Repair", "Recycling", "Demolition",
         ]
-        while _index < len(_preload_order):
-            name = _preload_order[_index]
-            _index += 1
+        QTimer.singleShot(0, lambda: self._do_preload(_order, 0, on_complete))
+
+    def _do_preload(self, order, index, on_complete):
+        """Build one unbuilt widget, yield to event loop, then continue."""
+        while index < len(order):
+            name = order[index]
+            index += 1
             if name not in self.widget_map:
                 self._get_or_create_widget(name)
-                # Schedule next one after yielding to event loop
-                QTimer.singleShot(50, lambda i=_index: self._preload_next_widget(i))
+                QTimer.singleShot(0, lambda i=index: self._do_preload(order, i, on_complete))
                 return
-        # All done — nothing to do
+        on_complete()
 
     def has_project_loaded(self):
         return self.project_id is not None
@@ -735,8 +737,6 @@ class ProjectWindow(QMainWindow):
             set_active_unit_system(unit_system)
         except Exception:
             pass
-
-        self.show_project_view()
 
     def _on_fault(self, error_message: str):
         QMessageBox.critical(

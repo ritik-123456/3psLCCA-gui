@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialogButtonBox,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, QTimer
 from gui.theme import VALIDATION_ERROR
 
 
@@ -28,6 +28,16 @@ _UNIT_SYSTEMS = [
 
 class NewProjectDialog(QDialog):
     """Collect project name, country, currency, and unit system before creating a project."""
+
+    loading_started = Signal(str, str, str, str)  # display_name, country, currency, unit_system
+
+    _LOADING_MSGS = [
+        "Preparing project…",
+        "Loading modules…",
+        "Setting up workspace…",
+        "Configuring files…",
+        "Almost ready…",
+    ]
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -110,10 +120,16 @@ class NewProjectDialog(QDialog):
         layout.addSpacing(8)
 
         # ── Buttons ───────────────────────────────────────────────────────
-        btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        btn_box.accepted.connect(self._on_accept)
-        btn_box.rejected.connect(self.reject)
-        layout.addWidget(btn_box)
+        self._btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self._btn_box.accepted.connect(self._on_accept)
+        self._btn_box.rejected.connect(self.reject)
+        layout.addWidget(self._btn_box)
+
+        self._ok_btn = self._btn_box.button(QDialogButtonBox.Ok)
+        self._msg_index = 0
+        self._msg_timer = QTimer(self)
+        self._msg_timer.setInterval(1100)
+        self._msg_timer.timeout.connect(self._cycle_message)
 
         self.name_input.returnPressed.connect(self._on_accept)
 
@@ -127,7 +143,34 @@ class NewProjectDialog(QDialog):
         _set_combo_error(self.currency_input, not currency_ok)
 
         if name_ok and country_ok and currency_ok:
-            self.accept()
+            self._lock_inputs()
+            self.loading_started.emit(
+                self.name_input.text().strip(),
+                self.country_input.currentData(),
+                self.currency_input.currentData(),
+                self.unit_system_input.currentData() or "metric",
+            )
+
+    def _lock_inputs(self):
+        for w in (self.name_input, self.country_input,
+                  self.currency_input, self.unit_system_input):
+            w.setEnabled(False)
+        cancel = self._btn_box.button(QDialogButtonBox.Cancel)
+        if cancel:
+            cancel.setEnabled(False)
+        self._ok_btn.setEnabled(False)
+        self._ok_btn.setText(self._LOADING_MSGS[0])
+        self._msg_index = 0
+        self._msg_timer.start()
+
+    def _cycle_message(self):
+        self._msg_index = (self._msg_index + 1) % len(self._LOADING_MSGS)
+        self._ok_btn.setText(self._LOADING_MSGS[self._msg_index])
+
+    def finish_loading(self):
+        """Called by project_manager when preloading is done — closes the dialog."""
+        self._msg_timer.stop()
+        self.accept()
 
     def get_name(self) -> str:
         return self.name_input.text().strip()

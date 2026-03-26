@@ -47,6 +47,15 @@ class SaveStatusBar(QWidget):
             self.controller.dirty_changed.connect(self._on_dirty_changed)
             self.controller.status_message.connect(self._on_status_message)
             self.controller.fault_occurred.connect(self._on_fault)
+            # If the project was already loaded before this widget was created
+            # (e.g. created mid-preload), sync state immediately so the label
+            # never shows "No project open" when a project is actually active.
+            if self.controller.active_project_id:
+                self.set_active(True)
+                if self.controller.is_dirty():
+                    self.status_label.setText("Unsaved changes...")
+                else:
+                    self.status_label.setText("All changes saved")
 
     def _on_saved(self):
         self.status_label.setText("All changes saved")

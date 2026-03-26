@@ -343,6 +343,8 @@ class _GridCardDelegate(QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._mouse_pos = QPoint(-1, -1)  # viewport-relative; set by _GridList
+        self._loading_pid = None
+        self._loading_dots = 0  # 0 / 1 / 2 → "." / ".." / "..."
 
     def _card_h(self, status: str) -> int:
         return CARD_H_WARN if status in ("crashed", "corrupted") else CARD_H_NORM
@@ -376,6 +378,10 @@ class _GridCardDelegate(QStyledItemDelegate):
         muted_col = pal.placeholderText().color()
         R = rect.right()
         card_h = self._card_h(status)
+        is_loading = (
+            self._loading_pid is not None
+            and data.get("project_id") == self._loading_pid
+        )
 
         # ── Computed vertical anchors (relative to rect.top()) ─────────────
         # Three content lines centred within the card, evenly distributed
@@ -388,6 +394,51 @@ class _GridCardDelegate(QStyledItemDelegate):
         painter.setPen(Qt.NoPen)
         painter.setBrush(QBrush(pal.base().color()))
         painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
+
+        # ── Loading state — early exit ──────────────────────────────────────
+        if is_loading:
+            # Muted overlay tint
+            tint = QColor(muted_col)
+            tint.setAlpha(18)
+            painter.setBrush(QBrush(tint))
+            painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
+
+            # Separator
+            sep_col = pal.mid().color()
+            sep_col.setAlpha(35)
+            painter.setPen(QPen(sep_col, 1))
+            painter.drawLine(rect.left() + 16, option.rect.bottom(),
+                             rect.right() - 16, option.rect.bottom())
+
+            # "Opening ." / ".." / "..." pill (always visible, not just hover)
+            dots = "." * (self._loading_dots + 1)
+            pill_label = f"Opening{dots}"
+            pill_h, pill_w = 22, 72
+            pill_x = R - 32 - SP2 - pill_w
+            pill_y = rect.top() + (card_h - pill_h) // 2
+            pill_rect = QRect(pill_x, pill_y, pill_w, pill_h)
+            m = QColor(muted_col)
+            m.setAlpha(160)
+            painter.setPen(QPen(m, 1))
+            painter.setBrush(Qt.NoBrush)
+            painter.drawRoundedRect(pill_rect, pill_h // 2, pill_h // 2)
+            painter.setFont(_f(FS_SM, FW_MEDIUM))
+            painter.drawText(pill_rect, Qt.AlignCenter, pill_label)
+
+            # Title (dimmed)
+            painter.setFont(_f(FS_LG, FW_MEDIUM))
+            dim = QColor(text_col)
+            dim.setAlpha(100)
+            painter.setPen(dim)
+            nfm = painter.fontMetrics()
+            title_x = rect.left() + SP4
+            painter.drawText(
+                QPoint(title_x, y_title),
+                nfm.elidedText(name, Qt.ElideRight, pill_x - title_x - SP4),
+            )
+
+            painter.restore()
+            return
 
         # Semantic surface tint for non-ok statuses
         tint_rgb = self._STATUS_TINT.get(status)
@@ -590,6 +641,10 @@ class _GridList(QListWidget):
                 data = item.data(Qt.UserRole) if item else None
                 if isinstance(data, dict):
                     pid = data["project_id"]
+                    # Swallow all clicks on a card that is currently loading
+                    delegate = self.itemDelegate()
+                    if getattr(delegate, "_loading_pid", None) == pid:
+                        return
                     gpos = self.viewport().mapToGlobal(event.pos())
                     if event.button() == Qt.RightButton:
                         self.menu_requested.emit(pid, gpos)
@@ -915,6 +970,32 @@ class HomePage(QWidget):
         self._render_grid()
 
     # ── Public API ────────────────────────────────────────────────────────────
+
+    def set_card_loading(self, pid: str):
+        """Mark a project card as loading — shows animated 'Opening…' pill."""
+        delegate = self.grid_list.itemDelegate()
+        delegate._loading_pid = pid
+        delegate._loading_dots = 0
+        if not hasattr(self, "_loading_timer"):
+            self._loading_timer = QTimer(self)
+            self._loading_timer.setInterval(600)
+            self._loading_timer.timeout.connect(self._tick_loading_dots)
+        self._loading_timer.start()
+        self.grid_list.viewport().update()
+
+    def _tick_loading_dots(self):
+        delegate = self.grid_list.itemDelegate()
+        delegate._loading_dots = (delegate._loading_dots + 1) % 3
+        self.grid_list.viewport().update()
+
+    def clear_card_loading(self):
+        """Remove the loading state from any card."""
+        if hasattr(self, "_loading_timer"):
+            self._loading_timer.stop()
+        delegate = self.grid_list.itemDelegate()
+        delegate._loading_pid = None
+        delegate._loading_dots = 0
+        self.grid_list.viewport().update()
 
     def set_active_project(self, project_id: str | None):
         self._active_project_id = project_id

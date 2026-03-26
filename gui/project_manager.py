@@ -1,6 +1,34 @@
 import os
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 import core.start_manager as sm
+
+# All chunk names used by page widgets and their sub-widgets.
+# Reading them once populates the controller cache so every subsequent
+# get_chunk() call during preloading (and after window opens) is instant.
+_CHUNKS_TO_WARM = [
+    "general_info",
+    "bridge_data",
+    "financial_data",
+    "maintenance_data",
+    "demolition_data",
+    "traffic_and_road_data",
+    "str_foundation",
+    "str_sub_structure",
+    "str_super_structure",
+    "str_misc",
+    "transport_data",
+    "machinery_emissions_data",
+    "social_cost_data",
+    "diversion_emissions",
+]
+
+
+def _warm_cache(target):
+    """Read all known chunks into the controller cache (disk I/O happens here,
+    during the loading phase, before any widget is built)."""
+    for chunk in _CHUNKS_TO_WARM:
+        target.controller.get_chunk(chunk)
 
 
 class ProjectManager:
@@ -54,68 +82,99 @@ class ProjectManager:
                 existing.activateWindow()
                 return
 
-        # Ask for details if new
-        display_name = None
-        country = None
-        currency = None
-        unit_system = None
         if is_new:
             from gui.components.new_project_dialog import NewProjectDialog
 
             dialog = NewProjectDialog()
-            if dialog.exec() != NewProjectDialog.Accepted:
-                return
-            display_name = dialog.get_name()
-            country = dialog.get_country()
-            currency = dialog.get_currency()
-            unit_system = dialog.get_unit_system()
 
-        # Find or create a window
-        target = self._find_empty_window() or self._create_window()
-        if not target.isVisible():
-            target.show()
+            def _on_loading_started(display_name, country, currency, unit_system):
+                target = self._find_empty_window() or self._create_window()
+                if not target.isVisible():
+                    target.show()
 
-        # Init project
-        success = False
-        if is_new:
-            new_id = f"proj_{os.urandom(4).hex()}"
-            success = target.controller.init_project(
-                new_id, is_new=True, display_name=display_name
-            )
-            if success:
-                engine = target.controller.engine
-                # Write locked fields into their respective chunks
-                engine.stage_update(
-                    {
-                        "project_name": display_name,
-                        "project_country": country,
-                        "project_currency": currency,
-                        "unit_system": unit_system or "metric",
-                    },
-                    "general_info",
-                )
-                engine.stage_update(
-                    {"project_country": country},
-                    "bridge_data",
-                )
-                # Force flush to disk NOW — project_loaded fires on the next
-                # event loop tick (QTimer.singleShot 0) and refresh_from_engine
-                # calls fetch_chunk. Without this the chunks aren't written yet
-                # and the widgets load empty.
-                engine.force_sync()
-        elif project_id:
-            success = target.controller.init_project(project_id, is_new=False)
+                def _do_init():
+                    new_id = f"proj_{os.urandom(4).hex()}"
+                    success = target.controller.init_project(
+                        new_id, is_new=True, display_name=display_name
+                    )
+                    if success:
+                        engine = target.controller.engine
+                        engine.stage_update(
+                            {
+                                "project_name": display_name,
+                                "project_country": country,
+                                "project_currency": currency,
+                                "unit_system": unit_system or "metric",
+                            },
+                            "general_info",
+                        )
+                        engine.stage_update({"project_country": country}, "bridge_data")
+                        # Force flush so chunks exist before widgets load
+                        engine.force_sync()
+                        target.project_id = target.controller.active_project_id
+                        sm.record_open(target.project_id)
 
-        if success:
-            target.project_id = target.controller.active_project_id
-            sm.record_open(target.project_id)
-            target.show_project_view()
-            self.refresh_all_home_screens()
-        else:
-            target.show_home()
+                        # Pre-warm controller chunk cache so all widget
+                        # refresh_from_engine calls during preload are
+                        # cache hits — no disk I/O after this point.
+                        _warm_cache(target)
 
-        target.show()
-        target.activateWindow()
+                        def _on_complete():
+                            dialog.finish_loading()
+                            target.show_project_view()
+                            target.show()
+                            target.activateWindow()
+                            QTimer.singleShot(0, self.refresh_all_home_screens)
+
+                        target.preload_all(_on_complete)
+                    else:
+                        dialog.finish_loading()
+                        target.show_home()
+                        target.show()
+
+                # Yield one tick so dialog paints its locked/cycling state first
+                QTimer.singleShot(0, _do_init)
+
+            dialog.loading_started.connect(_on_loading_started)
+            dialog.exec()
+            return
+
+        # Existing project
+        if project_id:
+            target = self._find_empty_window() or self._create_window()
+            if not target.isVisible():
+                target.show()
+
+            # Mark card as loading on all visible home screens
+            for win in self.windows:
+                win.home_widget.set_card_loading(project_id)
+
+            def _do_open():
+                success = target.controller.init_project(project_id, is_new=False)
+                if success:
+                    target.project_id = target.controller.active_project_id
+                    sm.record_open(target.project_id)
+
+                    # Pre-warm controller chunk cache before any widget is built
+                    _warm_cache(target)
+
+                    def _on_complete():
+                        for win in self.windows:
+                            win.home_widget.clear_card_loading()
+                        target.show_project_view()
+                        target.show()
+                        target.activateWindow()
+                        QTimer.singleShot(0, self.refresh_all_home_screens)
+
+                    target.preload_all(_on_complete)
+                else:
+                    for win in self.windows:
+                        win.home_widget.clear_card_loading()
+                    target.show_home()
+                    target.show()
+
+            # Yield one tick so card loading state paints before heavy work
+            QTimer.singleShot(0, _do_open)
 
     def is_project_open(self, project_id: str) -> bool:
         return self._find_window_for_project(project_id) is not None
