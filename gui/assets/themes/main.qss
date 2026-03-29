@@ -606,3 +606,9 @@ QToolTip {
 #top_bar QPushButton {
     padding: 3px 10px;
 }
+
+/* ── Dialog boxes ───────────────────────────────────────────────────────── */
+QDialog{
+    background-color: $body-bg;
+    color: $body-color;
+}

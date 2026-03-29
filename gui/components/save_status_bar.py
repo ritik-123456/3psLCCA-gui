@@ -15,9 +15,6 @@ class SaveStatusBar(QWidget):
         super().__init__(parent)
         self.controller = controller
 
-        # Transparent background
-        self.setStyleSheet("background: transparent;")
-
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 0, 12, 0)
         layout.setSpacing(10)
