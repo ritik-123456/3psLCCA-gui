@@ -891,7 +891,6 @@ class OutputsPage(ScrollableForm):
         h_lay.addStretch()
 
         go_btn = QPushButton("Go →")
-        go_btn.setFixedWidth(60)
         go_btn.clicked.connect(
             lambda checked=False, p=page_name: self.navigate_requested.emit(p)
         )
