@@ -30,7 +30,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 2),
         unit="(%/yr)",
         required=True,
-        doc_slug="routine-inspection-cost",
         default=0.0,
         warn=(0.01, 100.0, "Routine Inspection Cost is 0 — cost will not be included"),
     ),
@@ -42,7 +41,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 50),
         unit="(yr)",
         required=True,
-        doc_slug="routine-inspection-freq",
         default=0,
         warn=(
             1,
@@ -60,7 +58,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 1),
         unit="(%/yr)",
         required=True,
-        doc_slug="periodic-maintenance-cost",
         default=0.0,
         warn=(
             0.01,
@@ -76,7 +73,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 2),
         unit="(%)",
         required=True,
-        doc_slug="periodic-maintenance-carbon-cost",
         default=0.0,
         warn=(
             0.01,
@@ -92,7 +88,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 100),
         unit="(yr)",
         required=True,
-        doc_slug="periodic-maintenance-freq",
         default=0,
         warn=(
             1,
@@ -110,7 +105,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 2),
         unit="(%)",
         required=True,
-        doc_slug="major-inspection-cost",
         default=0.0,
         warn=(0.01, 100.0, "Major Inspection Cost is 0 — cost will not be included"),
     ),
@@ -122,7 +116,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 100),
         unit="(yr)",
         required=True,
-        doc_slug="major-inspection-freq",
         default=0,
         warn=(
             1,
@@ -138,7 +131,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 1),
         unit="(%)",
         required=True,
-        doc_slug="major-repair-cost",
         default=0.0,
         warn=(0.01, 100.0, "Major Repair Cost is 0 — cost will not be included"),
     ),
@@ -150,7 +142,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 2),
         unit="(%)",
         required=True,
-        doc_slug="major-repair-carbon-cost",
         default=0.0,
         warn=(0.01, 100.0, "Major Repair Carbon Cost is 0 — cost will not be included"),
     ),
@@ -162,7 +153,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 100),
         unit="(yr)",
         required=True,
-        doc_slug="major-repair-freq",
         default=0,
         warn=(
             1,
@@ -178,7 +168,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 60),
         unit="(mo)",
         required=True,
-        doc_slug="major-repair-duration",
         default=0,
         warn=(
             1,
@@ -196,7 +185,6 @@ MAINTENANCE_FIELDS = [
         options=(0.0, 100.0, 2),
         unit="(%)",
         required=True,
-        doc_slug="bearing-exp-joint-cost",
         default=0.0,
         warn=(
             0.01,
@@ -212,7 +200,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 100),
         unit="(yr)",
         required=True,
-        doc_slug="bearing-exp-joint-freq",
         default=0,
         warn=(
             1,
@@ -228,7 +215,6 @@ MAINTENANCE_FIELDS = [
         options=(0, 365),
         unit="(days)",
         required=True,
-        doc_slug="bearing-exp-joint-duration",
         default=0,
         warn=(
             1,

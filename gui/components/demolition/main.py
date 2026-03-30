@@ -28,7 +28,7 @@ DEMOLITION_FIELDS = [
     FieldDef(
         "demolition_cost_pct",
         "Demolition & Disposal Cost (%)",
-        "",
+        "Cost of demoilition cost expressed as percentage of initial construction cost.",
         "float",
         (0.0, 100.0, 1),
         unit="(%)",
@@ -38,7 +38,7 @@ DEMOLITION_FIELDS = [
     FieldDef(
         "demolition_carbon_cost_pct",
         "Demolition & Disposal Carbon Cost (%)",
-        "",
+        "Carbon emission cost of demolition expressed as a percentage of inital carbon emission cost.",
         "float",
         (0.0, 100.0, 1),
         unit="(%)",
@@ -48,7 +48,7 @@ DEMOLITION_FIELDS = [
     FieldDef(
         "demolition_duration",
         "Demolition & Disposal Duration",
-        "",
+        "Time taken for demolition work in months",
         "int",
         (0, 60),
         unit="(mo)",
@@ -58,7 +58,7 @@ DEMOLITION_FIELDS = [
     FieldDef(
         "demolition_method",
         "Demolition Method",
-        "",
+        "Type of demolition method used.",
         "combo",
         options=["Conventional", "Implosion", "Deconstruction"],
     ),

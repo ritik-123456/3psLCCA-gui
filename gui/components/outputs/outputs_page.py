@@ -29,7 +29,7 @@ OUTPUTS_FIELDS = [
     FieldDef(
         "analysis_period",
         "Analysis Period",
-        "Total time horizon used for life cycle financial evaluation.",
+        "Total time horizon used for life cycle cost evaluation.",
         "int",
         options=(0, 999),
         required=True,

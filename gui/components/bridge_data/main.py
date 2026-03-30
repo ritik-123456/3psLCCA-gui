@@ -38,16 +38,14 @@ BRIDGE_FIELDS = [
     FieldDef(
         "bridge_name",
         "Name of Bridge",
-        "The official or commonly used name identifying the bridge.",
-        "text",
-        doc_slug="bridge-name",
+        "",
+        "text"
     ),
     FieldDef(
         "user_agency",
         "Owner",
         "Name of the owner, client, or responsible agency for this bridge.",
-        "text",
-        doc_slug="user-agency",
+        "text"
     ),
     # ── Location ─────────────────────────────────────────────────────────
     Section("Location"),
@@ -57,36 +55,25 @@ BRIDGE_FIELDS = [
         "Country in which the bridge is situated.",
         "text",
         options=COUNTRIES,
-        required=True,
-        doc_slug="location-country",
-    ),
-    FieldDef(
-        "location_address",
-        "Address",
-        "Full address or site description of the bridge location.",
-        "text",
-        doc_slug="location-address",
+        required=True
     ),
     FieldDef(
         "location_from",
         "From",
         "Starting point of the bridge (city, road name, landmark, or coordinates).",
-        "text",
-        doc_slug="location-from",
+        "text"
     ),
     FieldDef(
         "location_via",
         "Via",
         "Intermediate feature crossed by the bridge (e.g., river, valley, railway, highway).",
-        "text",
-        doc_slug="location-via",
+        "text"
     ),
     FieldDef(
         "location_to",
         "To",
         "Ending point of the bridge (city, road name, landmark, or coordinates).",
-        "text",
-        doc_slug="location-to",
+        "text"
     ),
     # ── Technical Specifications ─────────────────────────────────────────
     Section("Technical Specifications"),
@@ -114,7 +101,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 99999.0, DECIMAL_PLACES),
         unit="(m)",
-        doc_slug="span",
         default=0.0,
     ),
     FieldDef(
@@ -124,7 +110,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 9999.0, DECIMAL_PLACES),
         unit="(m)",
-        doc_slug="carriageway-width",
         default=0.0,
     ),
     FieldDef(
@@ -133,7 +118,6 @@ BRIDGE_FIELDS = [
         "Total number of traffic lanes on the bridge deck.",
         "int",
         options=(0, 50),
-        doc_slug="num-lanes",
         default=0,
     ),
     FieldDef(
@@ -142,7 +126,6 @@ BRIDGE_FIELDS = [
         "Indicates whether the road allows one-way or two-way traffic.",
         "combo",
         options=["One Way", "Two Way"],
-        doc_slug="vehicle-path-direction",
     ),
     FieldDef(
         "footpath",
@@ -150,7 +133,6 @@ BRIDGE_FIELDS = [
         "Indicates whether a dedicated pedestrian footpath is provided.",
         "combo",
         options=["Yes", "No"],
-        doc_slug="footpath",
     ),
     FieldDef(
         "wind_speed",
@@ -159,7 +141,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 999.0, DECIMAL_PLACES),
         unit="(m/s)",
-        doc_slug="wind-speed",
         default=0.0,
     ),
     # ── Life Cycle ───────────────────────────────────────────────────────
@@ -172,7 +153,6 @@ BRIDGE_FIELDS = [
         options=(0, 999),
         unit="(years)",
         required=True,
-        doc_slug="design-life",
         default=0,
     ),
     FieldDef(
@@ -183,7 +163,6 @@ BRIDGE_FIELDS = [
         "int",
         options=(2000, 2500),
         required=True,
-        doc_slug="year-of-construction",
         default=date.today().year,
     ),
     # ── Construction Schedule ─────────────────────────────────────────────
@@ -196,7 +175,6 @@ BRIDGE_FIELDS = [
         options=(0.0, 1200.0, DECIMAL_PLACES),
         required=True,
         unit="(months)",
-        doc_slug="duration-construction-months",
         default=0.0,
     ),
     FieldDef(
@@ -206,17 +184,15 @@ BRIDGE_FIELDS = [
         "int",
         options=(0, 31),
         unit="(days)",
-        doc_slug="working-days-per-month",
         default=22,
     ),
     FieldDef(
         "days_per_month",
         "Days per Month",
-        "Calendar days assumed per month for time-based cost calculations.",
+        "Days assumed per month the traffic of the road is affected.",
         "int",
         options=(0, 31),
         unit="(days)",
-        doc_slug="days-per-month",
         default=30,
     ),
 ]
