@@ -179,7 +179,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "severity_minor",
         "Minor Injury",
-        "",
+        "Percentage of accidents resulting in minor injury",
         "float",
         (0.0, 100.0, 2),
         unit="(%)",
@@ -187,7 +187,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "severity_major",
         "Major Injury",
-        "",
+        "Percentage of accidents resulting in major injury",
         "float",
         (0.0, 100.0, 2),
         unit="(%)",
@@ -195,7 +195,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "severity_fatal",
         "Fatal Accident",
-        "",
+        "Percentage of accidents resulting in fatal injury",
         "float",
         (0.0, 100.0, 2),
         unit="(%)",
@@ -204,7 +204,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "road_roughness_mm_per_km",
         "Road Roughness",
-        "",
+        "Indicates the smoothness of the road surface; lower values mean smoother ride quality, higher values mean more unevenness measured in mm/km",
         "float",
         (2000, 1_00_000.0, 0),
         unit="(mm/km)",
@@ -212,7 +212,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "road_rise_m_per_km",
         "Road Rise",
-        "",
+        "Upward gradient of the road, expressed as vertical increase in meters per kilometer (m/km).",
         "float",
         (0.0, 9_999.0, 3),
         unit="(m/km)",
@@ -226,7 +226,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "road_fall_m_per_km",
         "Road Fall",
-        "",
+        "Downward gradient of the road, expressed as vertical decrease in meters per kilometer (m/km).",
         "float",
         (0.0, 9_999.0, 3),
         unit="(m/km)",
@@ -240,7 +240,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "additional_reroute_distance_km",
         "Additional Reroute Distance",
-        "",
+        "Additional travel distance incurred due to rerouting during construction.",
         "float",
         (0.0, 9_999.0, 3),
         unit="(km)",
@@ -253,7 +253,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "additional_travel_time_min",
         "Additional Travel Time",
-        "",
+        "Extra travel time incurred by road users due to rerouting during construction.",
         "float",
         (0.0, 9_999.0, 3),
         unit="(min)",
@@ -266,7 +266,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "crash_rate_accidents_per_million_km",
         "Crash Rate",
-        "",
+        "Number of accidents per million kilometers of road length per day.",
         "float",
         (0.0, 999_999.0, 2),
         unit="(acc / M km)",
@@ -280,10 +280,11 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "work_zone_multiplier",
         "Work Zone Multiplier",
-        "",
+        "Multiplier applied to reflect higher accident risk or delays due to construction work zone conditions.",
         "float",
         (0.0, 1.0, 4),
         required=True,
+        default=1,
         warn=(
             0.001,
             1.0,
@@ -294,7 +295,7 @@ TRAFFIC_FIELDS = [
     FieldDef(
         "num_peak_hours",
         "Number of Peak Hours",
-        "",
+        "Total hours per day with peak traffic conditions.",
         "int",
         (0, 24),
         required=True,
