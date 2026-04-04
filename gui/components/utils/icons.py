@@ -132,21 +132,6 @@ _ICONS: dict[str, str] = {
         '<path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1'
         '-1h-5l-1 1H5v2h14V4z"/>'
     ),
-
-    # ── Custom bridge — window / taskbar icon ────────────────────────────────
-    "bridge": (
-        # Deck
-        '<rect x="1" y="15" width="22" height="3"/>'
-        # Left tower
-        '<rect x="5" y="5" width="3" height="13"/>'
-        # Right tower
-        '<rect x="16" y="5" width="3" height="13"/>'
-        # Suspension cable (thin filled arch between tower tops)
-        '<path d="M6.5 7Q12 2 17.5 7L17.5 9Q12 4.5 6.5 9Z"/>'
-        # Hangers
-        '<rect x="10" y="10" width="1.5" height="5"/>'
-        '<rect x="12.5" y="9" width="1.5" height="6"/>'
-    ),
 }
 
 # ---------------------------------------------------------------------------

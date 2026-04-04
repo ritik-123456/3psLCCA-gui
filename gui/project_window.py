@@ -311,7 +311,9 @@ class ProjectWindow(QMainWindow):
         self.project_id = None
 
         self.setWindowTitle("LCCA - Home")
-        self.setWindowIcon(make_icon("bridge", color=get_token("$icon-brand", "#2ecc71"), size=64))
+        _icon_path = os.path.join("gui", "assets", "logo", "logo-3psLCCA.png")
+        if os.path.exists(_icon_path):
+            self.setWindowIcon(QIcon(_icon_path))
         self.resize(1100, 750)
 
         self.main_stack = QStackedWidget()

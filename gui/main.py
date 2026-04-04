@@ -1,8 +1,22 @@
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit, QProxyStyle, QStyle, QTableView, QSplashScreen
+import time
+
+from PySide6.QtWidgets import (
+    QApplication,
+    QSpinBox,
+    QDoubleSpinBox,
+    QComboBox,
+    QLineEdit,
+    QProxyStyle,
+    QStyle,
+    QTableView,
+)
 from PySide6.QtCore import QObject, QEvent, Qt, QTimer, QCoreApplication
-from PySide6.QtGui import QFocusEvent, QMouseEvent, QFontDatabase, QPixmap, QColor
+from PySide6.QtGui import QFontDatabase, QIcon
+
+# Custom UI Components and Managers
+from gui.components.splash_screen import SplashScreen
 from gui.project_manager import ProjectManager
 from gui.themes import get_light_theme, get_dark_theme, resolve_is_dark, track_mode
 
@@ -10,22 +24,19 @@ _QSS_PATH = os.path.join("gui", "assets", "themes", "main.qss")
 
 
 def _is_dark(scheme=None) -> bool:
-    """Return True if the OS is in dark mode.
-
-    Tries Qt's colorScheme enum first (Qt 6.5+); falls back to the Windows
-    registry when Qt reports Unknown (common on Windows with Fusion style).
-    """
+    """Return True if the OS is in dark mode."""
     try:
         if scheme == Qt.ColorScheme.Dark:
             return True
         if scheme == Qt.ColorScheme.Light:
             return False
     except AttributeError:
-        pass  # Qt.ColorScheme not available in this build
+        pass
 
     # Windows registry fallback
     try:
         import winreg
+
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER,
             r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
@@ -44,11 +55,12 @@ def _apply_theme(scheme=None, app: QApplication = None) -> None:
         app = QApplication.instance()
     raw_dark = _is_dark(scheme)
     is_dark = resolve_is_dark(raw_dark)
-    from gui.themes import APPEARANCE_MODE
-    print(f"[main] _apply_theme: scheme={scheme}, raw_os_dark={raw_dark}, APPEARANCE_MODE={APPEARANCE_MODE!r}, resolved is_dark={is_dark}")
+
+    # Update global tracking
     track_mode(is_dark)
     palette, tokens = get_dark_theme() if is_dark else get_light_theme()
     app.setPalette(palette)
+
     if os.path.exists(_QSS_PATH):
         try:
             with open(_QSS_PATH) as f:
@@ -60,11 +72,12 @@ def _apply_theme(scheme=None, app: QApplication = None) -> None:
             print(f"Warning: Could not reload stylesheet: {e}")
 
 
+# ── Global UI Behavior Overrides ──────────────────────────────────────────────
 
-# ── Combo popup item height ───────────────────────────────────────────────────
+
 class _ComboItemStyle(QProxyStyle):
-    """Qt ignores QSS min-height on ::item in combo popups on Windows.
-    This proxy enforces it at the style engine level instead."""
+    """Enforces minimum item height in combo popups for Windows."""
+
     _MIN_H = 36
 
     def sizeFromContents(self, ct, opt, sz, widget=None):
@@ -74,10 +87,9 @@ class _ComboItemStyle(QProxyStyle):
         return size
 
 
-# ── Table row selection ───────────────────────────────────────────────────────
 class _TableRowSelectFilter(QObject):
-    """Apply single-row selection + hover highlight to every QTableView in the app.
-    Uses QEvent.Polish which fires after __init__ completes, so it always wins."""
+    """Enforces row selection and hover tracking on all TableViews."""
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Polish and isinstance(obj, QTableView):
             obj.setSelectionMode(QTableView.SingleSelection)
@@ -86,8 +98,9 @@ class _TableRowSelectFilter(QObject):
         return super().eventFilter(obj, event)
 
 
-# ── Wheel blocker ─────────────────────────────────────────────────────────────
 class DisableSpinBoxScroll(QObject):
+    """Prevents mouse wheel from changing values in SpinBoxes/Combos."""
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Wheel:
             if isinstance(obj, (QSpinBox, QDoubleSpinBox, QComboBox)):
@@ -96,9 +109,12 @@ class DisableSpinBoxScroll(QObject):
                 return True
         return super().eventFilter(obj, event)
 
-# Select text when a QLineEdit is pressed
+
 class SelectTextOnFocus(QObject):
+    """Selects all text when a QLineEdit is clicked."""
+
     watching = None
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonRelease and isinstance(obj, QLineEdit):
             if self.watching != obj and obj.isEnabled():
@@ -107,80 +123,88 @@ class SelectTextOnFocus(QObject):
         return super().eventFilter(obj, event)
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+# ── Main Entry Point ──────────────────────────────────────────────────────────
+
+
 def main():
+    # Configure High DPI and Scaling
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     os.environ["QT_SCALE_FACTOR"] = "1"
     QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeMenuBar)
+
     app = QApplication(sys.argv)
-
-    # Show splash immediately so the user sees something while loading
-    _px = QPixmap(420, 140)
-    import gui.themes as _themes
-    _px.fill(QColor(_themes.get_token("$splash-bg", "#1a1a2e")))
-    splash = QSplashScreen(_px)
-    splash.showMessage(
-        "Loading OS Bridge LCCA...",
-        Qt.AlignHCenter | Qt.AlignBottom,
-        QColor(_themes.get_token("$splash-progress", "#2ecc71")),
-    )
-    splash.show()
-    app.processEvents()
-
-    # Load bundled Ubuntu font family
-    _font_dir = os.path.join("gui", "assets", "themes", "Ubuntu_font")
-    for _ttf in [
-        "Ubuntu-Light.ttf", "Ubuntu-LightItalic.ttf",
-        "Ubuntu-Regular.ttf", "Ubuntu-Italic.ttf",
-        "Ubuntu-Medium.ttf", "Ubuntu-MediumItalic.ttf",
-        "Ubuntu-Bold.ttf", "Ubuntu-BoldItalic.ttf",
-    ]:
-        QFontDatabase.addApplicationFont(os.path.join(_font_dir, _ttf))
-
-    # Load user-defined custom units after event loop starts (non-blocking)
-    def _load_custom_units():
-        try:
-            from gui.components.utils.unit_resolver import load_custom_units
-            load_custom_units()
-        except Exception as _e:
-            print(f"Warning: Could not load custom units: {_e}")
-    QTimer.singleShot(0, _load_custom_units)
-
-    wheel_filter = DisableSpinBoxScroll()
-    app.installEventFilter(wheel_filter)
-
-    table_filter = _TableRowSelectFilter()
-    app.installEventFilter(table_filter)
-    
-    focus_filter = SelectTextOnFocus()
-    app.installEventFilter(focus_filter)
-
     app.setApplicationName("OS Bridge LCCA")
     app.setOrganizationName("OSBridge")
 
-    # Style must be set before palette/QSS — setStyle() resets the palette
+    # Set Window Icon
+    _ICON_PATH = os.path.join("gui", "assets", "logo", "logo-3psLCCA.png")
+    if os.path.exists(_ICON_PATH):
+        app.setWindowIcon(QIcon(_ICON_PATH))
+
+    # Initialize Style and Theme before showing Splash
     app.setStyle(_ComboItemStyle("Fusion"))
-    # Apply palette + QSS for the current OS colour scheme
     _apply_theme(app.styleHints().colorScheme(), app)
 
-    # Re-apply when the OS switches dark ↔ light at runtime (Qt 6.5+)
+    # Show Custom Splash Screen
+    splash = SplashScreen()
+    splash.show()
+    app.processEvents()
+
+    # Load Bundled Fonts
+    _font_dir = os.path.join("gui", "assets", "themes", "Ubuntu_font")
+    if os.path.exists(_font_dir):
+        for _ttf in [
+            "Ubuntu-Light.ttf",
+            "Ubuntu-LightItalic.ttf",
+            "Ubuntu-Regular.ttf",
+            "Ubuntu-Italic.ttf",
+            "Ubuntu-Medium.ttf",
+            "Ubuntu-MediumItalic.ttf",
+            "Ubuntu-Bold.ttf",
+            "Ubuntu-BoldItalic.ttf",
+        ]:
+            QFontDatabase.addApplicationFont(os.path.join(_font_dir, _ttf))
+
+    # Load Custom Units (deferred to start of event loop)
+    def _load_custom_units():
+        try:
+            from gui.components.utils.unit_resolver import load_custom_units
+
+            load_custom_units()
+        except Exception as _e:
+            print(f"Warning: Could not load custom units: {_e}")
+
+    QTimer.singleShot(0, _load_custom_units)
+
+    # Install Global Event Filters
+    app.installEventFilter(DisableSpinBoxScroll())
+    app.installEventFilter(_TableRowSelectFilter())
+    app.installEventFilter(SelectTextOnFocus())
+
+    # Runtime Theme Switching (Qt 6.5+)
     try:
         app.styleHints().colorSchemeChanged.connect(lambda s: _apply_theme(s, app))
     except AttributeError:
         pass
 
-    # First-launch: ask for user's name
+    # Handle First Launch Dialog
     import core.start_manager as sm
+
     if sm.is_first_launch():
         from gui.components.first_launch_dialog import FirstLaunchDialog
+
         dlg = FirstLaunchDialog()
         if dlg.exec() == FirstLaunchDialog.Accepted:
             sm.set_name(dlg.get_name())
         else:
-            sm.set_name("")  # mark as seen so dialog won't repeat
+            sm.set_name("")  # Mark as seen
 
+    # Initialize Project Manager and Close Splash
     manager = ProjectManager()
-    splash.close()
+
+    # splash.finish() handles the minimum display duration internally
+    splash.finish()
+
     manager.open_project()
 
     sys.exit(app.exec())
