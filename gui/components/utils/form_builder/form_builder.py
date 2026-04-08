@@ -351,6 +351,10 @@ def build_form(
                 idx = widget.findText(str(f.default))
                 if idx >= 0:
                     widget.setCurrentIndex(idx)
+            
+            widget.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            widget.setMinimumContentsLength(15)
+            
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
             widget.currentIndexChanged.connect(

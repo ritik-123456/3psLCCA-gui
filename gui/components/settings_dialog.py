@@ -14,11 +14,16 @@ from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFrame,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPushButton,
     QVBoxLayout,
     QWidget,
+    QTabWidget,
+    QMessageBox,
 )
+import json
 from gui.themes import (
     list_themes,
     get_theme_name,
@@ -27,6 +32,9 @@ from gui.themes import (
     reapply,
 )
 import gui.themes as _themes
+from gui.styles import btn_outline, font
+from gui.theme import FS_SM, FW_MEDIUM
+from gui.components.agency_profile_dialog import AgencyProfileForm
 
 
 # ── Shared form panel ─────────────────────────────────────────────────────────
@@ -99,6 +107,8 @@ class SettingsPanel(QWidget):
         theme_hint = QLabel("Theme changes apply immediately on save.")
         theme_hint.setEnabled(False)
         layout.addWidget(theme_hint)
+        
+        layout.addStretch()
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -150,7 +160,8 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Settings")
-        self.setFixedWidth(420)
+        self.setFixedWidth(500)
+        self.setFixedHeight(650)
         self.setModal(True)
         self._build()
 
@@ -159,8 +170,56 @@ class SettingsDialog(QDialog):
         layout.setSpacing(10)
         layout.setContentsMargins(24, 24, 24, 24)
 
+        self.tabs = QTabWidget()
+        
         self._panel = SettingsPanel(self)
-        layout.addWidget(self._panel)
+        self.tabs.addTab(self._panel, "General Settings")
+        
+        # ── Add Profile Tab ──
+        self.add_profile_tab = QWidget()
+        add_profile_layout = QVBoxLayout(self.add_profile_tab)
+        add_profile_layout.setContentsMargins(10, 10, 10, 10)
+        add_profile_layout.setSpacing(10)
+        
+        name_layout = QHBoxLayout()
+        name_layout.addWidget(QLabel("<b>Save Profile As:</b>"))
+        self.add_profile_name_edit = QLineEdit()
+        self.add_profile_name_edit.setPlaceholderText("Enter a new profile name to save...")
+        name_layout.addWidget(self.add_profile_name_edit)
+        add_profile_layout.addLayout(name_layout)
+        
+        self.add_profile_form = AgencyProfileForm()
+        add_profile_layout.addWidget(self.add_profile_form)
+        
+        self.tabs.addTab(self.add_profile_tab, "Add Profile")
+        
+        # ── Edit/Delete Profile Tab ──
+        self.edit_profile_tab = QWidget()
+        edit_profile_layout = QVBoxLayout(self.edit_profile_tab)
+        edit_profile_layout.setContentsMargins(10, 10, 10, 10)
+        edit_profile_layout.setSpacing(10)
+        
+        edit_top_layout = QHBoxLayout()
+        edit_top_layout.addWidget(QLabel("<b>Select Profile:</b>"))
+        
+        self.edit_profile_combo = QComboBox()
+        self.btn_delete_profile = QPushButton("🗑️ Delete")
+        self.btn_delete_profile.setFixedWidth(80)
+        self.btn_delete_profile.clicked.connect(self._delete_profile)
+        
+        edit_top_layout.addWidget(self.edit_profile_combo)
+        edit_top_layout.addWidget(self.btn_delete_profile)
+        edit_profile_layout.addLayout(edit_top_layout)
+        
+        self.edit_profile_form = AgencyProfileForm()
+        edit_profile_layout.addWidget(self.edit_profile_form)
+        
+        self._populate_profiles()
+        self.edit_profile_combo.currentIndexChanged.connect(self._on_profile_selected)
+        
+        self.tabs.addTab(self.edit_profile_tab, "Edit/Delete Profile")
+        
+        layout.addWidget(self.tabs)
 
         layout.addSpacing(8)
 
@@ -172,4 +231,63 @@ class SettingsDialog(QDialog):
 
     def _on_accept(self):
         self._panel.save()
+        
+        current_tab_title = self.tabs.tabText(self.tabs.currentIndex())
+        
+        if current_tab_title == "Add Profile":
+            profile_name = self.add_profile_name_edit.text().strip()
+            if profile_name:
+                self.add_profile_form.save_to_json(profile_name)
+            else:
+                data = self.add_profile_form.get_data_dict()
+                sm.set_pref("agency_profile", json.dumps(data))
+                
+        elif current_tab_title == "Edit/Delete Profile" and self.edit_profile_form.isEnabled():
+            profile_name = self.edit_profile_combo.currentText().strip()
+            if profile_name:
+                self.edit_profile_form.save_to_json(profile_name)
+            
         self.accept()
+
+    def _populate_profiles(self):
+        self.edit_profile_combo.blockSignals(True)
+        self.edit_profile_combo.clear()
+        
+        profiles = self.edit_profile_form.get_available_profiles()
+        for name in profiles.keys():
+            self.edit_profile_combo.addItem(name)
+            
+        self.edit_profile_combo.blockSignals(False)
+        
+        if self.edit_profile_combo.count() > 0:
+            self.edit_profile_form.setEnabled(True)
+            self.btn_delete_profile.setEnabled(True)
+            self._on_profile_selected(self.edit_profile_combo.currentIndex())
+        else:
+            self.edit_profile_form.setEnabled(False)
+            self.btn_delete_profile.setEnabled(False)
+
+    def _on_profile_selected(self, index):
+        if index < 0: return
+        name = self.edit_profile_combo.itemText(index)
+        profiles = self.edit_profile_form.get_available_profiles()
+        if name in profiles:
+            self.edit_profile_form.load_data_dict(profiles[name])
+
+    def _delete_profile(self):
+        name = self.edit_profile_combo.currentText().strip()
+        if not name:
+            return
+            
+        profiles = self.edit_profile_form.get_available_profiles()
+        if name not in profiles:
+            QMessageBox.warning(self, "Delete Profile", f"Profile '{name}' does not exist.")
+            return
+            
+        reply = QMessageBox.question(
+            self, "Delete Profile", f"Are you sure you want to delete profile '{name}'?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply == QMessageBox.Yes:
+            self.edit_profile_form.delete_from_json(name)
+            self._populate_profiles()
