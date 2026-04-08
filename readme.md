@@ -28,21 +28,51 @@ git clone https://github.com/swas02/3psLCCA-core.git
 
 This places `3psLCCA-core/` inside `3psLCCA-gui/`, which is where `requirements.txt` expects it.
 
+---
+
 **3. Create and activate a virtual environment**
 
 ```bash
 python -m venv venv
 ```
 
-Windows:
+### ▶ Windows (PowerShell)
+
 ```bash
 venv\Scripts\activate
 ```
 
-macOS / Linux:
+⚠️ **If you get an execution policy error**, run:
+
+```bash
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then try activating again:
+
+```bash
+venv\Scripts\activate
+```
+
+> This error occurs because PowerShell restricts running scripts by default.
+
+---
+
+### ▶ Windows (Command Prompt)
+
+```bash
+venv\Scripts\activate
+```
+
+---
+
+### ▶ macOS / Linux
+
 ```bash
 source venv/bin/activate
 ```
+
+---
 
 **4. Install dependencies**
 
