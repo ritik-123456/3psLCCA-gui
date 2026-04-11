@@ -42,16 +42,6 @@ from PySide6.QtWidgets import (
 from core.safechunk_engine import SafeChunkEngine
 import core.start_manager as sm
 from gui.theme import (
-    PRIMARY,
-    PRIMARY_ACTIVE,
-    MUTED,
-    SUCCESS,
-    WARNING_COLOR,
-    INFO,
-    DANGER,
-    SIDEBAR_HOVER,
-    SIDEBAR_SEL,
-    CARD_BG,
     SP2,
     SP3,
     SP4,
@@ -78,6 +68,7 @@ from gui.theme import (
     FW_SEMIBOLD,
     FW_BOLD,
 )
+from gui.themes import get_token
 from gui.styles import (
     font as _f,
     btn_primary,
@@ -129,6 +120,7 @@ def _relative_time(dt_str: str) -> str:
 
 from datetime import datetime
 
+
 def _greeting() -> str:
     """Returns a time-based greeting string (no name)."""
     hour = datetime.now().hour
@@ -143,10 +135,13 @@ def _greeting() -> str:
 
 
 STATUS_CONFIG = {
-    "ok": {"label": "OK", "color": SUCCESS},
-    "crashed": {"label": "Needs recovery", "color": DANGER},
-    "locked": {"label": "Open", "color": INFO},  # blue — distinct from brand green
-    "corrupted": {"label": "Corrupted", "color": WARNING_COLOR},
+    "ok": {"label": "OK", "color": get_token("success")},
+    "crashed": {"label": "Needs recovery", "color": get_token("danger")},
+    "locked": {
+        "label": "Open",
+        "color": get_token("info"),
+    },  # blue — distinct from brand green
+    "corrupted": {"label": "Corrupted", "color": get_token("warning")},
 }
 
 
@@ -184,7 +179,7 @@ class _NavButton(QWidget):
 
         # Background
         if self._selected:
-            bg = QColor(PRIMARY)
+            bg = QColor(get_token("primary"))
             bg.setAlpha(28)
             p.fillRect(self.rect(), bg)
         elif self._hover:
@@ -192,16 +187,16 @@ class _NavButton(QWidget):
 
         # Icon & text colour
         if self._selected:
-            col = QColor(PRIMARY)
+            col = QColor(get_token("primary"))
         elif self._hover:
-            col = self.palette().windowText().color()
+            col = QColor(get_token("text"))
         else:
-            col = self.palette().placeholderText().color()
+            col = QColor(get_token("text_secondary"))
 
         # Left accent bar for selected
         if self._selected:
             p.setPen(Qt.NoPen)
-            p.setBrush(QColor(PRIMARY))
+            p.setBrush(QColor(get_token("primary")))
             p.drawRoundedRect(0, 10, 3, 40, RADIUS_SM, RADIUS_SM)
 
         pen = QPen(col, 1.6, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
@@ -221,7 +216,8 @@ class _NavButton(QWidget):
         # Label
         if self._label:
             p.setPen(col)
-            p.setFont(_f(FS_XS, FW_MEDIUM))
+            weight = FW_SEMIBOLD if self._selected else FW_MEDIUM
+            p.setFont(_f(FS_XS, weight))
             p.drawText(QRect(0, 42, w, 14), Qt.AlignCenter, self._label)
 
         p.end()
@@ -229,11 +225,15 @@ class _NavButton(QWidget):
     @staticmethod
     def _draw_home(p: QPainter, cx: int, cy: int):
         # Roof
-        p.drawPolyline(QPolygonF([
-            QPointF(cx - 11, cy + 1),
-            QPointF(cx,       cy - 10),
-            QPointF(cx + 11, cy + 1),
-        ]))
+        p.drawPolyline(
+            QPolygonF(
+                [
+                    QPointF(cx - 11, cy + 1),
+                    QPointF(cx, cy - 10),
+                    QPointF(cx + 11, cy + 1),
+                ]
+            )
+        )
         # Left wall
         p.drawLine(QPointF(cx - 9, cy + 1), QPointF(cx - 9, cy + 12))
         # Right wall
@@ -281,12 +281,13 @@ class _NavButton(QWidget):
     @staticmethod
     def _draw_settings(p: QPainter, cx: int, cy: int):
         import math
+
         # Gear: 8 rectangular teeth + centre hole
-        N      = 8      # number of teeth
-        r_out  = 9.0    # tooth tip radius
-        r_in   = 6.5    # tooth root (valley) radius
-        r_hole = 3.5    # centre hole radius
-        half_t = math.radians(8)   # half tooth angular width
+        N = 8  # number of teeth
+        r_out = 9.0  # tooth tip radius
+        r_in = 6.5  # tooth root (valley) radius
+        r_hole = 3.5  # centre hole radius
+        half_t = math.radians(8)  # half tooth angular width
 
         pts = []
         for i in range(N):
@@ -335,9 +336,9 @@ class _GridCardDelegate(QStyledItemDelegate):
         "corrupted": (249, 115, 22),  # orange
     }
     _STATUS_DOT = {
-        "locked": INFO,
-        "crashed": DANGER,
-        "corrupted": WARNING_COLOR,
+        "locked": get_token("info"),
+        "crashed": get_token("danger"),
+        "corrupted": get_token("warning"),
     }
 
     def __init__(self, parent=None):
@@ -407,8 +408,12 @@ class _GridCardDelegate(QStyledItemDelegate):
             sep_col = pal.mid().color()
             sep_col.setAlpha(35)
             painter.setPen(QPen(sep_col, 1))
-            painter.drawLine(rect.left() + 16, option.rect.bottom(),
-                             rect.right() - 16, option.rect.bottom())
+            painter.drawLine(
+                rect.left() + 16,
+                option.rect.bottom(),
+                rect.right() - 16,
+                option.rect.bottom(),
+            )
 
             # "Opening ." / ".." / "..." pill (always visible, not just hover)
             dots = "." * (self._loading_dots + 1)
@@ -450,12 +455,12 @@ class _GridCardDelegate(QStyledItemDelegate):
 
         # Selection / hover tint (on top of semantic tint)
         if is_sel:
-            tint = QColor(PRIMARY)
+            tint = QColor(get_token("primary"))
             tint.setAlpha(22)
             painter.setBrush(QBrush(tint))
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
         elif is_hov:
-            tint = QColor(PRIMARY)
+            tint = QColor(get_token("primary"))
             tint.setAlpha(14)
             painter.setBrush(QBrush(tint))
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
@@ -463,7 +468,7 @@ class _GridCardDelegate(QStyledItemDelegate):
         # ── Pinned left accent bar (visible at rest, mirrors _NavButton) ───
         if is_pinned:
             painter.setPen(Qt.NoPen)
-            pin_bar = QColor(PRIMARY)
+            pin_bar = QColor(get_token("primary"))
             pin_bar.setAlpha(200)
             painter.setBrush(pin_bar)
             painter.drawRoundedRect(
@@ -477,7 +482,7 @@ class _GridCardDelegate(QStyledItemDelegate):
 
         # ── Locked project outline border ──────────────────────────────────
         if status == "locked":
-            lock_col = QColor(INFO)
+            lock_col = QColor(get_token("info"))
             lock_col.setAlpha(160)
             painter.setPen(QPen(lock_col, 1.5))
             painter.setBrush(Qt.NoBrush)
@@ -500,7 +505,7 @@ class _GridCardDelegate(QStyledItemDelegate):
         tx = rect.left() + SP4
 
         # ── ⋮ menu button (always visible) ────────────────────────────────
-        menu_col = QColor(PRIMARY) if is_sel else QColor(muted_col)
+        menu_col = QColor(get_token("primary")) if is_sel else QColor(muted_col)
         menu_col.setAlpha(200 if is_hov else 150)
         painter.setPen(menu_col)
         painter.setFont(_f(FS_MD, FW_BOLD))
@@ -514,7 +519,7 @@ class _GridCardDelegate(QStyledItemDelegate):
         if is_hov:
             # Star toggle
             star_rect = QRect(R - 58, rect.top(), 26, card_h)
-            star_col = QColor(PRIMARY) if is_pinned else QColor(muted_col)
+            star_col = QColor(get_token("primary")) if is_pinned else QColor(muted_col)
             star_col.setAlpha(220 if is_pinned else 150)
             painter.setPen(star_col)
             painter.setFont(_f(FS_MD + 1, FW_NORMAL))
@@ -528,7 +533,7 @@ class _GridCardDelegate(QStyledItemDelegate):
             pill_x = R - 58 - SP2 - pill_w
             pill_y = rect.top() + (card_h - pill_h) // 2
             pill_rect = QRect(pill_x, pill_y, pill_w, pill_h)
-            prim = QColor(PRIMARY)
+            prim = QColor(get_token("primary"))
             pill_hov = pill_rect.contains(self._mouse_pos)
             if pill_hov:
                 painter.setBrush(QBrush(prim))
@@ -560,7 +565,7 @@ class _GridCardDelegate(QStyledItemDelegate):
             # Pin dot (hidden on hover — star takes priority, bar shows at rest)
             if is_pinned:
                 painter.setPen(Qt.NoPen)
-                pin_c = QColor(PRIMARY)
+                pin_c = QColor(get_token("primary"))
                 pin_c.setAlpha(180)
                 painter.setBrush(pin_c)
                 painter.drawEllipse(
@@ -594,7 +599,7 @@ class _GridCardDelegate(QStyledItemDelegate):
 
         # ── Warning line (crashed / corrupted only) ────────────────────────
         if status == "crashed":
-            warn_col = QColor(DANGER)
+            warn_col = QColor(get_token("danger"))
             warn_col.setAlpha(210)
             painter.setPen(warn_col)
             painter.setFont(_f(FS_XS, FW_MEDIUM))
@@ -602,7 +607,7 @@ class _GridCardDelegate(QStyledItemDelegate):
                 QPoint(tx, y_warn), "Needs recovery — last save may be incomplete"
             )
         elif status == "corrupted":
-            warn_col = QColor(WARNING_COLOR)
+            warn_col = QColor(get_token("warning"))
             warn_col.setAlpha(210)
             painter.setPen(warn_col)
             painter.setFont(_f(FS_XS, FW_MEDIUM))
@@ -699,7 +704,7 @@ class _EmptyState(QWidget):
         icon_lbl = QLabel("🗂")
         icon_lbl.setFont(_f(FS_DISP + 10, FW_NORMAL))
         icon_lbl.setAlignment(Qt.AlignCenter)
-        icon_lbl.setStyleSheet(f"color: {MUTED};")
+        icon_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
         layout.addWidget(icon_lbl)
 
         # Heading
@@ -712,7 +717,7 @@ class _EmptyState(QWidget):
         sub_lbl = QLabel(subtext)
         sub_lbl.setFont(_f(FS_BASE))
         sub_lbl.setAlignment(Qt.AlignCenter)
-        sub_lbl.setStyleSheet(f"color: {MUTED};")
+        sub_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
         layout.addWidget(sub_lbl)
 
         # CTA button
@@ -842,7 +847,9 @@ class HomePage(QWidget):
 
         self.grid_section_lbl = QLabel("RECENT PROJECTS")
         self.grid_section_lbl.setFont(_f(FS_SM, FW_SEMIBOLD))
-        self.grid_section_lbl.setStyleSheet(f"color: {MUTED}; letter-spacing: 2px;")
+        self.grid_section_lbl.setStyleSheet(
+            f"color: {get_token('text_disabled')}; letter-spacing: 2px;"
+        )
         tl.addWidget(self.grid_section_lbl)
         tl.addStretch()
 
@@ -857,7 +864,7 @@ class HomePage(QWidget):
         self.search_input.setStyleSheet(
             f"QLineEdit {{ min-height: 0; padding: 0 8px;"
             f"  border-radius: {RADIUS_MD}px; border: 1px solid palette(mid); }}"
-            f"QLineEdit:focus {{ border: 1px solid {PRIMARY}; padding: 0 7px; }}"
+            f"QLineEdit:focus {{ border: 1px solid {get_token('primary')}; padding: 0 7px; }}"
         )
         self.search_input.textChanged.connect(self._on_search)
         tl.addWidget(self.search_input)
@@ -934,7 +941,7 @@ class HomePage(QWidget):
     def _update_greeting(self):
         profile = sm.get_profile()
         name = profile.get("display_name", "").strip()
-        
+
         # Fallback to system username if no name provided
         if not name:
             # Get system username (fallback to 'User')
@@ -947,9 +954,10 @@ class HomePage(QWidget):
             name = name.strip().title() if name else "User"
 
         greet = _greeting()
+
         self.greeting_lbl.setText(
             f"<span style='font-size:{FS_MD}pt; font-weight:{FW_LIGHT};'>{greet},&nbsp;</span>"
-            f"<span style='font-size:{FS_DISP}pt; font-weight:{FW_BOLD}; color:{PRIMARY};'>{name}!</span>"
+            f"<span style='font-size:{FS_DISP}pt; font-weight:{FW_BOLD}; color:{get_token('primary')};'>{name}!</span>"
         )
 
     def _current_sort(self) -> str:
@@ -1390,3 +1398,5 @@ class HomePage(QWidget):
         close_btn.clicked.connect(dlg.accept)
         layout.addWidget(close_btn)
         dlg.exec()
+
+

@@ -390,3 +390,5 @@ def library_unique_name(base: str) -> str:
     e.g. 'My 2024'  →  'My 2024 (2)'  →  'My 2024 (3)'  …
     """
     return _library.unique_name(base)
+
+

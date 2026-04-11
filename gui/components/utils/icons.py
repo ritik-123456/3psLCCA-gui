@@ -171,9 +171,9 @@ class _SvgIconEngine(QIconEngine):
         app = QApplication.instance()
         if mode == QIcon.Mode.Disabled:
             from gui.themes import get_token
-            return app.palette().placeholderText().color().name() if app else get_token("$icon-muted", "#aaaaaa")
+            return app.palette().placeholderText().color().name() if app else get_token("icon-muted")
         from gui.themes import get_token
-        return app.palette().windowText().color().name() if app else get_token("$body-color", "#333333")
+        return app.palette().windowText().color().name() if app else get_token("text")
 
     @classmethod
     def _render(cls, body: str, color: str, w: int, h: int) -> QPixmap:
@@ -290,3 +290,5 @@ def make_icon(name: str, color: str | None = None, size: int = 64) -> QIcon:
     renderer.render(painter)
     painter.end()
     return QIcon(pix)
+
+

@@ -59,15 +59,20 @@ def _apply_theme(scheme=None, app: QApplication = None) -> None:
 
     # Update global tracking
     track_mode(is_dark)
-    palette, tokens = get_dark_theme() if is_dark else get_light_theme()
+    palette, tokens, _ = get_dark_theme() if is_dark else get_light_theme()
     app.setPalette(palette)
 
     if os.path.exists(_QSS_PATH):
         try:
-            with open(_QSS_PATH) as f:
+            with open(_QSS_PATH, encoding="utf-8") as f:
                 qss = f.read()
-            for token, value in tokens.items():
-                qss = qss.replace(token, value)
+
+            # Sort tokens by length (longest first) to avoid partial replacements
+            # (e.g., substituting 'primary' shouldn't break '$primary-hover')
+            sorted_tokens = sorted(tokens.items(), key=lambda x: len(x[0]), reverse=True)
+            for token, value in sorted_tokens:
+                qss = qss.replace(f"${token}", value)
+
             app.setStyleSheet(qss)
         except Exception as e:
             print(f"Warning: Could not reload stylesheet: {e}")
@@ -233,3 +238,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

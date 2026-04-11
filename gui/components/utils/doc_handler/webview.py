@@ -169,3 +169,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     navigate(args.path, docs_dir=args.docs_dir, run_loop=True)
+
+

@@ -1,91 +1,26 @@
-# gui/themes/light/soft_light.yml — Soft light theme based on Catppuccin Latte.
-#
-# Designed to reduce eye fatigue: warm background, ~8:1 text contrast (vs ~15:1
-# for the Bootstrap default), warm purple-grey text instead of near-black.
-#
-# Catppuccin Latte reference: https://github.com/catppuccin/catppuccin
-#   Base      #eff1f5   Mantle    #e6e9ef   Crust     #dce0e8
-#   Surface0  #ccd0da   Surface1  #bcc0cc   Overlay0  #9ca0b0
-#   Subtext0  #6c6f85   Text      #4c4f69
 name: Soft Light
 
 palette:
-  accent:           "#0d6efd"   # PRIMARY
-  window:           "#eff1f5"   # Base — main window background
-  alternate_base:   "#e6e9ef"   # Mantle — sidebar / alternate background
-  base:             "#ffffff"   # inputs, cards, tables (elevated above Base)
-  button:           "#ffffff"
-  mid:              "#ccd0da"   # Surface0 — standard border
-  midlight:         "#bcc0cc"   # Surface1 — subtle border (inputs on hover)
-  light:            "#dce0e8"   # Crust — pressed surface / darkest bg layer
-  highlight:        "#0d6efd"
-  highlighted_text: "#ffffff"
-  text:             "#4c4f69"   # Text — ~8:1 on white, WCAG AA
-  window_text:      "#4c4f69"
-  button_text:      "#4c4f69"
-  placeholder_text: "#9ca0b0"   # Overlay0 — disabled / placeholder
+  primary:         "#86A022"
+  brand:           "#90af13"
 
-qss_tokens:
-  # ── Core (longest prefix first) ─────────────────────────────────────────
-  "$primary-hover":      "#0b5ed7"
-  "$primary-active":     "#0a58ca"
-  "$border-subtle":      "#bcc0cc"   # Surface1
-  "$surface-active":     "#dce0e8"   # Crust
-  "$body-color":         "#4c4f69"
-  "$secondary":          "#6c6f85"   # Subtext0
-  "$primary":            "#0d6efd"
-  "$body-bg":            "#eff1f5"
-  "$border":             "#ccd0da"   # Surface0
-  "$surface":            "#dce0e8"   # Crust
-  "$muted":              "#9ca0b0"   # Overlay0
-  "$white":              "#ffffff"
-  # ── Semantic status ────────────────────────────────────────────────────
-  "$validation-error":   "#dc3545"
-  "$danger":             "#ef4444"
-  "$success":            "#22c55e"
-  "$warning":            "#f97316"
-  "$info":               "#3b82f6"
-  "$placeholder":        "#9ca0b0"   # Overlay0 for placeholders
-  "$card-bg":            "#ffffff"
-  # ── Sidebar chrome ──────────────────────────────────────────────────────
-  "$sidebar-hover":      "#dce0e8"   # Crust
-  "$sidebar-sel":        "#ccd0da"   # Surface0
-  # ── Splash screen (gui/main.py) ─────────────────────────────────────────
-  "$splash-progress":    "#2ecc71"
-  "$splash-bg":          "#1a1a2e"
-  # ── Brand icon (gui/project_window.py window icon) ───────────────────────
-  "$icon-brand":         "#2ecc71"
-  # ── Log viewer (gui/components/logs.py) ─────────────────────────────────
-  "$log-success":        "#b5cea8"
-  "$log-default":        "#4c4f69"   # matches body-color for soft light
-  "$danger-bg":          "rgba(239,68,68,0.08)"        # soft red tint (same system as default light)
-  "$danger-bg-pressed":  "rgba(239,68,68,0.16)"
-  "$placeholder-text":   "#6c6f85"              # Subtext0 (better than Overlay0 for readability)
-  "$log-warning":        "#dcdcaa"
-  "$log-error":          "#f48771"
-  "$log-info":           "#4ec9b0"
-  # ── Action icons ─────────────────────────────────────────────────────────
-  "$icon-success":       "#2ecc71"
-  "$icon-danger":        "#e74c3c"
-  "$icon-muted":         "#9ca0b0"   # Overlay0
-  # ── Table cell validation states ─────────────────────────────────────────
-  "$cell-warn-row-bg":   "#fff1f0"
-  "$cell-disabled-bg":   "#dce0e8"   # Crust
-  "$cell-invalid-bg":    "#f8d7da"
-  "$cell-warn-bg":       "#fff3cd"
-  "$cell-warn-fg":       "#cf1322"
-  # ── Integrity states ────────────────────────────────────────────────────
-  "$integrity-mismatch": "#b71c1c"
-  "$integrity-missing":  "#e65100"
-  "$integrity-ok":       "#2e7d32"
-  # ── LCC Plot chart bands ─────────────────────────────────────────────────
-  "$chart-initial-tick": "#2c4a75"
-  "$chart-initial-bg":   "#cfd9e8"
-  "$chart-use-tick":     "#1f6f66"
-  "$chart-use-bg":       "#cfe8e2"
-  "$chart-recon-tick":   "#5a3270"
-  "$chart-recon-bg":     "#e8d5f0"
-  "$chart-eol-tick":     "#7a3b3b"
-  "$chart-eol-bg":       "#edd5d5"
-  "$chart-bar-positive": "#8b1a1a"
-  "$chart-bar-negative": "#2e7d32"
+  window:          "#eff1f5"
+  base:            "#ffffff"
+  surface:         "#e6e9ef"
+  surface_mid:     "#ccd0da"
+  surface_pressed: "#dce0e8"
+
+  text:            "#4c4f69"
+  text_secondary:  "#6c6f85"
+  text_disabled:   "#9ca0b0"
+
+  success:         "#22c55e"
+  warning:         "#f97316"
+  danger:          "#ef4444"
+  info:            "#3b82f6"
+
+state:
+  hover:    0.06
+  pressed:  0.12
+  focus:    0.18
+  disabled: 0.38

@@ -46,3 +46,5 @@ def make_doc_opener(section: str) -> Callable[[str], None]:
             pass
 
     return _open
+
+

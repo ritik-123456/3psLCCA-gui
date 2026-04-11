@@ -1,92 +1,32 @@
-# gui/themes/dark/dracula.yml — Dracula dark theme.
-#
+name: Dracula
+
 # Dracula palette reference: https://draculatheme.com/contribute
 #   Background  #282a36   Current Line  #44475a   Foreground  #f8f8f2
 #   Comment     #6272a4   Cyan          #8be9fd   Green       #50fa7b
 #   Orange      #ffb86c   Pink          #ff79c6   Purple      #bd93f9
 #   Red         #ff5555   Yellow        #f1fa8c
-#
-# Brand tokens ($primary / hover / active) are preserved so buttons and
-# accents stay on-brand while the chrome uses Dracula's palette.
-name: Dracula
 
 palette:
-  accent:           "#6B7D20"   # brand olive-green accent (kept for consistency)
-  window:           "#282a36"   # Background — main window
-  alternate_base:   "#21222c"   # Elevated — inputs, cards (darker than bg)
-  base:             "#21222c"
-  button:           "#44475a"   # Current Line
-  mid:              "#44475a"
-  midlight:         "#565869"
-  light:            "#565869"
-  highlight:        "#bd93f9"   # Purple — selection
-  highlighted_text: "#282a36"   # Background (text on selection)
-  text:             "#f8f8f2"   # Foreground
-  window_text:      "#f8f8f2"
-  button_text:      "#f8f8f2"
-  placeholder_text: "#6272a4"   # Comment — muted / placeholder
+  primary:         "#bd93f9"   # Dracula Purple — theme accent
+  brand:           "#90af13"   # app signature green
 
-qss_tokens:
-  # ── Core (longest prefix first) ─────────────────────────────────────────
-  "$primary-hover":      "#7c9811"
-  "$primary-active":     "#6c830e"
-  "$border-subtle":      "#565869"
-  "$surface-active":     "#44475a"   # Current Line
-  "$body-color":         "#f8f8f2"
-  "$secondary":          "#6272a4"   # Comment
-  "$primary":            "#90af13"
-  "$body-bg":            "#282a36"
-  "$border":             "#44475a"
-  "$surface":            "#383a4a"   # between bg and current-line
-  "$muted":              "#4d5068"
-  "$white":              "#21222c"   # elevated surface (inputs, cards, tables)
-  # ── Semantic status ────────────────────────────────────────────────────
-  "$validation-error":   "#ff5555"   # Dracula Red
-  "$danger":             "#ff5555"   # Dracula Red
-  "$danger-bg":          "rgba(255,85,85,0.10)"        # Dracula red #ff5555
-  "$danger-bg-pressed":  "rgba(255,85,85,0.20)"
-  "$placeholder-text":   "#6272a4"              # Comment (correct Dracula semantic choice)
-  "$success":            "#50fa7b"   # Dracula Green
-  "$warning":            "#ffb86c"   # Dracula Orange
-  "$info":               "#8be9fd"   # Dracula Cyan
-  "$placeholder":        "#6272a4"   # Comment
-  "$card-bg":            "#21222c"
-  # ── Sidebar chrome ──────────────────────────────────────────────────────
-  "$sidebar-hover":      "#383a4a"   # between bg and current-line
-  "$sidebar-sel":        "#44475a"   # Current Line
-  # ── Splash screen (gui/main.py) ─────────────────────────────────────────
-  "$splash-progress":    "#50fa7b"   # Dracula Green
-  "$splash-bg":          "#1a1a2e"
-  # ── Brand icon (gui/project_window.py window icon) ───────────────────────
-  "$icon-brand":         "#50fa7b"   # Dracula Green
-  # ── Log viewer (gui/components/logs.py) ─────────────────────────────────
-  "$log-success":        "#50fa7b"   # Dracula Green
-  "$log-default":        "#f8f8f2"   # Foreground
-  "$log-warning":        "#f1fa8c"   # Dracula Yellow
-  "$log-error":          "#ff5555"   # Dracula Red
-  "$log-info":           "#8be9fd"   # Dracula Cyan
-  # ── Action icons ─────────────────────────────────────────────────────────
-  "$icon-success":       "#50fa7b"   # Dracula Green
-  "$icon-danger":        "#ff5555"   # Dracula Red
-  "$icon-muted":         "#6272a4"   # Comment
-  # ── Table cell validation states ─────────────────────────────────────────
-  "$cell-warn-row-bg":   "#2a1515"
-  "$cell-disabled-bg":   "#21222c"
-  "$cell-invalid-bg":    "#3d1818"
-  "$cell-warn-bg":       "#2e2000"
-  "$cell-warn-fg":       "#ff6e6e"   # lighter red on dark
-  # ── Integrity states ────────────────────────────────────────────────────
-  "$integrity-mismatch": "#ff5555"   # Dracula Red
-  "$integrity-missing":  "#ffb86c"   # Dracula Orange
-  "$integrity-ok":       "#50fa7b"   # Dracula Green
-  # ── LCC Plot chart bands ─────────────────────────────────────────────────
-  "$chart-initial-tick": "#8be9fd"   # Dracula Cyan
-  "$chart-initial-bg":   "#1e2a38"
-  "$chart-use-tick":     "#50fa7b"   # Dracula Green
-  "$chart-use-bg":       "#1a2e28"
-  "$chart-recon-tick":   "#bd93f9"   # Dracula Purple
-  "$chart-recon-bg":     "#2a1c35"
-  "$chart-eol-tick":     "#ff5555"   # Dracula Red
-  "$chart-eol-bg":       "#2e1a1a"
-  "$chart-bar-positive": "#ff5555"   # Dracula Red
-  "$chart-bar-negative": "#50fa7b"   # Dracula Green
+  window:          "#282a36"   # Background
+  base:            "#21222c"   # elevated surface (inputs, cards)
+  surface:         "#383a4a"   # hover bg (between Background and Current Line)
+  surface_mid:     "#44475a"   # Current Line — border / divider
+  surface_pressed: "#565869"   # pressed bg
+
+  text:            "#f8f8f2"   # Foreground
+  text_secondary:  "#6272a4"   # Comment
+  text_disabled:   "#4d5068"   # muted
+
+  success:         "#50fa7b"   # Dracula Green
+  warning:         "#ffb86c"   # Dracula Orange
+  danger:          "#ff5555"   # Dracula Red
+  info:            "#8be9fd"   # Dracula Cyan
+
+state:
+  hover:    0.06
+  pressed:  0.12
+  focus:    0.18
+  disabled: 0.38

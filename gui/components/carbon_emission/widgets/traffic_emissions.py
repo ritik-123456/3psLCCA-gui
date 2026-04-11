@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QBrush, QColor
+from gui.themes import get_token
 
 from ...base_widget import ScrollableForm
 from ...utils.form_builder.form_definitions import FieldDef
@@ -218,7 +219,7 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
         sb = self._factors[key]
         if is_zero:
             sb.setStyleSheet(
-                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} background-color: #ffffb4; color: #644f00; }}"
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} background-color: {get_token('cell-warn-bg')}; color: {get_token('warning')}; }}"
             )
         else:
             sb.setStyleSheet("")
@@ -551,3 +552,5 @@ class TrafficEmissions(ScrollableForm):
         self._remarks.clear_content()
         self._refresh_total()
         self._on_field_changed()
+
+

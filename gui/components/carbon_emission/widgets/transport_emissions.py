@@ -283,7 +283,7 @@ class VehicleCard(QGroupBox):
         # Buttons
         btn_row = QHBoxLayout()
         edit_btn = make_icon_btn("edit", "Edit Delivery", size=32, hover_color="241, 196, 15")
-        trash_btn = make_icon_btn("trash", "Remove", size=32, icon_color=get_token("$icon-danger", "#e74c3c"), hover_color="192, 57, 43")
+        trash_btn = make_icon_btn("trash", "Remove", size=32, icon_color=get_token("danger"), hover_color="192, 57, 43")
         edit_btn.clicked.connect(on_edit)
         trash_btn.clicked.connect(on_trash)
         freeze_widgets(frozen, edit_btn, trash_btn)
@@ -373,8 +373,8 @@ class VehicleCard(QGroupBox):
                     table.setItem(row, c, self._item("—", Qt.AlignCenter))
                 label = "In Trash" if status == "trashed" else "Removed"
                 warn_item = self._item(f"✕ {label}", Qt.AlignCenter)
-                warn_item.setForeground(QColor(get_token("$cell-warn-fg", "#cf1322")))
-                warn_item.setBackground(QColor(get_token("$cell-warn-row-bg", "#fff1f0")))
+                warn_item.setForeground(QColor(get_token("")))
+                warn_item.setBackground(QColor(get_token("warning")))
                 table.setItem(row, 6, warn_item)
 
         row_h = table.verticalHeader().defaultSectionSize()
@@ -761,3 +761,5 @@ class TransportEmissions(QWidget):
         if self.isVisible():
             self.on_refresh()
             self._loaded = True
+
+

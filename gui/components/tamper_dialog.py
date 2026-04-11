@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont, QColor
-from gui.theme import SUCCESS, DANGER, WARNING_COLOR, PLACEHOLDER
+from gui.themes import get_token
 
 
 class VerifyWorker(QThread):
@@ -139,7 +139,7 @@ class TamperDialog(QDialog):
         f = QFont()
         f.setBold(True)
         status_item.setFont(0, f)
-        status_item.setForeground(0, QColor(SUCCESS) if passed else QColor(DANGER))
+        status_item.setForeground(0, QColor(get_token("success")) if passed else QColor(get_token("danger")))
 
         # Manifest
         mf_item = QTreeWidgetItem(self.result_tree)
@@ -167,12 +167,12 @@ class TamperDialog(QDialog):
             for c in missing:
                 m = QTreeWidgetItem(obj_item)
                 m.setText(0, f"  ⚠ Missing: {c}")
-                m.setForeground(0, QColor(WARNING_COLOR))
+                m.setForeground(0, QColor(get_token("warning")))
         if tampered:
             for c in tampered:
                 t = QTreeWidgetItem(obj_item)
                 t.setText(0, f"  ❌ Tampered: {c}")
-                t.setForeground(0, QColor(DANGER))
+                t.setForeground(0, QColor(get_token("danger")))
 
         # Checkpoints
         cp_item = QTreeWidgetItem(self.result_tree)
@@ -184,7 +184,7 @@ class TamperDialog(QDialog):
         if bad:
             b = QTreeWidgetItem(cp_item)
             b.setText(0, f"  ❌ Tampered: {bad}")
-            b.setForeground(0, QColor(DANGER))
+            b.setForeground(0, QColor(get_token("danger")))
         if uns:
             self._add_child(cp_item, f"  ℹ Unsigned (legacy): {uns}")
 
@@ -202,7 +202,7 @@ class TamperDialog(QDialog):
     def _add_check(self, parent: QTreeWidgetItem, label: str, ok: bool):
         item = QTreeWidgetItem(parent)
         item.setText(0, f"{'✅' if ok else '❌'}  {label}")
-        item.setForeground(0, QColor(SUCCESS) if ok else QColor(DANGER))
+        item.setForeground(0, QColor(get_token("success")) if ok else QColor(get_token("danger")))
 
     def _add_child(self, parent: QTreeWidgetItem, text: str):
         item = QTreeWidgetItem(parent)
@@ -239,7 +239,7 @@ class TamperDialog(QDialog):
         if not entries:
             placeholder = QTreeWidgetItem(self.tamper_log_tree)
             placeholder.setText(0, "No tamper events recorded.")
-            placeholder.setForeground(0, QColor(PLACEHOLDER))
+            placeholder.setForeground(0, QColor(get_token("text_secondary")))
             return
 
         for entry in entries:
@@ -247,7 +247,7 @@ class TamperDialog(QDialog):
             item.setText(0, entry.get("timestamp", ""))
             item.setText(1, entry.get("reason", ""))
             item.setText(2, entry.get("details", ""))
-            item.setForeground(1, QColor(DANGER))
+            item.setForeground(1, QColor(get_token("danger")))
 
     # ── Key management tab ────────────────────────────────────────────────────
 
@@ -378,3 +378,5 @@ class TamperDialog(QDialog):
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)
         return line
+
+

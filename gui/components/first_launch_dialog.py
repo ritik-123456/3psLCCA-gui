@@ -16,12 +16,12 @@ from PySide6.QtWidgets import (
 )
 from gui.styles import font, btn_primary, btn_outline
 from gui.theme import (
-    PRIMARY,
     SP2, SP4, SP6, SP8, SP10,
     BTN_MD,
     FS_BASE, FS_DISP,
     FW_BOLD, FW_MEDIUM,
 )
+from gui.themes import get_token
 from gui.components.settings_dialog import SettingsPanel
 
 
@@ -41,7 +41,7 @@ class FirstLaunchDialog(QDialog):
         # Brand accent bar
         accent = QFrame()
         accent.setFixedHeight(4)
-        accent.setStyleSheet(f"background: {PRIMARY}; border-radius: 2px;")
+        accent.setStyleSheet(f"background: {get_token('primary')}; border-radius: 2px;")
         layout.addWidget(accent)
         layout.addSpacing(SP8 - SP2)
 
@@ -91,3 +91,5 @@ class FirstLaunchDialog(QDialog):
 
     def get_name(self) -> str:
         return self._panel.get_name()
+
+

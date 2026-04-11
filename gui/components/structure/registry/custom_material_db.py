@@ -275,3 +275,5 @@ class CustomMaterialDB:
             conn.execute(
                 "DELETE FROM custom_units WHERE symbol=?", (symbol,)
             )
+
+

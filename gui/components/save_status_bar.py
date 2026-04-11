@@ -79,3 +79,5 @@ class SaveStatusBar(QWidget):
         self.manager_btn.setEnabled(active)
         if not active:
             self.status_label.setText("No project open")
+
+

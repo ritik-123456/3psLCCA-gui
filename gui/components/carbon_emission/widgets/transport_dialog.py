@@ -553,7 +553,7 @@ class TransportDialog(QDialog):
         saved_kg: dict,
     ):
         """Insert all 6 cells for one material row."""
-        _grey = QColor(get_token("$icon-muted", "#aaaaaa"))
+        _grey = QColor(get_token("text_secondary"))
         _ro = Qt.ItemIsEnabled  # read-only flag
         name_val = v.get("material_name", "")
 
@@ -1072,3 +1072,5 @@ class TransportDialog(QDialog):
             },
             "state": self.existing_data.get("state", {}),
         }
+
+

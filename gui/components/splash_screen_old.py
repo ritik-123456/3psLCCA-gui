@@ -17,7 +17,7 @@ from gui.styles import font
 
 MIN_DISPLAY_MS = 1_500
 SPLASH_W, SPLASH_H = 520, 300
-_ICON_PATH = os.path.join("gui", "assets", "logo", "logo-3psLCCA.png")
+_ICON_PATH = os.path.join("gui", "assets", "logo", "logo-3psLCCA.svg")
 
 
 class _Bar(QWidget):
@@ -42,12 +42,12 @@ class _Bar(QWidget):
         p.setPen(Qt.NoPen)
         # Track
         p.setOpacity(0.12)
-        p.setBrush(QColor(get_token("$body-color", "#888888")))
+        p.setBrush(QColor(get_token("window")))
         p.drawRect(self.rect())
         # Fill
         if self._v > 0:
             p.setOpacity(1.0)
-            p.setBrush(QColor(get_token("$primary", "#90af13")))
+            p.setBrush(QColor(get_token("primary")))
             p.drawRect(0, 0, int(self.width() * self._v), self.height())
         p.end()
 
@@ -113,11 +113,11 @@ class SplashScreen(QWidget):
 
         # Background
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(get_token("$splash-bg", get_token("$body-bg", "#0d1117"))))
+        p.setBrush(QColor(get_token("window")))
         p.drawRoundedRect(self.rect(), 12, 12)
 
         # Top accent strip
-        p.setBrush(QColor(get_token("$primary", "#90af13")))
+        p.setBrush(QColor(get_token("primary")))
         p.drawRoundedRect(QRect(0, 0, SPLASH_W, 4), 2, 2)
 
         margin, logo_size = SP10, 64
@@ -127,7 +127,7 @@ class SplashScreen(QWidget):
             p.drawPixmap(margin, margin + SP8, self._logo)
 
         # App name
-        p.setPen(QColor(get_token("$body-color", "#FFFFFF")))
+        p.setPen(QColor(get_token("text")))
         p.setFont(font(FS_DISP, FW_BOLD))
         p.drawText(
             QRect(margin + logo_size + SP4, margin + SP8, 300, logo_size),
@@ -136,7 +136,7 @@ class SplashScreen(QWidget):
         )
 
         # Subtitle
-        p.setPen(QColor(get_token("$secondary", "#8b949e")))
+        p.setPen(QColor(get_token("text_secondary")))
         p.setFont(font(FS_BASE))
         p.drawText(
             margin,
@@ -148,3 +148,5 @@ class SplashScreen(QWidget):
         )
 
         p.end()
+
+

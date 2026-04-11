@@ -22,10 +22,10 @@ from PySide6.QtGui import QColor
 from gui.theme import (
     FS_LG, FS_BASE, FS_SM,
     FW_SEMIBOLD, FW_NORMAL,
-    MUTED,
     BTN_MD, BTN_SM,
     SP2, SP3, SP4, SP8, SP10,
 )
+from gui.themes import get_token
 from gui.styles import font as _f
 
 
@@ -231,7 +231,7 @@ class CheckpointManagerDialog(QDialog):
             empty_item = QTableWidgetItem(
                 "No checkpoints yet. Use '+ New Checkpoint' to create one."
             )
-            empty_item.setForeground(QColor(MUTED))
+            empty_item.setForeground(QColor(get_token("text_disabled")))
             empty_item.setFlags(Qt.ItemIsEnabled)
             self.table.setItem(0, 0, empty_item)
             self.table.setSpan(0, 0, 1, 4)
@@ -297,3 +297,5 @@ class CheckpointManagerDialog(QDialog):
                 QMessageBox.critical(
                     self, "Delete Failed", "Could not delete the checkpoint file.",
                 )
+
+

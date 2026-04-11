@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont, QColor
-from gui.theme import SUCCESS
+from gui.themes import get_token
 
 
 class RecoveryWorker(QThread):
@@ -69,7 +69,7 @@ class RecoveryDialog(QDialog):
 
         issues_label = QLabel(issues_text)
         issues_label.setWordWrap(True)
-        issues_label.setStyleSheet("color: #ef4444;")
+        issues_label.setStyleSheet(f"color: {get_token('danger')};")
         layout.addWidget(issues_label)
 
         layout.addWidget(self._divider())
@@ -174,10 +174,10 @@ class RecoveryDialog(QDialog):
                 msg += "\n\n⚠  Some recent changes may not have been recovered."
             if missing:
                 msg += f"\n\nMissing sections: {', '.join(missing)}"
-            self.result_label.setStyleSheet(f"color: {SUCCESS};")
+            self.result_label.setStyleSheet(f"color: {get_token('success')};")
         else:
             msg = f"❌  Recovery failed.\n\n{description}\n\nYour .ebak backup is preserved in the project's backups/ folder."
-            self.result_label.setStyleSheet("color: #ef4444;")
+            self.result_label.setStyleSheet(f"color: {get_token('danger')};")
 
         self.result_label.setText(msg)
         self.result_label.show()
@@ -206,3 +206,5 @@ class RecoveryDialog(QDialog):
 
     def was_skipped(self) -> bool:
         return self.result is not None and self.result.get("level") == 0
+
+

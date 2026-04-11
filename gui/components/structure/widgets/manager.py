@@ -365,3 +365,5 @@ class StructureManagerWidget(QWidget):
                 eng.on_dirty(True)
             except Exception:
                 pass
+
+

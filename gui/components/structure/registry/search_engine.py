@@ -293,3 +293,5 @@ if __name__ == "__main__":
             print(f"  [{r['db_key']:12}] {r['name']:<40} ₹{r['rate']}")
     else:
         print("  No results.")
+
+

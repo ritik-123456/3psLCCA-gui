@@ -291,3 +291,5 @@ class SettingsDialog(QDialog):
         if reply == QMessageBox.Yes:
             self.edit_profile_form.delete_from_json(name)
             self._populate_profiles()
+
+

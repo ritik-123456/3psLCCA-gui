@@ -2192,3 +2192,5 @@ class MaterialDialog(QDialog):
                 self.save_btn.click()
         else:
             super().keyPressEvent(event)
+
+

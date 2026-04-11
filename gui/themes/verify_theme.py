@@ -10,47 +10,55 @@ from collections import defaultdict
 
 REQUIRED_TOKENS = {
     # Core
-    "$primary", "$primary-hover", "$primary-active",
-    "$border", "$border-subtle",
-    "$surface", "$surface-active",
-    "$body-bg", "$body-color",
-    "$secondary", "$muted",
-    "$white", "$card-bg",
+    "primary", "primary-hover", "primary-active",
+    "border", "border-subtle",
+    "surface", "surface-active",
+    "body-bg", "body-color",
+    "secondary", "muted",
+    "white", "card-bg",
 
     # Semantic
-    "$danger", "$danger-bg", "$danger-bg-pressed",
-    "$success", "$warning", "$info",
-    "$validation-error",
-    "$placeholder", "$placeholder-text",
+    "danger", "danger-bg", "danger-bg-pressed",
+    "success", "warning", "info",
+    "validation-error",
+    "placeholder", "placeholder-text",
 
     # Sidebar
-    "$sidebar-hover", "$sidebar-sel",
+    "sidebar-hover", "sidebar-sel",
 
     # Splash
-    "$splash-progress", "$splash-bg",
+    "splash-progress", "splash-bg",
 
     # Icons
-    "$icon-brand", "$icon-success", "$icon-danger", "$icon-muted",
+    "icon-brand", "icon-success", "icon-danger", "icon-muted",
 
     # Logs
-    "$log-success", "$log-default", "$log-warning",
-    "$log-error", "$log-info",
+    "log-success", "log-default", "log-warning",
+    "log-error", "log-info",
 
     # Table
-    "$cell-warn-row-bg", "$cell-disabled-bg",
-    "$cell-invalid-bg", "$cell-warn-bg", "$cell-warn-fg",
+    "cell-editable-bg", "cell-warn-row-bg", "cell-disabled-bg",
+    "cell-invalid-bg", "cell-warn-bg", "cell-warn-fg",
 
     # Integrity
-    "$integrity-mismatch", "$integrity-missing", "$integrity-ok",
+    "integrity-mismatch", "integrity-missing", "integrity-ok",
 
     # Charts
-    "$chart-initial-tick", "$chart-initial-bg",
-    "$chart-use-tick", "$chart-use-bg",
-    "$chart-recon-tick", "$chart-recon-bg",
-    "$chart-eol-tick", "$chart-eol-bg",
-    "$chart-bar-positive", "$chart-bar-negative",
+    "chart-initial-tick", "chart-initial-bg",
+    "chart-use-tick", "chart-use-bg",
+    "chart-recon-tick", "chart-recon-bg",
+    "chart-eol-tick", "chart-eol-bg",
+    "chart-bar-positive", "chart-bar-negative",
 }
 
+
+# Core semantic keys that MUST be in 'palette'
+REQUIRED_PALETTE = {
+    "primary", "brand", "window", "base", "surface", 
+    "surface_mid", "surface_pressed", "text", 
+    "text_secondary", "text_disabled", "success", 
+    "warning", "danger", "info"
+}
 
 # ─────────────────────────────────────────────────────────────
 # YAML LOADING
@@ -61,9 +69,9 @@ def load_yaml(file_path):
         return yaml.safe_load(f)
 
 
-def extract_tokens(theme_data):
-    """Extract qss_tokens keys safely."""
-    return set((theme_data.get("qss_tokens") or {}).keys())
+def extract_palette(theme_data):
+    """Extract palette keys safely."""
+    return set((theme_data.get("palette") or {}).keys())
 
 
 # ─────────────────────────────────────────────────────────────
@@ -77,10 +85,10 @@ def validate_theme(file_path):
         print(f"[ERROR] Empty or invalid YAML: {file_path}")
         return False
 
-    tokens = extract_tokens(data)
+    palette_keys = extract_palette(data)
 
-    missing = REQUIRED_TOKENS - tokens
-    extra = tokens - REQUIRED_TOKENS
+    missing = REQUIRED_PALETTE - palette_keys
+    extra = palette_keys - REQUIRED_PALETTE
 
     ok = True
 
@@ -158,3 +166,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

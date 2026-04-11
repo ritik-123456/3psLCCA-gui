@@ -163,3 +163,5 @@ class ProjectController(QObject):
 
     def get_health_report(self) -> dict:
         return self.engine.get_health_report() if self.engine else {}
+
+

@@ -8,12 +8,12 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
 )
 from PySide6.QtCore import Qt, Signal, QTimer
-from gui.theme import VALIDATION_ERROR
+from gui.themes import get_token
 
 
 def _set_combo_error(widget: QComboBox, error: bool):
     """Set or clear a validation error on a QComboBox via dynamic property."""
-    widget.setProperty("validationState", VALIDATION_ERROR if error else "")
+    widget.setProperty("validationState", get_token("danger") if error else "")
     widget.style().unpolish(widget)
     widget.style().polish(widget)
 
@@ -142,7 +142,7 @@ class NewProjectDialog(QDialog):
         country_ok = bool(self.country_input.currentData())
         currency_ok = bool(self.currency_input.currentData())
 
-        self.name_input.setStyleSheet("" if name_ok else "border: 1.5px solid #e53e3e;")
+        self.name_input.setStyleSheet("" if name_ok else f"border: 1.5px solid {get_token('danger')};")
         _set_combo_error(self.country_input, not country_ok)
 
         if name_ok and country_ok and currency_ok:
@@ -198,3 +198,5 @@ class NewProjectDialog(QDialog):
                 self.currency_input.setCurrentIndex(idx)
         else:
             self.currency_input.setCurrentIndex(0)
+
+

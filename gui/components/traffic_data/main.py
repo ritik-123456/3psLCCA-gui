@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtCore import Qt, QSize
+from gui.themes import get_token
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section, ValidationStatus
@@ -29,7 +30,7 @@ from ..utils.wpi_manager import WPIManager, WPIProfile
 from .wpi_table import _WPITable
 from .wpi_selector import _WPISelector
 from ..utils.table_widgets import TableDoubleSpinBox, TableSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
-from gui.theme import VALIDATION_ERROR
+from gui.themes import get_token
 
 # ── Dev mode ──────────────────────────────────────────────────────────────────
 
@@ -512,7 +513,7 @@ class _PeakHoursTable(TooltipTableMixin, QTableWidget):
         for sb in self._spinboxes:
             sb.setReadOnly(frozen)
             sb.setStyleSheet(
-                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: #a0a0a0; }}" if frozen else ""
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: {get_token('text_disabled')}; }}" if frozen else ""
             )
 
     def collect_to_dict(self) -> dict:
@@ -668,7 +669,7 @@ class TrafficData(ScrollableForm):
 
         # Unlisted warning (shown if any DB entries failed integrity on load)
         self._wpi_warning = QLabel()
-        self._wpi_warning.setStyleSheet("color: #b71c1c;")
+        self._wpi_warning.setStyleSheet(f"color: {get_token('danger')};")
         self._wpi_warning.setWordWrap(True)
         self._wpi_warning.setVisible(False)
         india_layout.addRow(self._wpi_warning)
@@ -1075,7 +1076,7 @@ class TrafficData(ScrollableForm):
             if hasattr(self, "alternate_road_carriageway"):
                 if self.alternate_road_carriageway.currentText() == _NONE_LANE:
                     errors.append("Alternate Road Carriageway must be selected")
-                    self.alternate_road_carriageway.setProperty("validationState", VALIDATION_ERROR)
+                    self.alternate_road_carriageway.setProperty("validationState", get_token("danger"))
                     self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
                     self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
                 else:
@@ -1084,7 +1085,7 @@ class TrafficData(ScrollableForm):
                     self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
                 if hasattr(self, "carriage_width_in_m") and self.carriage_width_in_m.value() == 0.0:
                     errors.append("Carriageway Width cannot be 0")
-                    self.carriage_width_in_m.setStyleSheet(f"border: 1px solid {VALIDATION_ERROR};")
+                    self.carriage_width_in_m.setStyleSheet(f"border: 1px solid {get_token("danger")};")
 
             vehicle_data = self._vehicle_table.collect_to_dict()
             total_vpd = sum(v["vehicles_per_day"] for v in vehicle_data.values())
@@ -1125,7 +1126,7 @@ class TrafficData(ScrollableForm):
                 # Hourly capacity must be > 0
                 if hasattr(self, "hourly_capacity") and self.hourly_capacity.value() == 0:
                     errors.append("Hourly Capacity cannot be 0")
-                    self.hourly_capacity.setStyleSheet(f"border: 1px solid {VALIDATION_ERROR};")
+                    self.hourly_capacity.setStyleSheet(f"border: 1px solid {get_token("danger")};")
 
                 # Peak hour validation
                 n_peak = self.num_peak_hours.value() if hasattr(self, "num_peak_hours") else 0
@@ -1154,7 +1155,7 @@ class TrafficData(ScrollableForm):
                 warnings.append(
                     "Road User Cost per Day is 0 — road user cost will not be included"
                 )
-                self.road_user_cost_per_day.setStyleSheet("border: 1px solid orange;")
+                self.road_user_cost_per_day.setStyleSheet(f"border: 1px solid {get_token('warning')};")
 
         return {"errors": errors, "warnings": warnings}
 
@@ -1164,13 +1165,13 @@ class TrafficData(ScrollableForm):
         warnings = result.get("warnings", [])
 
         if not errors and not warnings:
-            html = '<span style="color:#2e7d32; font-weight:bold;">&#10004; All checks passed</span>'
+            html = f'<span style="color:{get_token("success")}; font-weight:bold;">&#10004; All checks passed</span>'
         else:
             lines = []
             for e in errors:
-                lines.append(f'<span style="color:{VALIDATION_ERROR};">&#10006; {e}</span>')
+                lines.append(f'<span style="color:{get_token("danger")};">&#10006; {e}</span>')
             for w in warnings:
-                lines.append(f'<span style="color:#e65100;">&#9888; {w}</span>')
+                lines.append(f'<span style="color:{get_token("warning")};">&#9888; {w}</span>')
             html = "<br>".join(lines)
 
         self._val_result_label.setText(html)
@@ -1195,3 +1196,5 @@ class TrafficData(ScrollableForm):
         data = self.controller.engine.fetch_chunk(self.chunk_name)
         if data:
             self.load_data(data)
+
+

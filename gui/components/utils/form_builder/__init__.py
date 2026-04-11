@@ -10,3 +10,5 @@ __all__ = [
     "compress_image",
     "image_file_to_base64",
 ]
+
+

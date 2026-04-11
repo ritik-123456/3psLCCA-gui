@@ -65,10 +65,10 @@ CHUNKS = [
 ]
 
 # Row background states — sourced from active theme; fallback keeps original colour
-BG_INVALID    = get_token("$cell-invalid-bg",  "#f8d7da")  # red
-BG_SUSPICIOUS = get_token("$cell-warn-bg",     "#fff3cd")  # orange/yellow
-BG_DISABLED   = get_token("$cell-disabled-bg", "#e9ecef")  # gray
-TEXT_DARK     = get_token("$body-color",        "#212529")
+BG_INVALID    = get_token("danger")
+BG_SUSPICIOUS = get_token("warning")
+BG_DISABLED   = get_token("surface")
+TEXT_DARK     = get_token("text")
 
 
 # ---------------------------------------------------------------------------
@@ -146,8 +146,8 @@ class _CarbonActionDelegate(BaseActionDelegate):
 
     _ICON_CFG = {
         "edit": (None, (46, 204, 113), "Edit emission factor"),
-        "exclude": (get_token("$icon-danger", "#e74c3c"), (231, 76, 60), "Exclude from calculation"),
-        "include": (get_token("$icon-success", "#2ecc71"), (46, 204, 113), "Include in calculation"),
+        "exclude": (get_token("danger"), (231, 76, 60), "Exclude from calculation"),
+        "include": (get_token("success"), (46, 204, 113), "Include in calculation"),
     }
 
     def __init__(self, table, handler):
@@ -974,3 +974,5 @@ class MaterialEmissions(QWidget):
         if self.isVisible():
             self.on_refresh()
             self._loaded = True
+
+

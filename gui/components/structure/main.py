@@ -10,7 +10,8 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtCore import QThread, Signal
-from PySide6.QtGui import QPalette
+from PySide6.QtGui import QPalette, QColor
+from gui.themes import get_token
 from ..utils.validation_helpers import LOCK_TOOLTIP, freeze_widgets
 from .excel_importer import parse_excel, verify_schema, ImportPreviewWindow
 from .widgets.foundation import FoundationWidget
@@ -161,7 +162,7 @@ class StructureTabView(QWidget):
             self.trash_view.on_refresh()
             self.content_stack.setCurrentIndex(1)
             self.update_trash_count()
-            self.trash_btn.setStyleSheet("font-weight: bold; color: #2ecc71;")
+            self.trash_btn.setStyleSheet(f"font-weight: bold; color: {get_token('success')};")
         else:
             # Returning to Work View
             self.content_stack.setCurrentIndex(0)
@@ -384,3 +385,5 @@ class StructureTabView(QWidget):
         if idx is not None:
             self.content_stack.setCurrentIndex(0)
             self.tab_view.setCurrentIndex(idx)
+
+

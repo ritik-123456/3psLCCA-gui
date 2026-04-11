@@ -42,12 +42,12 @@ class _Bar(QWidget):
         p.setPen(Qt.NoPen)
         # Track
         p.setOpacity(0.12)
-        p.setBrush(QColor(get_token("$body-color", "#888888")))
+        p.setBrush(QColor(get_token("text")))
         p.drawRect(self.rect())
         # Fill
         if self._v > 0:
             p.setOpacity(1.0)
-            p.setBrush(QColor(get_token("$primary", "#90af13")))
+            p.setBrush(QColor(get_token("primary")))
             p.drawRect(0, 0, int(self.width() * self._v), self.height())
         p.end()
 
@@ -108,7 +108,7 @@ class SplashScreen(QWidget):
 
         # Background (visible only if image fails to load)
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(get_token("$splash-bg", get_token("$body-bg", "#0d1117"))))
+        p.setBrush(QColor(get_token("window")))
         p.drawRoundedRect(self.rect(), 12, 12)
 
         # Clip to rounded rect so image corners are masked
@@ -128,7 +128,9 @@ class SplashScreen(QWidget):
 
         # Top accent strip drawn on top of image, outside clip
         p.setClipping(False)
-        p.setBrush(QColor(get_token("$primary", "#90af13")))
+        p.setBrush(QColor(get_token("primary")))
         p.drawRoundedRect(QRect(0, 0, SPLASH_W, 4), 2, 2)
 
         p.end()
+
+

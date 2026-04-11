@@ -670,3 +670,5 @@ class SocialCost(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": CHUNK, "data": self.get_data_dict()}
+
+

@@ -323,3 +323,5 @@ class RemarksEditor(QGroupBox):
         else:
             self._editor.removeEventFilter(_lock_filter)
             self._editor.setToolTip("")
+
+

@@ -46,9 +46,9 @@ from ..utils.wpi_manager import (
 # ── Integrity badge ───────────────────────────────────────────────────────────
 
 _BADGE = {
-    IntegrityState.OK:       ("✅", get_token("$integrity-ok",       "#2e7d32"), "Integrity verified"),
-    IntegrityState.MISMATCH: ("⚠",  get_token("$integrity-mismatch", "#b71c1c"), "Hash mismatch — data may be tampered"),
-    IntegrityState.MISSING:  ("❓", get_token("$integrity-missing",  "#e65100"), "No hash — unverified profile"),
+    IntegrityState.OK:       ("✅", get_token("success"), "Integrity verified"),
+    IntegrityState.MISMATCH: ("⚠",  get_token("danger"), "Hash mismatch — data may be tampered"),
+    IntegrityState.MISSING:  ("❓", get_token("warning"), "No hash — unverified profile"),
 }
 
 
@@ -575,3 +575,5 @@ class _WPISelector(QWidget):
             f"⚠ The following WPI profiles failed integrity check and were unlisted: {names}. "
             f"The WPI database file may have been tampered with."
         )
+
+

@@ -22,6 +22,7 @@ from typing import Any
 
 from PySide6.QtCore import Qt, QRegularExpression
 from PySide6.QtGui import QPixmap, QRegularExpressionValidator
+from gui.themes import get_token
 from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
@@ -36,7 +37,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from gui.theme import BORDER
+from gui.themes import get_token
 from .form_definitions import FieldDef, Section
 from .image_utils import compress_image, resolve_img_settings
 
@@ -55,7 +56,7 @@ def _make_section_header(title: str) -> list[QWidget]:
 
     divider = QWidget()
     divider.setFixedHeight(1)
-    divider.setStyleSheet(f"background-color: {BORDER};")
+    divider.setStyleSheet(f"background-color: {get_token('surface_mid')};")
 
     return [header, divider]
 
@@ -121,7 +122,7 @@ def _make_upload_img_widget(
     preview = QLabel("No image selected")
     preview.setFixedSize(120, 120)
     preview.setAlignment(Qt.AlignCenter)
-    preview.setStyleSheet("border: 1px solid #ccc;")
+    preview.setStyleSheet(f"border: 1px solid {get_token('surface_mid')};")
 
     btn_browse = QPushButton("Browse Image")
     btn_browse.setMinimumHeight(30)
@@ -429,3 +430,5 @@ def build_form(
     host.load_data_dict = _load_data_dict_with_previews
 
     return required_keys
+
+

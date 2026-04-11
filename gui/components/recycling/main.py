@@ -107,8 +107,8 @@ class _RecyclingActionDelegate(BaseActionDelegate):
 
     _ICON_CFG = {
         "edit": (None, (46, 204, 113), "Edit"),
-        "exclude": (get_token("$icon-danger", "#e74c3c"), (231, 76, 60), "Exclude from calculation"),
-        "include": (get_token("$icon-success", "#2ecc71"), (46, 204, 113), "Include in calculation"),
+        "exclude": (get_token("danger"), (231, 76, 60), "Exclude from calculation"),
+        "include": (get_token("success"), (46, 204, 113), "Include in calculation"),
     }
 
     def __init__(self, table, handler):
@@ -857,3 +857,5 @@ class Recycling(QWidget):
         if self.isVisible():
             self.on_refresh()
             self._loaded = True
+
+

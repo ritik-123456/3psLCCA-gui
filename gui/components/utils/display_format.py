@@ -32,3 +32,5 @@ def fmt_pct(val) -> str:
         return f"{float(val):.1f}"
     except (TypeError, ValueError):
         return str(val)
+
+

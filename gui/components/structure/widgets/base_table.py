@@ -45,7 +45,7 @@ class _ActionDelegate(BaseActionDelegate):
             self._btns = [
                 (make_icon("edit"), (46, 204, 113), "edit", "Edit"),
                 (
-                    make_icon("trash", color=get_token("$icon-danger", "#e74c3c")),
+                    make_icon("trash", color=get_token("danger")),
                     (231, 76, 60),
                     "trash",
                     "Move to trash",
@@ -55,7 +55,7 @@ class _ActionDelegate(BaseActionDelegate):
             self._btns = [
                 (make_icon("restore"), (46, 204, 113), "restore", "Restore"),
                 (
-                    make_icon("trash", color=get_token("$icon-danger", "#e74c3c")),
+                    make_icon("trash", color=get_token("danger")),
                     (192, 57, 43),
                     "delete",
                     "Permanently delete",
@@ -417,3 +417,5 @@ class StructureTableWidget(TooltipTableMixin, QTableWidget):
     def showEvent(self, event):
         super().showEvent(event)
         self._frozen_col.reposition()
+
+

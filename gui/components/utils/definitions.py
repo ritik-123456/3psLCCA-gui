@@ -168,3 +168,5 @@ DEFAULT_VEHICLES = {
         "emission_factor": 0.19,
     },
 }
+
+

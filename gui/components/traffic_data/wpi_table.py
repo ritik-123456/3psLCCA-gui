@@ -443,3 +443,5 @@ class _WPITable(QTableWidget):
                 self._checkboxes[col].setChecked(checked)
                 self._apply_common_style(col, checked)
         self._loading = False
+
+

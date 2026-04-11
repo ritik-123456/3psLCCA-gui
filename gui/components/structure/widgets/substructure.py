@@ -9,3 +9,5 @@ class SubStructureWidget(StructureManagerWidget):
             chunk_name="str_sub_structure",
             default_components=["Pier", "Pier Cap", "Pedestal", "Bearings"],
         )
+
+

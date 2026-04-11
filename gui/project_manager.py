@@ -188,3 +188,5 @@ class ProjectManager:
     def refresh_all_home_screens(self):
         for win in self.windows:
             win.home_widget.refresh_project_list()
+
+

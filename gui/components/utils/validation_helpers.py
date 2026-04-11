@@ -56,7 +56,7 @@ from PySide6.QtWidgets import (
 )
 
 from .form_builder.form_definitions import FieldDef
-from gui.theme import VALIDATION_ERROR
+from gui.themes import get_token
 
 
 # ── Style helpers ─────────────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ def validate_form(
             error_keys.add(f.key)
             continue
         if isinstance(widget, QLineEdit) and not widget.text().strip():
-            _apply_border_style(widget, VALIDATION_ERROR)
+            _apply_border_style(widget, get_token("danger"))
             errors.append(f"Missing: {f.title}")
             error_keys.add(f.key)
         elif (isinstance(widget, QAbstractSpinBox)
@@ -165,7 +165,7 @@ def validate_form(
               and widget.value() == widget.minimum()):
             # Spinbox with an explicit default uses the minimum as the "blank" sentinel.
             # If still at minimum it has never been filled — treat as a required error.
-            _apply_border_style(widget, VALIDATION_ERROR)
+            _apply_border_style(widget, get_token("danger"))
             errors.append(f"Required: {f.title}")
             error_keys.add(f.key)
         # QSpinBox/QDoubleSpinBox without default: 0 is a valid value — use warn_rules
@@ -209,11 +209,11 @@ def validate_form(
         if too_low:
             label = low_msg if low_msg else f"{field_title(key, fields)} looks unusual ({val})"
             warnings.append(label)
-            _apply_border_style(widget, "orange")
+            _apply_border_style(widget, get_token("warning"))
         elif too_high:
             label = high_msg if high_msg else f"{field_title(key, fields)} looks unusual ({val})"
             warnings.append(label)
-            _apply_border_style(widget, "orange")
+            _apply_border_style(widget, get_token("warning"))
         else:
             _clear_border_style(widget)  # passed both checks — clear any stale style
 
@@ -346,7 +346,7 @@ def freeze_form(
             widget.setToolTip(LOCK_TOOLTIP)
             widget.installEventFilter(_lock_filter)
             widget.setProperty("_pre_freeze_style", widget.styleSheet())
-            widget.setStyleSheet(widget.styleSheet() + "; color: #a0a0a0;")
+            widget.setStyleSheet(widget.styleSheet() + f"; color: {get_token('text_disabled')};")
         else:
             widget.removeEventFilter(_lock_filter)
             widget.setToolTip("")
@@ -394,3 +394,5 @@ def freeze_widgets(frozen: bool, *widgets) -> None:
                 w.unsetCursor()
             else:
                 w.setEnabled(True)
+
+

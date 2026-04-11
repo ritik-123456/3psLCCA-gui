@@ -25,7 +25,7 @@ from ..utils.validation_helpers import (
 )
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 from ..utils.display_format import DECIMAL_PLACES
-from gui.theme import VALIDATION_ERROR
+from gui.themes import get_token
 
 
 from ..utils.doc_handler import make_doc_opener
@@ -301,7 +301,7 @@ class BridgeData(ScrollableForm):
         dm = getattr(self, "days_per_month", None)
         if dm is not None and not (29 <= dm.value() <= 31):
             result["errors"].append("Days per Month must be between 29 and 31")
-            dm.setStyleSheet(f"border: 1px solid {VALIDATION_ERROR};")
+            dm.setStyleSheet(f"border: 1px solid {get_token('danger')};")
         # Cross-field: working_days_per_month must not exceed days_per_month
         wd = getattr(self, "working_days_per_month", None)
         if (
@@ -327,3 +327,5 @@ class BridgeData(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": "bridge_data", "data": self.get_data_dict()}
+
+

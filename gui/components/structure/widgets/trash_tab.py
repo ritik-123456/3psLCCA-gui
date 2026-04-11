@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QMessageBox,
 )
+from gui.themes import get_token
 from .base_table import StructureTableWidget
 
 
@@ -25,7 +26,7 @@ class TrashTabWidget(QWidget):
         header = QLabel(
             "<b>Trash Bin</b><br>Items here are excluded from all calculations."
         )
-        header.setStyleSheet("color: #7f8c8d; margin-bottom: 10px;")
+        header.setStyleSheet(f"color: {get_token('text_secondary')}; margin-bottom: 10px;")
         self.layout.addWidget(header)
 
         # Scroll Area for multiple group boxes
@@ -83,7 +84,7 @@ class TrashTabWidget(QWidget):
 
         if not has_content:
             empty_lbl = QLabel("No items in Trash Bin.")
-            empty_lbl.setStyleSheet("color: #bdc3c7; font-style: italic;")
+            empty_lbl.setStyleSheet(f"color: {get_token('text_disabled')}; font-style: italic;")
             self.container_layout.addWidget(empty_lbl)
 
         # Force items to the top
@@ -125,3 +126,5 @@ class TrashTabWidget(QWidget):
                 if main_view:
                     main_view.on_refresh()
                 return
+
+

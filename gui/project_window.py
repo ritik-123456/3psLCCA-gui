@@ -143,15 +143,16 @@ class _SidebarDelegate(QStyledItemDelegate):
             p = p.parent()
 
         # Font by depth — size stays at FS_MD; weight carries the hierarchy
+        # Bump weight if selected
         if depth == 0:
-            painter.setFont(_f(FS_MD, FW_MEDIUM))
+            painter.setFont(_f(FS_MD, FW_SEMIBOLD if is_sel else FW_MEDIUM))
         elif depth == 1:
-            painter.setFont(_f(FS_MD, FW_MEDIUM))
+            painter.setFont(_f(FS_MD, FW_SEMIBOLD if is_sel else FW_MEDIUM))
         else:
-            painter.setFont(_f(FS_BASE, FW_NORMAL))
+            painter.setFont(_f(FS_BASE, FW_MEDIUM if is_sel else FW_NORMAL))
 
         # Text colour — PRIMARY on selected, normal otherwise
-        text_col = QColor(get_token("$primary-active")) if is_sel else option.palette.windowText().color()
+        text_col = QColor(get_token("primary")) if is_sel else option.palette.windowText().color()
         painter.setPen(text_col)
 
         extra = 28 if depth >= 2 else 0
@@ -221,10 +222,10 @@ class _SidebarTree(QTreeWidget):
         painter.setBrush(self.palette().window())
         painter.drawRect(full)
         if is_hovered and not is_sel:
-            tint = QColor(get_token("$primary")); tint.setAlpha(11)
+            tint = QColor(get_token("primary")); tint.setAlpha(11)
             painter.setBrush(tint); painter.drawRect(full)
         if is_sel:
-            tint = QColor(get_token("$primary")); tint.setAlpha(22)
+            tint = QColor(get_token("primary")); tint.setAlpha(22)
             painter.setBrush(tint); painter.drawRect(full)
         painter.restore()
 
@@ -235,7 +236,7 @@ class _SidebarTree(QTreeWidget):
         if is_sel:
             painter.save()
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(get_token("$primary")))
+            painter.setBrush(QColor(get_token("primary")))
             painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
             painter.restore()
 
@@ -867,3 +868,5 @@ class ProjectWindow(QMainWindow):
         self.manager.remove_window(self)
         self.manager.refresh_all_home_screens()
         event.accept()
+
+

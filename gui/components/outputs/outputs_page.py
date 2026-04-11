@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QObject, QThread, QTimer, Signal
 from PySide6.QtGui import QFont
-from gui.theme import VALIDATION_ERROR
+from gui.themes import get_token
 
 from gui.components.base_widget import ScrollableForm
 from gui.components.utils.form_builder.form_definitions import (
@@ -379,7 +379,7 @@ class OutputsPage(ScrollableForm):
         if all_errors:
             banner = QGroupBox()
             banner.setStyleSheet(
-                f"QGroupBox {{ border: 2px solid {VALIDATION_ERROR}; padding: 8px; }}"
+                f"QGroupBox {{ border: 2px solid {get_token("danger")}; padding: 8px; }}"
             )
             layout = QVBoxLayout(banner)
             title = QLabel("🛑  Calculation Blocked — Please fix the errors below.")
@@ -451,7 +451,7 @@ class OutputsPage(ScrollableForm):
         ap = self.analysis_period.value()
         if ap <= 0:
             self.analysis_period.setStyleSheet(
-                f"border: 1.5px solid {VALIDATION_ERROR};"
+                f"border: 1.5px solid {get_token("danger")};"
             )
             all_errors["Analysis Period"] = [
                 "Analysis Period is required — please enter a value greater than zero."
@@ -547,7 +547,7 @@ class OutputsPage(ScrollableForm):
         self._clear_status()
         banner = QGroupBox()
         banner.setStyleSheet(
-            f"QGroupBox {{ border: 2px solid {VALIDATION_ERROR}; padding: 8px; }}"
+            f"QGroupBox {{ border: 2px solid {get_token("danger")}; padding: 8px; }}"
         )
         layout = QVBoxLayout(banner)
 
@@ -1313,3 +1313,5 @@ class OutputsPage(ScrollableForm):
             self.show_success()
         else:
             self._show_idle()
+
+

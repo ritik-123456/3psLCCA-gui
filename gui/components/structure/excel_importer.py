@@ -157,14 +157,14 @@ SHEET_TO_CHUNK: dict[str, str] = {
 FALLBACK_CHUNK = "str_misc"
 
 
-ERROR_COLOR = QColor(get_token("$cell-invalid-bg", "#f8d7da"))
-WARN_COLOR = QColor(get_token("$cell-warn-bg", "#fff3cd"))
+ERROR_COLOR = QColor(get_token("danger"))
+WARN_COLOR = QColor(get_token("warning"))
 DUP_FG = QColor(
-    get_token("$muted", "#adb5bd")
+    get_token("text_secondary")
 )  # dimmed text foreground for duplicate-name rows
 # No OK_COLOR — default background is left untouched (inherits theme)
 
-_DARK_TEXT = QColor("#1a1a1a")
+_DARK_TEXT = QColor("#000000")
 _LIGHT_TEXT = QColor("#ffffff")
 
 
@@ -172,7 +172,9 @@ def _text_color(bg: QColor) -> QColor:
     """Return dark or light text so it contrasts against *bg*."""
     # Perceived luminance (0–255)
     lum = 0.299 * bg.red() + 0.587 * bg.green() + 0.114 * bg.blue()
-    return _DARK_TEXT if lum > 128 else _LIGHT_TEXT
+    if lum > 128:
+        return QColor(_DARK_TEXT)
+    return QColor(_LIGHT_TEXT)
 
 
 # ---------------------------------------------------------------------------
@@ -1047,7 +1049,7 @@ class ComponentBlock(QGroupBox):
     ):
         super().__init__(comp_name, parent)
         self.setStyleSheet(
-            "QGroupBox { font-weight: bold; font-size: 12px; color: #888; }"
+            f"QGroupBox {{ font-weight: bold; font-size: 12px; color: {get_token('text_disabled')}; }}"
             if is_uncat
             else "QGroupBox { font-weight: bold; font-size: 12px; }"
         )
@@ -1070,7 +1072,7 @@ class ComponentBlock(QGroupBox):
         hl.addStretch()
 
         self._count_lbl = QLabel()
-        self._count_lbl.setStyleSheet("font-size: 11px; color: #777;")
+        self._count_lbl.setStyleSheet(f"font-size: 11px; color: {get_token('text_secondary')};")
         hl.addWidget(self._count_lbl)
 
         bl.addWidget(hdr)
@@ -1083,7 +1085,7 @@ class ComponentBlock(QGroupBox):
         self._empty_lbl = QLabel(
             "All rows hidden by filter (missing/zero Name, Qty, Rate, or Unit)."
         )
-        self._empty_lbl.setStyleSheet("color: #888; font-style: italic; padding: 4px;")
+        self._empty_lbl.setStyleSheet(f"color: {get_token('text_disabled')}; font-style: italic; padding: 4px;")
         self._empty_lbl.setVisible(False)
         bl.addWidget(self._empty_lbl)
 
@@ -1171,7 +1173,7 @@ class SheetPreviewWidget(QWidget):
         # EC2: sheet had headers but no data rows
         if not rows:
             lbl = QLabel("This sheet has no data rows.")
-            lbl.setStyleSheet("color: #888; font-style: italic; padding: 12px;")
+            lbl.setStyleSheet(f"color: {get_token('text_disabled')}; font-style: italic; padding: 12px;")
             outer.addWidget(lbl)
             return
 
@@ -1938,3 +1940,5 @@ if __name__ == "__main__":
         preview = ImportPreviewWindow(parsed)
         preview.showMaximized()
         preview.exec()
+
+

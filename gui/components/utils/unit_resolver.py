@@ -376,3 +376,5 @@ def validate_cf_simple(mat_unit: str, carbon_unit_denom: str, cf: float) -> dict
     # Different or unknown dimensions — CF=1 is suspicious
     sus = abs(cf - 1.0) < 1e-6
     return {"sus": sus, "suggest": "!1" if sus else None}
+
+

@@ -26,3 +26,5 @@ def verify_hash(data: dict, stored_hash: str) -> bool:
     if not stored_hash:
         return False
     return compute_hash(data) == stored_hash
+
+

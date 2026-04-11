@@ -86,7 +86,7 @@ palette:
 # ─────────────────────────────────────────────────────────────────────────────
 # QSS Tokens  (substituted into gui/assets/themes/main.qss at startup)
 # Also readable in Python:  from gui.themes import get_token
-#                           color = get_token("$primary", "#90af13")
+#                           color = get_token("primary")
 # ─────────────────────────────────────────────────────────────────────────────
 qss_tokens:
 
@@ -200,6 +200,9 @@ qss_tokens:
 
   # ── Table cell validation states ───────────────────────────────────────
   # Used in table models / delegates to highlight cell backgrounds
+
+  "$cell-editable-bg":   "#ffffff"   # clean white — editable cell background
+  #   gui/components/utils/table_widgets.py  (_EditableColumnDelegate)
 
   "$cell-invalid-bg":    "#f8d7da"   # red tint — invalid / error cell background
   #   gui/components/carbon_emission/widgets/material_emissions.py  BG_INVALID

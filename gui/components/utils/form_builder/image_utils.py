@@ -173,3 +173,5 @@ def image_file_to_base64(
     settings = resolve_img_settings(preset)
     img_bytes = compress_image(file_path, settings)
     return base64.b64encode(img_bytes).decode("utf-8")
+
+
