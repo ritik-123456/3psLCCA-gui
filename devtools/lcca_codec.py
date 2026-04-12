@@ -63,3 +63,5 @@ def is_binary(path: Path) -> bool:
         return path.read_bytes()[:4] == MAGIC
     except Exception:
         return False
+
+

@@ -2015,3 +2015,4 @@ class SafeChunkEngine:
         self._log(f"FAULT: {message}")
         if self.on_fault:
             self.on_fault(message)
+            

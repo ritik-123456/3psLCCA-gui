@@ -492,3 +492,5 @@ class LauncherWindow(QMainWindow):
         fl.addWidget(count_lbl)
 
         return footer
+
+

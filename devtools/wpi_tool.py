@@ -786,3 +786,5 @@ class WpiDatabaseDialog(QDialog):
 
     def _set_status(self, msg: str):
         self._status.setText(msg)
+
+

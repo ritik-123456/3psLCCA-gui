@@ -875,3 +875,5 @@ class DevToolsWindow(QMainWindow):
     def closeEvent(self, event):
         self._cleanup_temp()
         super().closeEvent(event)
+
+

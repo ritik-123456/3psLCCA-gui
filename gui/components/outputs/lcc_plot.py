@@ -734,3 +734,5 @@ def create_lcc_figure(results: dict):
     values, labels, stage_info = _build_chart_data(results)
     fig, _ = _create_figure(values, labels, stage_info, text_color, bg_color)
     return fig
+
+

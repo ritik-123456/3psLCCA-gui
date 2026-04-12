@@ -711,3 +711,5 @@ class CountryManagerDialog(QDialog):
         self._worker = None
         self._log_line(f"Rebuild failed: {msg}", color=_RED)
         QMessageBox.critical(self, "Rebuild Failed", msg)
+
+

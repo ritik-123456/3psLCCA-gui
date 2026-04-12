@@ -235,3 +235,5 @@ class DocsBuilderDialog(QDialog):
             webbrowser.open(p.as_uri())
         else:
             QMessageBox.warning(self, "Error", "index.html not found")
+
+

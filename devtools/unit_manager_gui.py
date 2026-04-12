@@ -966,3 +966,5 @@ class UnitManagerDialog(QDialog):
     def _refresh_all(self):
         self._builtin_tab.refresh()
         self._custom_tab.refresh()
+
+

@@ -380,3 +380,5 @@ class CustomDbViewerDialog(QDialog):
 
     def _set_status(self, msg: str):
         self._status_lbl.setText(msg)
+
+

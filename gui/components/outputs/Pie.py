@@ -499,3 +499,5 @@ class LCCPieWidget(QWidget):
         layout.addWidget(lbl)
         layout.addWidget(canvas)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+

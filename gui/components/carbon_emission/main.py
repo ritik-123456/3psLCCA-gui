@@ -97,3 +97,5 @@ class CarbonEmissionTabView(QWidget):
         ]
         if name in tabs:
             self.tab_view.setCurrentIndex(tabs.index(name))
+
+

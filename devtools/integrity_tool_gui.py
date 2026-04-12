@@ -541,3 +541,5 @@ class IntegrityToolDialog(QDialog):
             self._worker.quit()
             self._worker.wait()
         event.accept()
+
+
