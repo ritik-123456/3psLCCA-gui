@@ -13,7 +13,7 @@ from ...base_widget import ScrollableForm
 from ...utils.form_builder.form_definitions import FieldDef, Section
 from ...utils.form_builder.form_builder import build_form
 from ...utils.display_format import fmt, DECIMAL_PLACES
-from ...utils.validation_helpers import freeze_form, freeze_widgets
+from ...utils.validation_helpers import freeze_form, freeze_widgets, confirm_clear_all
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -657,6 +657,9 @@ class SocialCost(ScrollableForm):
         )
 
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         self._suppress_signals = True
         self.source.setCurrentIndex(0)
         self.inr_to_local_rate.setValue(1.0)

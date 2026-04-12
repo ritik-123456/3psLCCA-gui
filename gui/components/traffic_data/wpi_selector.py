@@ -366,7 +366,7 @@ class _WPISelector(QWidget):
         if self._manager.is_name_taken(name):
             QMessageBox.warning(
                 self, "Name Taken",
-                f"A profile named '{name}' already exists.\nPlease choose a different name."
+                f"A profile named '{name}' already exists.\nChoose a different name."
             )
             return
 
@@ -408,7 +408,7 @@ class _WPISelector(QWidget):
         if self._manager.is_name_taken(name, exclude_id=self._current.id):
             QMessageBox.warning(
                 self, "Name Taken",
-                f"A profile named '{name}' already exists.\nPlease choose a different name."
+                f"A profile named '{name}' already exists.\nChoose a different name."
             )
             return
 
@@ -453,8 +453,7 @@ class _WPISelector(QWidget):
                 QMessageBox.information(
                     self,
                     "Saved to Library",
-                    f"Profile '{lib_profile.name}' has been saved to your global WPI library.\n"
-                    "You can import it into any project via 'Import from Library'.",
+                    f"'{lib_profile.name}' saved to your WPI library.\nImport it in any project via 'Import from Library'.",
                 )
             except Exception as e:
                 QMessageBox.warning(self, "Save Failed", f"Could not save to library:\n{e}")
@@ -544,8 +543,7 @@ class _WPISelector(QWidget):
         QMessageBox.information(
             self,
             "Imported",
-            f"Profile '{name}' imported from your library as a custom profile.\n"
-            "You can edit it freely.",
+            f"'{name}' imported as a custom profile.",
         )
 
     # ── Public API ────────────────────────────────────────────────────────────

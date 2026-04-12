@@ -1,0 +1,26 @@
+name: Neon City Standard Dark
+
+palette:
+  primary:         "#e93cff"   # balanced neon magenta
+  brand:           "#00d4ff"   # standard neon cyan
+
+  window:          "#0c0f17"   # dark neutral blue-black
+  base:            "#121622"
+  surface:         "#1a2030"
+  surface_mid:     "#242b3d"
+  surface_pressed: "#2f3750"
+
+  text:            "#e8ecf8"
+  text_secondary:  "#cdd4e5"   # brighter silver-blue (was #a9b1c7)
+  text_disabled:   "#6b738a"
+
+  success:         "#2ee6a6"
+  warning:         "#ffb020"
+  danger:          "#ff4d6d"
+  info:            "#3da9fc"
+
+state:
+  hover:    0.50
+  pressed:  0.14
+  focus:    0.20
+  disabled: 0.40

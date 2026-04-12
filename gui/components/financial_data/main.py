@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
 
 
 from ..utils.doc_handler import make_doc_opener
@@ -55,13 +55,46 @@ FINANCIAL_FIELDS = [
     FieldDef(
         "investment_ratio",
         "Investment Ratio",
-        "Proportion of total cost financed through investment (0–1). "
-        "Example: 0.5 means 50%.",
+        "Proportion of total cost financed through investment (0–1).",
         "float",
         options=(0.0, 1.0, 4),
         required=True,
         doc_slug="investment-ratio",
         default=0.0,
+    ),
+    FieldDef(
+        "social_cost_of_carbon",
+        "Social Cost of Carbon",
+        "Financial cost attributed to 1 kg of CO2e emissions.",
+        "float",
+        options=(0.0, 10000.0, 2),
+        unit="Currency/kgCO2e",
+        required=True,
+        default=0.0,
+    ),
+    FieldDef(
+        "currency_conversion",
+        "Currency Conversion",
+        "Conversion rate for international adjustments.",
+        "float",
+        options=(0.0, 10000.0, 4),
+        required=True,
+        default=1.0,
+    ),
+    Section("Data Sources"),
+    FieldDef("discount_rate_source", "Source: Discount Rate", "", "text"),
+    FieldDef("inflation_rate_source", "Source: Inflation Rate", "", "text"),
+    FieldDef("interest_rate_source", "Source: Interest Rate", "", "text"),
+    FieldDef("investment_ratio_source", "Source: Investment Ratio", "", "text"),
+    FieldDef("social_cost_of_carbon_source", "Source: Social Cost of Carbon", "", "text"),
+    FieldDef("currency_conversion_source", "Source: Currency Conversion", "", "text"),
+    FieldDef(
+        "data_source",
+        "General Data Source",
+        "Overall reference or origin of the economic parameters provided above.",
+        "text",
+        required=False,
+        default="",
     ),
 ]
 
@@ -132,6 +165,9 @@ class FinancialData(ScrollableForm):
     # ── Clear All ─────────────────────────────────────────────────────────────
 
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         for entry in FINANCIAL_FIELDS:
             if isinstance(entry, Section):
                 continue
@@ -142,6 +178,8 @@ class FinancialData(ScrollableForm):
                 widget.setValue(widget.minimum())
             elif isinstance(widget, QComboBox):
                 widget.setCurrentIndex(0)
+            elif hasattr(widget, "clear"):
+                widget.clear()
             widget.setStyleSheet("")
 
         self._on_field_changed()
@@ -163,3 +201,5 @@ class FinancialData(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": "financial_data", "data": self.get_data_dict()}
+
+

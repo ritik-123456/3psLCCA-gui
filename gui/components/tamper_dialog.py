@@ -313,12 +313,11 @@ class TamperDialog(QDialog):
                 QMessageBox.information(
                     self,
                     "Key Exported",
-                    f"Key exported to:\n{path}\n\n"
-                    "Keep this file safe — it verifies your project's integrity.",
+                    f"Key saved to:\n{path}\n\nKeep this file secure.",
                 )
             else:
                 QMessageBox.warning(
-                    self, "Export Failed", "Could not export key. Check logs."
+                    self, "Export Failed", "Could not export key."
                 )
 
     def _import_key(self):
@@ -330,20 +329,18 @@ class TamperDialog(QDialog):
                 QMessageBox.information(
                     self,
                     "Key Imported",
-                    "Key imported successfully.\n\n"
-                    "Click 'Re-sign All' to re-sign all project files with the new key.",
+                    "Key imported. Use 'Re-sign All' to update file signatures.",
                 )
             else:
                 QMessageBox.warning(
-                    self, "Import Failed", "Could not import key. File may be invalid."
+                    self, "Import Failed", "Could not import key — file may be invalid."
                 )
 
     def _resign_all(self):
         reply = QMessageBox.question(
             self,
             "Re-sign All Files",
-            "This will re-sign the manifest and all checkpoints with the current key.\n\n"
-            "Continue?",
+            "Re-sign the manifest and all checkpoints with the current key?\n\nContinue?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
@@ -367,7 +364,7 @@ class TamperDialog(QDialog):
                 QMessageBox.information(
                     self,
                     "Re-signed",
-                    f"Manifest and {resigned} checkpoint(s) re-signed successfully.",
+                    f"Manifest and {resigned} checkpoint(s) re-signed.",
                 )
             except Exception as e:
                 QMessageBox.warning(self, "Re-sign Failed", str(e))

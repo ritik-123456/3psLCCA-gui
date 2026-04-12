@@ -1,0 +1,26 @@
+name: Soft Pink
+
+palette:
+  primary:         "#d94680"
+  brand:           "#ec4899"
+
+  window:          "#fdf2f8"
+  base:            "#ffffff"
+  surface:         "#fce7f3"
+  surface_mid:     "#fbcfe8"
+  surface_pressed: "#f9a8d4"
+
+  text:            "#4a044e"
+  text_secondary:  "#6b2155"
+  text_disabled:   "#a78b9c"
+
+  success:         "#22c55e"
+  warning:         "#f97316"
+  danger:          "#ef4444"
+  info:            "#3b82f6"
+
+state:
+  hover:    0.50
+  pressed:  0.12
+  focus:    0.18
+  disabled: 0.38

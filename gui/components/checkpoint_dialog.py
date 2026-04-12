@@ -99,13 +99,13 @@ class SaveCheckpointDialog(QDialog):
         if zip_name:
             QMessageBox.information(
                 self, "Checkpoint Saved",
-                f"Checkpoint '{label}' saved successfully.\n\nFile: {zip_name}",
+                f"Checkpoint '{label}' saved.\nFile: {zip_name}",
             )
             self.accept()
         else:
             QMessageBox.critical(
                 self, "Save Failed",
-                "Failed to create checkpoint. Check the engine logs for details.",
+                "Could not save the checkpoint.",
             )
             self._save_btn.setEnabled(True)
             self._save_btn.setText("Save")
@@ -258,9 +258,7 @@ class CheckpointManagerDialog(QDialog):
             return
         result = QMessageBox.warning(
             self, "Confirm Restore",
-            f"Restore checkpoint '{cp['label']}' from {cp['date']}?\n\n"
-            "This will replace all current project data with this snapshot.\n"
-            "Any unsaved changes will be lost.",
+            f"Restore '{cp['label']}' from {cp['date']}?\n\nAll current data will be replaced. Unsaved changes will be lost.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )
@@ -269,14 +267,13 @@ class CheckpointManagerDialog(QDialog):
             if success:
                 QMessageBox.information(
                     self, "Restore Complete",
-                    f"Project restored from '{cp['label']}' successfully.\n"
-                    "The UI will now refresh.",
+                    f"Restored from '{cp['label']}'.",
                 )
                 self.accept()
             else:
                 QMessageBox.critical(
                     self, "Restore Failed",
-                    "Failed to restore the checkpoint. Check the engine logs for details.",
+                    "Could not restore the checkpoint.",
                 )
 
     def _on_delete(self):
@@ -285,7 +282,7 @@ class CheckpointManagerDialog(QDialog):
             return
         result = QMessageBox.warning(
             self, "Confirm Delete",
-            f"Permanently delete checkpoint '{cp['label']}'?\n\nThis cannot be undone.",
+            f"Delete checkpoint '{cp['label']}'?\nThis cannot be undone.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )

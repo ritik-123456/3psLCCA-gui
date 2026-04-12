@@ -23,7 +23,9 @@ from PySide6.QtGui import (
     QTextListFormat,
     QTextTableFormat,
 )
+from gui.theme import FW_BOLD
 from PySide6.QtCore import Qt
+from .validation_helpers import confirm_clear_all
 
 
 class RemarksEditor(QGroupBox):
@@ -53,7 +55,7 @@ class RemarksEditor(QGroupBox):
         self._act_bold.setCheckable(True)
         self._act_bold.setToolTip("Bold (Ctrl+B)")
         f = QFont()
-        f.setBold(True)
+        f.setWeight(QFont.Weight(FW_BOLD))
         self._act_bold.setFont(f)
         self._act_bold.triggered.connect(self._toggle_bold)
         toolbar.addAction(self._act_bold)
@@ -189,7 +191,7 @@ class RemarksEditor(QGroupBox):
 
     def _toggle_bold(self, checked: bool):
         fmt = QTextCharFormat()
-        fmt.setFontWeight(QFont.Bold if checked else QFont.Normal)
+        fmt.setFontWeight(FW_BOLD if checked else QFont.Normal)
         self._apply_char_fmt(fmt)
 
     def _toggle_italic(self, checked: bool):
@@ -275,13 +277,14 @@ class RemarksEditor(QGroupBox):
     # ── Clear ─────────────────────────────────────────────────────────────
 
     def _clear(self):
-        self._editor.clear()
+        if confirm_clear_all(self):
+            self._editor.clear()
 
     # ── Toolbar sync ──────────────────────────────────────────────────────
 
     def _sync_toolbar(self):
         fmt = self._editor.currentCharFormat()
-        self._act_bold.setChecked(fmt.fontWeight() == QFont.Bold)
+        self._act_bold.setChecked(fmt.fontWeight() == FW_BOLD)
         self._act_italic.setChecked(fmt.fontItalic())
         self._act_underline.setChecked(fmt.fontUnderline())
         self._act_strike.setChecked(fmt.fontStrikeOut())
@@ -308,7 +311,8 @@ class RemarksEditor(QGroupBox):
         self._editor.blockSignals(False)
 
     def clear_content(self):
-        self._editor.clear()
+        if confirm_clear_all(self):
+            self._editor.clear()
 
     def freeze(self, frozen: bool = True):
         """Freeze/unfreeze the editor. Read-only keeps content visible; toolbar is disabled."""

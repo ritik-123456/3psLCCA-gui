@@ -22,6 +22,7 @@ from ..utils.validation_helpers import (
     freeze_form,
     freeze_widgets,
     validate_form,
+    confirm_clear_all,
 )
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 from ..utils.display_format import DECIMAL_PLACES
@@ -262,6 +263,9 @@ class BridgeData(ScrollableForm):
 
     # ── Clear All ────────────────────────────────────────────────────────
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         for entry in BRIDGE_FIELDS:
             if isinstance(entry, Section):
                 continue

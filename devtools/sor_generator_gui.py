@@ -573,7 +573,7 @@ class SorGeneratorDialog(QDialog):
 
         out_path = self._output_edit.text().strip()
         if not out_path:
-            QMessageBox.warning(self, "No Output Path", "Please specify an output JSON path.")
+            QMessageBox.warning(self, "No Output Path", "Specify an output JSON path to continue.")
             return
         if not out_path.lower().endswith(".json"):
             out_path += ".json"
@@ -734,3 +734,5 @@ class SorGeneratorDialog(QDialog):
             self._log.appendPlainText(text)
         sb = self._log.verticalScrollBar()
         sb.setValue(sb.maximum())
+
+

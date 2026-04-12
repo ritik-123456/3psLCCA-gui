@@ -4,243 +4,78 @@
 # HOW TO USE
 # ──────────
 # 1. Copy this file into  gui/themes/light/  or  gui/themes/dark/
-# 2. Rename it to your theme name, e.g.  my_theme.yml
-# 3. Customise the values below.
-# 4. Select it in the app Settings panel — it appears automatically.
-#
-# SCHEMA RULES
-# ────────────
-# • Both  palette:  and  qss_tokens:  sections are required.
-# • Missing or corrupt files silently fall back to the built-in default.
-# • Token keys must include the leading  $  (e.g. "$primary").
-# • All colour values must be valid hex strings (e.g. "#ff0000").
-#
-# WHERE CHANGES ARE REFLECTED
-# ────────────────────────────
-# palette roles  → QPalette; affects every native Qt widget automatically.
-# qss_tokens     → substituted into gui/assets/themes/main.qss at startup
-#                  AND readable from Python via  gui.themes.get_token("$name").
+# 2. Rename it to something unique (e.g. my_theme.yml)
+# 3. Customise the hex values below.
 # ═══════════════════════════════════════════════════════════════════════════════
 
-name: My Custom Theme   # shown in Settings → Appearance drop-down
-
+name: My Custom Theme
 
 # ─────────────────────────────────────────────────────────────────────────────
-# QPalette roles
-# Reflect in: every QWidget that reads palette(role) — backgrounds, text,
-# inputs, combo boxes, table headers, scroll bars, selection highlight, …
+# 1. BASE PALETTE (Mandatory)
 # ─────────────────────────────────────────────────────────────────────────────
+# These are the foundation of the theme. Every key below MUST be present.
+# The system automatically builds the QPalette and state-derived tints from these.
+
 palette:
+  # Brand identity
+  primary:         "#90af13"   # brand green — main action color
+  brand:           "#90af13"   # used for logos and marks
 
-  # Main window / panel background — palette(window)
-  # Affects: QMainWindow, QDialog, QDockWidget, QGroupBox background
-  window:           "#f8f9fa"
+  # Neutrals (Surfaces)
+  window:          "#f8f9fa"   # app-wide background (sidebar, panels)
+  base:            "#ffffff"   # elevated surface (inputs, cards, table cells)
+  surface:         "#e9ecef"   # neutral hover background
+  surface_mid:     "#dee2e6"   # standard border / divider color
+  surface_pressed: "#ced4da"   # neutral pressed / active background
 
-  # Sidebar / alternate rows — palette(alternateBase)
-  # Affects: QAbstractItemView alternating row colour, sidebar panels
-  alternate_base:   "#ffffff"
+  # Typography
+  text:            "#212529"   # primary text color
+  text_secondary:  "#6c757d"   # section headers, helper text
+  text_disabled:   "#adb5bd"   # disabled text, placeholders
 
-  # Input / card elevated surface — palette(base)
-  # Affects: QLineEdit, QTextEdit, QPlainTextEdit, QComboBox drop-down background
-  base:             "#ffffff"
-
-  # Push-button face — palette(button)
-  # Affects: QPushButton background when no custom stylesheet overrides it
-  button:           "#ffffff"
-
-  # Standard border shade — palette(mid)
-  # Affects: QFrame, QGroupBox borders where palette(mid) is used
-  mid:              "#e9ecef"
-
-  # Subtle border (inputs on hover) — palette(midlight)
-  # Affects: input hover borders, separator lines
-  midlight:         "#ced4da"
-
-  # Pressed/active surface — palette(light)
-  # Affects: QFrame sunken appearance, pressed button indicator
-  light:            "#dee2e6"
-
-  # Selection / focus highlight — palette(highlight)
-  # Affects: selected text background, focused tab underline, list selection
-  highlight:        "#90af13"
-
-  # Text ON highlighted/selected items — palette(highlightedText)
-  # Affects: text inside selected list items, selected table cells
-  highlighted_text: "#000000"
-
-  # Primary text — palette(text) / palette(windowText) / palette(buttonText)
-  # Affects: all label text, input text, button labels
-  text:             "#212529"
-  window_text:      "#212529"
-  button_text:      "#212529"
-
-  # Disabled / placeholder text — palette(placeholderText)
-  # Affects: QLineEdit placeholder text, disabled widget labels
-  placeholder_text: "#6c757d"
-
-  # Accent colour (Qt 6.6+) — palette(accent)
-  # Affects: QCheckBox tick, QRadioButton fill, QSlider handle on some styles
-  accent:           "#90af13"
-
+  # Semantic status
+  success:         "#2ecc71"   # valid states, success messages
+  warning:         "#f39c12"   # warnings, unusual values
+  danger:          "#e74c3c"   # error states, destructive actions
+  info:            "#3498db"   # informative highlights
 
 # ─────────────────────────────────────────────────────────────────────────────
-# QSS Tokens  (substituted into gui/assets/themes/main.qss at startup)
-# Also readable in Python:  from gui.themes import get_token
-#                           color = get_token("primary")
+# 2. UI STATE MULTIPLIERS (Optional)
 # ─────────────────────────────────────────────────────────────────────────────
-qss_tokens:
+# These control the opacity (0.0 to 1.0) of tints applied during interactions.
+# If omitted, the system defaults below are used.
 
-  # ── Brand / primary colour ─────────────────────────────────────────────
-  # gui/assets/themes/main.qss — QPushButton, QCheckBox, QRadioButton,
-  #   tab underline, focus ring, scrollbar handle hover
-  # gui/theme.py PRIMARY / PRIMARY_HOVER / PRIMARY_ACTIVE constants
-  "$primary":            "#90af13"   # base brand colour
-  "$primary-hover":      "#7c9811"   # ~13% darker — button :hover state
-  "$primary-active":     "#6c830e"   # ~25% darker — button :pressed state
+state:
+  hover:    0.06   # subtle tint on mouse over
+  pressed:  0.12   # deeper tint on click
+  focus:    0.18   # halo / focus ring opacity
+  disabled: 0.38   # faded look for inactive elements
 
-  # ── App chrome ─────────────────────────────────────────────────────────
-  # gui/assets/themes/main.qss — window background, sidebar, panels
-  # gui/theme.py BODY_BG
-  "$body-bg":            "#f8f9fa"   # main window / sidebar background
-
-  # gui/assets/themes/main.qss — primary text colour on widgets
-  # gui/theme.py BODY_COLOR
-  "$body-color":         "#212529"   # primary text
-
-  # gui/assets/themes/main.qss — secondary / muted label text
-  # gui/theme.py SECONDARY
-  "$secondary":          "#6c757d"   # section headers, helper text
-
-  # gui/assets/themes/main.qss — elevated surface (inputs, cards, table cells)
-  # gui/theme.py WHITE / CARD_BG
-  "$white":              "#fafafa"   # elevated surface background
-  "$card-bg":            "#fafafa"   # explicit card / list-item background
-
-  # gui/assets/themes/main.qss — standard border
-  # gui/theme.py BORDER
-  "$border":             "#dee2e6"   # table borders, input borders, dividers
-
-  # gui/assets/themes/main.qss — subtle border (inputs on hover)
-  # gui/theme.py BORDER_SUBTLE
-  "$border-subtle":      "#ced4da"   # input :hover border
-
-  # gui/assets/themes/main.qss — neutral hover background
-  # gui/theme.py SURFACE
-  "$surface":            "#e9ecef"   # hover background on rows, menu items
-
-  # gui/assets/themes/main.qss — neutral pressed/active background
-  # gui/theme.py SURFACE_ACTIVE
-  "$surface-active":     "#dee2e6"   # pressed / active item background
-
-  # gui/assets/themes/main.qss — disabled / placeholder elements
-  # gui/theme.py MUTED
-  "$muted":              "#adb5bd"   # disabled text, scrollbar track
-
-  # gui/theme.py PLACEHOLDER
-  "$placeholder":        "#888888"   # empty-state / placeholder text
-
-  # ── Semantic status colours ────────────────────────────────────────────
-  # gui/assets/themes/main.qss — danger buttons, error badges
-  # gui/theme.py DANGER
-  "$danger":             "#ef4444"   # danger / destructive action
-
-  # gui/assets/themes/main.qss — QComboBox[validationState] selector
-  # gui/theme.py VALIDATION_ERROR
-  "$validation-error":   "#dc3545"   # form field validation error border & text
-
-  # gui/theme.py SUCCESS
-  "$success":            "#22c55e"   # ok / pass / include
-
-  # gui/theme.py WARNING_COLOR
-  "$warning":            "#f97316"   # corrupted / warning indicator
-
-  # gui/theme.py INFO
-  "$info":               "#3b82f6"   # locked / informational badge
-
-  # ── Sidebar ────────────────────────────────────────────────────────────
-  # gui/assets/themes/main.qss — sidebar navigation item states
-  # gui/theme.py SIDEBAR_HOVER / SIDEBAR_SEL
-  "$sidebar-hover":      "#ecf0de"   # sidebar item :hover background
-  "$sidebar-sel":        "#dee7c0"   # sidebar item selected background
-
-  # ── Splash screen ──────────────────────────────────────────────────────
-  # gui/main.py — shown while the app loads at startup
-  "$splash-bg":          "#1a1a2e"   # QPixmap fill colour (dark navy)
-  "$splash-progress":    "#2ecc71"   # splash message text colour
-
-  # ── Window icon ────────────────────────────────────────────────────────
-  # gui/project_window.py — bridge SVG icon in title bar & taskbar
-  "$icon-brand":         "#2ecc71"   # bridge icon colour
-
-  # ── Log viewer ─────────────────────────────────────────────────────────
-  # gui/components/logs.py — coloured log lines in the project log panel
-  "$log-error":          "#f48771"   # ERROR / CRITICAL / FAILED lines
-  "$log-warning":        "#dcdcaa"   # WARN / stale / DENIED lines
-  "$log-info":           "#4ec9b0"   # Checkpoint / Restored / saved lines
-  "$log-success":        "#b5cea8"   # attached / SUCCESS lines
-  "$log-default":        "#d4d4d4"   # all other lines
-
-  # ── Action icons ───────────────────────────────────────────────────────
-  # Used wherever make_icon() / make_icon_btn() is called with a colour arg
-  "$icon-danger":        "#e74c3c"   # trash / delete icons
-  #   gui/components/carbon_emission/widgets/machinery_emissions.py line 231
-  #   gui/components/carbon_emission/widgets/material_emissions.py  line 148
-  #   gui/components/carbon_emission/widgets/transport_emissions.py line 285
-  #   gui/components/recycling/main.py                              line 109
-  #   gui/components/structure/excel_importer.py                    (DUP_FG)
-  #   gui/components/structure/widgets/base_table.py                lines 47, 57
-
-  "$icon-success":       "#2ecc71"   # include / add icons
-  #   gui/components/carbon_emission/widgets/material_emissions.py  line 149
-  #   gui/components/recycling/main.py                              line 110
-
-  "$icon-muted":         "#aaaaaa"   # disabled / placeholder icon tint
-  #   gui/components/carbon_emission/widgets/transport_dialog.py    line 555
-  #   gui/components/utils/icons.py                                 line 188 (fallback)
-
-  # ── Table cell validation states ───────────────────────────────────────
-  # Used in table models / delegates to highlight cell backgrounds
-
-  "$cell-editable-bg":   "#ffffff"   # clean white — editable cell background
-  #   gui/components/utils/table_widgets.py  (_EditableColumnDelegate)
-
-  "$cell-invalid-bg":    "#f8d7da"   # red tint — invalid / error cell background
-  #   gui/components/carbon_emission/widgets/material_emissions.py  BG_INVALID
-  #   gui/components/structure/excel_importer.py                    ERROR_COLOR
-
-  "$cell-warn-bg":       "#fff3cd"   # amber tint — suspicious / warning cell background
-  #   gui/components/carbon_emission/widgets/material_emissions.py  BG_SUSPICIOUS
-  #   gui/components/structure/excel_importer.py                    WARN_COLOR
-
-  "$cell-disabled-bg":   "#e9ecef"   # grey — disabled / read-only cell background
-  #   gui/components/carbon_emission/widgets/material_emissions.py  BG_DISABLED
-
-  "$cell-warn-fg":       "#cf1322"   # red — warning text foreground in cells
-  #   gui/components/carbon_emission/widgets/transport_emissions.py line 375
-
-  "$cell-warn-row-bg":   "#fff1f0"   # light red — removed/trashed row background
-  #   gui/components/carbon_emission/widgets/transport_emissions.py line 376
-
-  # ── Integrity states ───────────────────────────────────────────────────
-  # gui/components/traffic_data/wpi_selector.py — WPI profile integrity badge
-  "$integrity-ok":       "#2e7d32"   # ✅ hash verified
-  "$integrity-mismatch": "#b71c1c"   # ⚠  hash mismatch (possible tampering)
-  "$integrity-missing":  "#e65100"   # ❓ no hash (unverified profile)
-
-  # ── LCC Plot chart ─────────────────────────────────────────────────────
-  # gui/components/outputs/lcc_plot.py — lifecycle cost stacked bar chart
-  # Stage band backgrounds (the coloured shading behind each lifecycle stage)
-  "$chart-initial-bg":   "#cfd9e8"   # Initial Stage band
-  "$chart-use-bg":       "#cfe8e2"   # Use Stage band
-  "$chart-recon-bg":     "#e8d5f0"   # Reconstruction Stage band
-  "$chart-eol-bg":       "#edd5d5"   # End-of-Life Stage band
-
-  # Stage axis tick label colours
-  "$chart-initial-tick": "#2c4a75"   # Initial Stage tick labels
-  "$chart-use-tick":     "#1f6f66"   # Use Stage tick labels
-  "$chart-recon-tick":   "#5a3270"   # Reconstruction Stage tick labels
-  "$chart-eol-tick":     "#7a3b3b"   # End-of-Life Stage tick labels
-
-  # Bar colours for the cost breakdown bars
-  "$chart-bar-positive": "#8b1a1a"   # positive cost bars (costs ≥ 0)
-  "$chart-bar-negative": "#2e7d32"   # negative bars (savings < 0) + results table green text
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. DERIVED TOKENS REFERENCE
+# ─────────────────────────────────────────────────────────────────────────────
+# You do NOT need to define these in your YAML. They are computed automatically
+# and available in QSS as $token-name or in Python via get_token("token-name").
+#
+# Semantic aliases (for cleaner code):
+#   $window          → maps to palette.window
+#   $text            → maps to palette.text
+#   $text_secondary  → maps to palette.text_secondary
+#   $base            → maps to palette.base
+#
+# Text contrast:
+#   $text-on-primary → automatically picks #ffffff or #000000 based on primary luminance
+#
+# State-derived alphas:
+#   $primary-hover   → $primary @ 6% alpha
+#   $primary-active  → $primary @ 12% alpha
+#   $danger-bg       → $danger  @ 6% alpha
+#   $sidebar-hover   → $primary @ 6% alpha
+#   $sidebar-sel     → $primary @ 12% alpha
+#
+# Table cell states:
+#   $cell-editable-bg → $primary @ 6% alpha (column highlight)
+#   $cell-invalid-bg  → $danger  @ 12% alpha
+#   $cell-warn-bg     → $warning @ 12% alpha
+#   $cell-disabled-bg → palette.surface
+# ─────────────────────────────────────────────────────────────────────────────

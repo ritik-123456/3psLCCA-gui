@@ -97,9 +97,11 @@ class TrashTabWidget(QWidget):
             if comp_name in data and data_index < len(data[comp_name]):
                 del data[comp_name][data_index]
                 self.controller.engine.stage_update(chunk_name=chunk_id, data=data)
+                
                 main_view = self.window().findChild(QWidget, "StructureTabView")
                 if main_view:
-                    main_view.on_refresh()
+                    # Lightweight update for Trash view and badge
+                    main_view.refresh_trash_only()
                 return
 
     def toggle_trash_status(self, comp_name, data_index, should_trash):
@@ -121,10 +123,16 @@ class TrashTabWidget(QWidget):
                 # Save to engine
                 self.controller.engine.stage_update(chunk_name=chunk_id, data=data)
 
-                # Find the main view to trigger a full UI sync (badge count + tables)
+                # Find the main view to trigger a targeted sync
                 main_view = self.window().findChild(QWidget, "StructureTabView")
                 if main_view:
-                    main_view.on_refresh()
+                    if should_trash:
+                        # If we just trashed something, refresh the source tab and trash badge
+                        main_view.refresh_tab_by_chunk(chunk_id)
+                    else:
+                        # If we restored something, refresh the source tab, trash view, and badge
+                        main_view.refresh_tab_by_chunk(chunk_id)
+                        main_view.refresh_trash_only()
                 return
 
 

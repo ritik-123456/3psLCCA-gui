@@ -17,12 +17,14 @@ from PySide6.QtWidgets import (
     QSpinBox,
     QStyledItemDelegate,
     QStyleOptionHeader,
+    QStyleOptionViewItem,
+    QStyle,
     QTableView,
     QAbstractItemView,
     QToolTip,
 )
 from PySide6.QtCore import Qt, QSize, QRect, QPoint, QEvent
-from PySide6.QtGui import QPainter, QColor
+from PySide6.QtGui import QPainter, QColor, QPalette
 from gui.themes import get_token
 
 
@@ -149,7 +151,21 @@ class BaseActionDelegate(QStyledItemDelegate):
     # ------------------------------------------------------------------
 
     def paint(self, painter, option, index):
-        super().paint(painter, option, index)   # row selection highlight
+        # Manually paint background to override QSS hover behavior
+        painter.save()
+        is_alt = self._table.alternatingRowColors() and (index.row() % 2 != 0)
+
+        if option.state & QStyle.State_Selected:
+            # Match QSS selection color ($surface_pressed)
+            bg = QColor(get_token("surface_pressed"))
+        else:
+            role = QPalette.AlternateBase if is_alt else QPalette.Base
+            bg = option.palette.color(role)
+
+        painter.fillRect(option.rect, bg)
+        painter.restore()
+
+        # We don't call super().paint() to ensure QSS hover rules are ignored.
         btns = self._get_btns_for_row(index.row())
         if not btns:
             return
@@ -266,6 +282,16 @@ class _EditableColumnDelegate(QStyledItemDelegate):
     Only highlights cells that are actually interactive (have a cell widget
     or the ItemIsEditable flag set).
     """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        from gui.themes import theme_manager
+        theme_manager().theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self):
+        parent = self.parent()
+        if parent and hasattr(parent, "viewport"):
+            parent.viewport().update()
+
     def paint(self, painter, option, index):
         # Check if the cell is actually editable:
         # 1. Does it have a custom widget set (e.g. TableSpinBox)?

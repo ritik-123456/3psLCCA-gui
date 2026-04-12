@@ -19,7 +19,7 @@ from PySide6.QtGui import QPixmap
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form, _IMG_PREVIEWS_ATTR, freeze_img_uploads
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 
 
@@ -62,6 +62,13 @@ PROJECT_INFO_FIELDS = [
 AGENCY_FIELDS = [
     Section("Evaluating Agency"),
     FieldDef(
+        "agency_logo",
+        "Agency Logo",
+        "Appears on the report cover page. PNG or JPG recommended.",
+        "upload_img",
+        options="default",
+    ),
+    FieldDef(
         "agency_name",
         "Agency Name",
         "",
@@ -77,7 +84,7 @@ AGENCY_FIELDS = [
     FieldDef(
         "agency_address",
         "Agency Address",
-        "(Appears in the report footer).",
+        "Appears in the report footer.",
         "text",
     ),
     FieldDef(
@@ -98,13 +105,6 @@ AGENCY_FIELDS = [
         "Phone",
         "",
         "phone",
-    ),
-    FieldDef(
-        "agency_logo",
-        "Agency Logo",
-        "Upload agency logo (JPG or PNG). Auto-resized to fit a 3 cm × 3 cm print area. Transparent PNG recommended.",
-        "upload_img",
-        options="default",
     ),
 ]
 
@@ -228,6 +228,9 @@ class GeneralInfo(ScrollableForm):
 
     # ── Clear All ────────────────────────────────────────────────────────
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         for entry in GENERAL_FIELDS:
             if isinstance(entry, Section):
                 continue
@@ -272,20 +275,6 @@ class GeneralInfo(ScrollableForm):
     }
 
     def load_data_dict(self, data: dict):
-        # Auto-populate agency details from preferences if this is a fresh project
-        if not data.get("agency_name") and not data.get("contact_person"):
-            import core.start_manager as sm
-            import json
-            saved = sm.get_pref("agency_profile", "{}")
-            try:
-                prof = json.loads(saved)
-                # Only populate agency fields to avoid overwriting anything else
-                agency_keys = {f.key for f in AGENCY_FIELDS if hasattr(f, "key")}
-                prof_filtered = {k: v for k, v in prof.items() if k in agency_keys}
-                data = {**prof_filtered, **data}
-            except Exception:
-                pass
-
         raw = data.get("unit_system", "metric")
         display = self._UNIT_SYSTEM_LABELS.get(raw, raw)
         data = {**data, "unit_system": display}
@@ -333,3 +322,5 @@ class GeneralInfo(ScrollableForm):
     def _on_field_changed(self):
         super()._on_field_changed()
         self.created.emit()
+
+

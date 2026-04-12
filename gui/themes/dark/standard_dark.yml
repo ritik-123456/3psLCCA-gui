@@ -1,0 +1,26 @@
+name: Standard Dark
+
+palette:
+  primary:         "#3b82f6"   # soft blue (not too bright)
+  brand:           "#2563eb"
+
+  window:          "#0f172a"   # deep navy (less harsh than pure black)
+  base:            "#111827"
+  surface:         "#1f2937"
+  surface_mid:     "#374151"
+  surface_pressed: "#4b5563"
+
+  text:            "#e5e7eb"   # soft off-white
+  text_secondary:  "#d1d5db"   # brighter gray (was #9ca3af)
+  text_disabled:   "#6b7280"
+
+  success:         "#22c55e"
+  warning:         "#f59e0b"
+  danger:          "#ef4444"
+  info:            "#38bdf8"
+
+state:
+  hover:    0.50
+  pressed:  0.12
+  focus:    0.18
+  disabled: 0.40

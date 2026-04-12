@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QLabel,
+    QMessageBox,
     QPushButton,
     QSizePolicy,
     QStackedWidget,
@@ -24,7 +25,7 @@ from gui.themes import get_token
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section, ValidationStatus
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
 from ..utils.remarks_editor import RemarksEditor
 from ..utils.wpi_manager import WPIManager, WPIProfile
 from .wpi_table import _WPITable
@@ -512,9 +513,10 @@ class _PeakHoursTable(TooltipTableMixin, QTableWidget):
     def freeze(self, frozen: bool = True):
         for sb in self._spinboxes:
             sb.setReadOnly(frozen)
-            sb.setStyleSheet(
-                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: {get_token('text_disabled')}; }}" if frozen else ""
-            )
+            # Use dynamic property so QSS can handle the theme-aware color
+            sb.setProperty("frozen", frozen)
+            sb.style().unpolish(sb)
+            sb.style().polish(sb)
 
     def collect_to_dict(self) -> dict:
         return {
@@ -1021,6 +1023,17 @@ class TrafficData(ScrollableForm):
     # ── Clear all ─────────────────────────────────────────────────────────────
 
     def clear_all(self):
+        reply = QMessageBox.question(
+            self,
+            "Clear All Data",
+            "This will reset all fields on this page to their default values. "
+            "This action cannot be undone.\n\nContinue?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+
         self.blockSignals(True)
         self._vehicle_table.load_from_dict({})
         self._peak_table.rebuild(1)
@@ -1030,6 +1043,8 @@ class TrafficData(ScrollableForm):
                 attr = getattr(self, f.key, None)
                 if isinstance(attr, (QSpinBox, QDoubleSpinBox)):
                     attr.setValue(attr.minimum())
+                elif hasattr(attr, "clear"):
+                    attr.clear()
         if hasattr(self, "alternate_road_carriageway"):
             self._suppress_lane_signal = True
             idx = self.alternate_road_carriageway.findText(_NONE_LANE)

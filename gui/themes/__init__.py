@@ -40,9 +40,25 @@ import pkgutil
 from pathlib import Path
 
 import yaml
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QObject, Signal
 from PySide6.QtGui import QPalette, QColor
 import sys
+
+
+class _ThemeManager(QObject):
+    """Internal singleton to manage theme change signals."""
+    theme_changed = Signal()
+
+
+_MANAGER = None
+
+
+def theme_manager() -> _ThemeManager:
+    """Return the global ThemeManager instance."""
+    global _MANAGER
+    if _MANAGER is None:
+        _MANAGER = _ThemeManager()
+    return _MANAGER
 
 # ── Fallback defaults (used if no user pref is saved) ────────────────────
 ACTIVE_LIGHT: str = "soft_light"  # built-in: "default" | "soft_light"
@@ -88,7 +104,7 @@ _FALLBACK_LIGHT: dict = {
         "danger": "#ef4444",
         "info": "#3b82f6",
     },
-    "state": {"hover": 0.06, "pressed": 0.12, "focus": 0.18, "disabled": 0.38},
+    "state": {"hover": 0.50, "pressed": 0.12, "focus": 0.18, "disabled": 0.38},
 }
 
 # Dark fallback: matches palette_manager.py + theme.py DARK_QSS_TOKENS
@@ -110,7 +126,7 @@ _FALLBACK_DARK: dict = {
         "danger": "#ff5555",
         "info": "#8be9fd",
     },
-    "state": {"hover": 0.06, "pressed": 0.12, "focus": 0.18, "disabled": 0.38},
+    "state": {"hover": 0.50, "pressed": 0.12, "focus": 0.18, "disabled": 0.38},
 }
 
 # Required keys for schema validation
@@ -239,7 +255,19 @@ def _derive_compat_tokens(raw: dict[str, str], state: dict[str, float]) -> dict[
         "splash-progress":     raw.get("success", ""),
         "text-on-primary":     text_on_primary,
     })
+
+    # Add centralized font weights
+    from gui.theme import QSS_WEIGHTS
+    tokens.update(QSS_WEIGHTS)
     
+    # Add URL-encoded versions of all color tokens for safe use in SVG data URIs
+    # e.g., $primary-url will be %23RRGGBB
+    url_tokens = {}
+    for k, v in tokens.items():
+        if isinstance(v, str) and v.startswith("#"):
+            url_tokens[f"{k}-url"] = v.replace("#", "%23")
+    tokens.update(url_tokens)
+
     return tokens
 
 
@@ -424,6 +452,11 @@ def track_mode(is_dark: bool) -> None:
     _current_is_dark = is_dark
 
 
+def is_dark() -> bool:
+    """Return True if the current active theme is a dark variant."""
+    return _current_is_dark
+
+
 def _detect_os_dark(app=None) -> bool:
     """Read the current OS dark/light state directly — never uses cached values.
 
@@ -473,6 +506,32 @@ def _detect_os_dark(app=None) -> bool:
     return False
 
 
+def _write_arrow_svgs(tokens: dict[str, str]) -> None:
+    """Write theme-colored down-arrow SVG files used by QComboBox::down-arrow."""
+    _assets = os.path.join(os.path.dirname(_QSS_PATH))
+    # Use standard text tokens (text for normal, text_secondary for disabled)
+    normal_color   = tokens.get("text", "#4c4f69")
+    disabled_color = tokens.get("text_secondary", "#9ca0b0")
+
+    def _svg(color: str) -> str:
+        # Convert hex to valid SVG color (ensure # is present)
+        if not color.startswith("#"):
+            color = f"#{color}"
+        return (
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+            f'<path fill="{color}" d="M7 10l5 5 5-5z"/>'
+            f'</svg>'
+        )
+
+    try:
+        with open(os.path.join(_assets, "arrow_down.svg"), "w", encoding="utf-8") as f:
+            f.write(_svg(normal_color))
+        with open(os.path.join(_assets, "arrow_down_disabled.svg"), "w", encoding="utf-8") as f:
+            f.write(_svg(disabled_color))
+    except Exception as e:
+        print(f"[themes] Could not write arrow SVGs: {e}")
+
+
 def reapply(app=None) -> None:
     """Re-apply the current active themes to the running QApplication."""
     from PySide6.QtWidgets import QApplication
@@ -497,6 +556,7 @@ def reapply(app=None) -> None:
     palette, tokens, _ = get_dark_theme() if is_dark else get_light_theme()
 
     app.setPalette(palette)
+    _write_arrow_svgs(tokens)
 
     if os.path.exists(_QSS_PATH):
         try:
@@ -524,6 +584,9 @@ def reapply(app=None) -> None:
         w.style().unpolish(w)
         w.style().polish(w)
         w.update()
+
+    # Notify all subscribed listeners
+    theme_manager().theme_changed.emit()
 
 
 def list_themes(variant: str) -> list[str]:

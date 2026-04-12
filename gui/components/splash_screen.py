@@ -7,17 +7,15 @@ Theme-aware Splash Screen — lightweight & smooth.
 from __future__ import annotations
 import time, os
 
-from PySide6.QtCore import Property, QEasingCurve, QPropertyAnimation, QRect, Qt, QTimer
 from PySide6.QtCore import Property, QEasingCurve, QPropertyAnimation, QRect, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter, QPainterPath
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QApplication, QWidget
 
-from gui.themes import get_token
+from gui.themes import get_token, is_dark
 
 MIN_DISPLAY_MS = 1_500
 SPLASH_W, SPLASH_H = 520, 300
-_SVG_PATH = os.path.join("gui", "assets", "logo", "splashScreen.svg")
 
 
 class _Bar(QWidget):
@@ -61,7 +59,9 @@ class SplashScreen(QWidget):
         self.setFixedSize(SPLASH_W, SPLASH_H)
         self._center()
 
-        self._svg = QSvgRenderer(_SVG_PATH, self)
+        logo_file = "logo-3psLCCA-dark.svg" if is_dark() else "logo-3psLCCA-light.svg"
+        logo_path = os.path.join("gui", "assets", "logo", logo_file)
+        self._svg = QSvgRenderer(logo_path, self)
 
         self._bar = _Bar(self)
         self._bar.setGeometry(0, SPLASH_H - 3, SPLASH_W, 3)

@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QFont, QColor, QTextCharFormat, QTextCursor
+from .utils.validation_helpers import confirm_clear_all
 
 
 class Logs(QWidget):
@@ -121,6 +122,8 @@ class Logs(QWidget):
 
     def _clear_display(self):
         """Clears the display (does not clear the engine's log_history)."""
+        if not confirm_clear_all(self):
+            return
         self.log_view.clear()
         self._last_log_count = 0
         if self.controller:

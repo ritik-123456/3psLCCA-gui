@@ -34,7 +34,7 @@ QPlainTextEdit {
     background-color: $base;
     border: 1px solid $surface_mid;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     min-height: 32px;
     color: $text;
     selection-background-color: $primary;
@@ -73,7 +73,7 @@ QDoubleSpinBox {
     background-color: $base;
     border: 1px solid $surface_mid;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     min-height: 32px;
     color: $text;
 }
@@ -105,6 +105,30 @@ QDoubleSpinBox::down-button {
     background: transparent;
 }
 
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow {
+    image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,8 6,16 18,16' fill='$text_secondary-url'/%3E%3C/svg%3E");
+    width: 12px;
+    height: 12px;
+}
+
+QSpinBox::up-arrow:disabled,
+QDoubleSpinBox::up-arrow:disabled {
+    image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,8 6,16 18,16' fill='$text_disabled-url'/%3E%3C/svg%3E");
+}
+
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow {
+    image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,16 6,8 18,8' fill='$text_secondary-url'/%3E%3C/svg%3E");
+    width: 12px;
+    height: 12px;
+}
+
+QSpinBox::down-arrow:disabled,
+QDoubleSpinBox::down-arrow:disabled {
+    image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,16 6,8 18,8' fill='$text_disabled-url'/%3E%3C/svg%3E");
+}
+
 /* ── Table-cell spin boxes (transparent, borderless — cell border highlights on focus) ── */
 TableSpinBox,
 TableDoubleSpinBox {
@@ -115,6 +139,17 @@ TableDoubleSpinBox {
     margin: 0;
     min-height: 0;
     color: $text;
+}
+
+TableSpinBox[frozen="true"],
+TableDoubleSpinBox[frozen="true"] {
+    color: $text_disabled;
+}
+
+TableSpinBox[invalid="true"],
+TableDoubleSpinBox[invalid="true"] {
+    background-color: $cell-warn-bg;
+    color: $warning;
 }
 
 TableSpinBox:hover,
@@ -180,13 +215,12 @@ TableLineEdit:disabled {
     color: $text_disabled;
     border: none;
 }
-
 /* ── Form controls — combo box ──────────────────────────────────────────── */
 QComboBox {
     background-color: $base;
     border: 1px solid $surface_mid;
     border-radius: 6px;
-    padding: 6px 36px 6px 12px;
+    padding: 5px 32px 5px 10px;
     min-height: 32px;
     color: $text;
     combobox-popup: 0;
@@ -215,18 +249,31 @@ QComboBox[validationState="orange"] {
     border: 1px solid orange;
 }
 
+/* Dropdown button */
 QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: center right;
     width: 32px;
-
+    border: none;
+    background: transparent;
 }
 
+QComboBox::down-arrow {
+    image: url(gui/assets/themes/arrow_down.svg);
+    width: 14px;
+    height: 14px;
+}
+
+QComboBox::down-arrow:disabled {
+    image: url(gui/assets/themes/arrow_down_disabled.svg);
+    width: 14px;
+    height: 14px;
+}
 
 /* ── Dropdown popup list ────────────────────────────────────────────────── */
 QComboBox QAbstractItemView {
     background-color: $base;
-    border: 1px solid $surface_mid;
+    border: 1px solid $surface;
     border-radius: 6px;
     padding: 6px 0;
     outline: none;
@@ -334,10 +381,10 @@ QPushButton {
     background-color: $base;
     border: 1px solid $surface_mid;
     border-radius: 6px;
-    padding: 6px 16px;
+    padding: 5px 12px;
     min-height: 32px;
     color: $text;
-    font-weight: 500;
+    font-weight: $weight-medium;
 }
 
 QPushButton:hover {
@@ -356,7 +403,7 @@ QPushButton:default {
     background-color: $primary;
     color: $text-on-primary;
     border: 1px solid $primary;
-    font-weight: 600;
+    font-weight: $weight-semibold;
 }
 
 QPushButton:default:hover {
@@ -392,17 +439,17 @@ QTabBar::tab {
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 10px 18px;
+    padding: 8px 14px;
     margin-right: 4px;
-    color: $text_secondary;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
+    color: $text;
+    font-weight: $weight-medium;
+    font-size: 13px;
 }
 
 QTabBar::tab:selected {
     border-bottom: 3px solid $primary;
     color: $primary;
+    font-weight: $weight-semibold;
 }
 
 QTabBar::tab:hover:!selected {
@@ -432,7 +479,7 @@ QTableView {
 }
 
 QTableView::item {
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: none;
     color: $text;
 }
@@ -468,8 +515,8 @@ QHeaderView::section {
     border: none;
     border-bottom: 2px solid $surface_mid;
     border-right: 1px solid $surface_mid;
-    padding: 8px 12px;
-    font-weight: 600;
+    padding: 6px 10px;
+    font-weight: $weight-semibold;
     font-size: 11px;
     text-transform: uppercase;
 }
@@ -538,7 +585,7 @@ QMenuBar {
 }
 
 QMenuBar::item {
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 4px;
     background: transparent;
 }
@@ -558,7 +605,7 @@ QMenu {
 
 QMenu::item {
     border-radius: 4px;
-    padding: 7px 24px;
+    padding: 6px 24px;
     color: $text;
     background: transparent;
 }
@@ -598,7 +645,7 @@ QToolTip {
     border-bottom: 1px solid $surface_mid;
 }
 #top_bar QPushButton {
-    padding: 3px 10px;
+    padding: 2px 8px;
 }
 
 /* ── Dialog boxes ───────────────────────────────────────────────────────── */

@@ -142,6 +142,25 @@ class StructureTabView(QWidget):
         if self.content_stack.currentIndex() == 1:
             self.trash_view.on_refresh()
 
+    def refresh_trash_only(self):
+        """Lightweight refresh for trash operations."""
+        if self.content_stack.currentIndex() == 1:
+            self.trash_view.on_refresh()
+        self.update_trash_count()
+
+    def refresh_tab_by_chunk(self, chunk_id: str):
+        """Refreshes only the tab associated with a specific chunk ID."""
+        mapping = {
+            "str_foundation": self.foundation_tab,
+            "str_sub_structure": self.substructure_tab,
+            "str_super_structure": self.superstructure_tab,
+            "str_misc": self.misc_tab,
+        }
+        tab = mapping.get(chunk_id)
+        if tab:
+            tab.on_refresh()
+        self.update_trash_count()
+
     def showEvent(self, event):
         """Qt event triggered when the widget is shown."""
         super().showEvent(event)
@@ -162,7 +181,7 @@ class StructureTabView(QWidget):
             self.trash_view.on_refresh()
             self.content_stack.setCurrentIndex(1)
             self.update_trash_count()
-            self.trash_btn.setStyleSheet(f"font-weight: bold; color: {get_token('success')};")
+            self.trash_btn.setStyleSheet(f"font-weight: {get_token('weight-bold')}; color: {get_token('success')};")
         else:
             # Returning to Work View
             self.content_stack.setCurrentIndex(0)
@@ -229,8 +248,7 @@ class StructureTabView(QWidget):
             QMessageBox.information(
                 self,
                 "Unrecognised Sheet(s)",
-                f"The following sheet(s) didn't match a known structural category "
-                f"and will be imported into <b>Misc</b> as new components:<br><br>{names}",
+                f"These sheets didn't match a known category and will be added to <b>Misc</b>:<br><br>{names}",
             )
 
         preview = ImportPreviewWindow(parsed, manager=self.foundation_tab, parent=self)
@@ -372,6 +390,13 @@ class StructureTabView(QWidget):
     def _on_tab_changed(self, index: int):
         name = self.tab_view.tabText(index)
         self.tab_changed.emit(name)
+
+    def reset_view(self):
+        """Resets the view to normal tabs (exits Trash view)."""
+        if self.content_stack.currentIndex() == 1:
+            self.content_stack.setCurrentIndex(0)
+            self.trash_btn.setStyleSheet("")
+            self.update_trash_count()
 
     def select_tab(self, name: str):
         """External helper to switch tabs (e.g., from a Sidebar)."""

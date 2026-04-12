@@ -97,7 +97,7 @@ class _ActionDelegate(BaseActionDelegate):
         reply = QMessageBox.warning(
             self._table,
             "Permanent Delete",
-            "This will permanently remove the item. This cannot be undone.\n\nContinue?",
+            "Remove this item? This cannot be undone.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )

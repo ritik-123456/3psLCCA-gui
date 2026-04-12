@@ -492,8 +492,8 @@ class ReportSectionDialog(QDialog):
         self._set_ui_enabled(True)
         QMessageBox.information(
             self,
-            "Success",
-            f"Report generated successfully!\n\n{pdf_path}",
+            "Report Saved",
+            f"Report saved to:\n{pdf_path}",
         )
         # Attempt to open the PDF
         if os.path.exists(pdf_path):
@@ -504,3 +504,5 @@ class ReportSectionDialog(QDialog):
         """Handle PDF generation error."""
         self._set_ui_enabled(True)
         QMessageBox.critical(self, "Error", error_msg)
+
+

@@ -224,7 +224,7 @@ class BlobManagerDialog(QDialog):
         result = QMessageBox.warning(
             self,
             "Delete Blob",
-            f"Permanently delete '{blob_name}'?\n\nThis cannot be undone.",
+            f"Delete '{blob_name}'?\nThis cannot be undone.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )

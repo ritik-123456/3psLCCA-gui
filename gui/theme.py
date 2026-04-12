@@ -66,10 +66,21 @@ FS_XL   = 15   # logo / brand mark
 FS_DISP = 18   # greeting display heading
 
 # Font weights (match QFont.Weight int values)
+# Toned down for subtler hierarchy:
+# - MEDIUM:   500 -> 450
+# - SEMIBOLD: 600 -> 550
+# - BOLD:     700 -> 600
 FW_LIGHT    = 300
 FW_NORMAL   = 400
-FW_MEDIUM   = 500
-FW_SEMIBOLD = 600
-FW_BOLD     = 700
+FW_MEDIUM   = 450
+FW_SEMIBOLD = 550
+FW_BOLD     = 600
+
+# Centralized weight tokens for QSS substitution
+QSS_WEIGHTS = {
+    "weight-medium":   str(FW_MEDIUM),
+    "weight-semibold": str(FW_SEMIBOLD),
+    "weight-bold":     str(FW_BOLD),
+}
 
 

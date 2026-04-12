@@ -382,8 +382,8 @@ class OutputsPage(ScrollableForm):
                 f"QGroupBox {{ border: 2px solid {get_token("danger")}; padding: 8px; }}"
             )
             layout = QVBoxLayout(banner)
-            title = QLabel("🛑  Calculation Blocked — Please fix the errors below.")
-            title.setStyleSheet("color: #b02a37; font-weight: bold;")
+            title = QLabel("🛑  Calculation Blocked — Fix the errors below to continue.")
+            title.setStyleSheet(f"color: {get_token('danger')}; font-weight: {get_token('weight-bold')};")
             layout.addWidget(title)
             self._status_layout.addWidget(banner)
             self._status_layout.addSpacing(10)
@@ -396,7 +396,7 @@ class OutputsPage(ScrollableForm):
                 self._status_layout.addSpacing(12)
             banner = QGroupBox()
             banner.setStyleSheet(
-                "QGroupBox { border: 2px solid #ffc107; padding: 8px; }"
+                f"QGroupBox {{ border: 2px solid {get_token('warning')}; padding: 8px; }}"
             )
             layout = QVBoxLayout(banner)
             label = (
@@ -405,7 +405,7 @@ class OutputsPage(ScrollableForm):
                 else "⚠️  Warnings — Data looks unusual but you can proceed."
             )
             title = QLabel(label)
-            title.setStyleSheet("color: #856404; font-weight: bold;")
+            title.setStyleSheet(f"color: {get_token('warning')}; font-weight: {get_token('weight-bold')};")
             layout.addWidget(title)
             self._status_layout.addWidget(banner)
             self._status_layout.addSpacing(10)
@@ -553,7 +553,7 @@ class OutputsPage(ScrollableForm):
 
         # ── Short summary ──────────────────────────────────────────────────
         title = QLabel(f"🛑  {type(error).__name__}")
-        title.setStyleSheet("color: #b02a37; font-weight: bold; font-size: 13px;")
+        title.setStyleSheet(f"color: {get_token('danger')}; font-weight: {get_token('weight-bold')}; font-size: 13px;")
         layout.addWidget(title)
 
         # Show only the first line of the error message
@@ -789,7 +789,7 @@ class OutputsPage(ScrollableForm):
         if _financial_data is None:
             raise ValueError(
                 "Financial Data is missing from the calculation inputs.\n"
-                "Please fill in the Financial Data page and try again."
+                "Fill in the Financial Data page and try again."
             )
 
         analysis_period_years = int(self.analysis_period.value())
@@ -803,14 +803,18 @@ class OutputsPage(ScrollableForm):
 
         # cost_of_carbon_local is in local_currency/kgCO2e (user-selected source).
         # The engine expects social_cost_of_carbon_per_mtco2e in local_currency/mtCO2e,
-        # so multiply by 1000. currency_conversion is 1.0 — cost is already in local currency.
-        _result = data.get("carbon_emission_data").get("social_cost_data").get("result")
-        _dbg(f"  social_cost_data result: {_result!r}")
-        social_cost_of_carbon_per_mtco2e = (
-            float(_result.get("cost_of_carbon_local")) * 1000
-        )
-        currency_conversion = 1.0
-        _dbg(f"  social_cost_of_carbon_per_mtco2e={social_cost_of_carbon_per_mtco2e}")
+        # so multiply by 1000.
+        scc_from_fin = _financial_data.get("social_cost_of_carbon")
+        if scc_from_fin is not None:
+            social_cost_of_carbon_per_mtco2e = float(scc_from_fin) * 1000
+        else:
+            _result = data.get("carbon_emission_data", {}).get("social_cost_data", {}).get("result", {})
+            social_cost_of_carbon_per_mtco2e = (
+                float(_result.get("cost_of_carbon_local", 0.0)) * 1000
+            )
+        
+        currency_conversion = float(_financial_data.get("currency_conversion", 1.0))
+        _dbg(f"  social_cost_of_carbon_per_mtco2e={social_cost_of_carbon_per_mtco2e}  currency_conversion={currency_conversion}")
 
         _bridge_data = data.get("bridge_data")
         _dbg(f"  bridge_data: {_bridge_data!r}")

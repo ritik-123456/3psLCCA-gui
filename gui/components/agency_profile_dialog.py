@@ -4,7 +4,7 @@ gui/components/agency_profile_dialog.py
 
 import os
 import json
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QDialogButtonBox, QInputDialog, QMessageBox
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QDialogButtonBox, QInputDialog, QMessageBox, QLineEdit
 from core import start_manager as sm
 
 from gui.components.base_widget import ScrollableForm
@@ -20,22 +20,26 @@ class AgencyProfileForm(ScrollableForm):
     """
     def __init__(self):
         super().__init__(controller=None, chunk_name="agency_profile")
-        
-        # Remove the heading section since the tab itself serves as the heading
-        fields_no_heading = [f for f in AGENCY_FIELDS if not isinstance(f, Section)]
-        self.required_keys = build_form(self, fields_no_heading)
-        
-        # Try to load latest saved from preferences soform isn't empty if opened repeatedly
-        saved = sm.get_pref("agency_profile", "{}")
-        try:
-            data = json.loads(saved)
-            if data:
-                self.load_data_dict(data)
-        except Exception:
-            pass
 
-    def save_to_json(self, profile_name: str):
-        data = self.get_data_dict()
+        # Exclude the section header and agency_logo — logo is handled by the
+        # avatar widget in SettingsDialog, not a separate Browse field here.
+        fields_no_logo = [
+            f for f in AGENCY_FIELDS
+            if not isinstance(f, Section) and getattr(f, "key", None) != "agency_logo"
+        ]
+        self.required_keys = build_form(self, fields_no_logo)
+
+        # Register a hidden QLineEdit for agency_logo so get_data_dict() / load_data_dict()
+        # still round-trip the logo data without showing a duplicate Browse button.
+        self._logo_input = QLineEdit(self._content)  # parented so Qt owns it
+        self._logo_input.setObjectName("agency_logo")
+        self._logo_input.setMaxLength(10_000_000)
+        self._logo_input.setReadOnly(True)
+        self._logo_input.hide()
+        self.register_field("agency_logo", self._logo_input)
+
+    def save_to_json(self, profile_name: str, manual_data: dict = None):
+        data = manual_data if manual_data is not None else self.get_data_dict()
         
         dir_path = os.path.join("data", "user_db")
         os.makedirs(dir_path, exist_ok=True)
@@ -118,3 +122,5 @@ class AgencyProfileDialog(QDialog):
             self.accept()
         elif ok:
             QMessageBox.warning(self, "Invalid Name", "Profile name cannot be empty.")
+
+

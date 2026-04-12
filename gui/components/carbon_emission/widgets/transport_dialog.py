@@ -94,6 +94,7 @@ class _TransportTable(TooltipTableMixin, QTableWidget):
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QDoubleValidator, QFont
+from gui.theme import FW_BOLD, FW_MEDIUM, FW_SEMIBOLD
 
 from ...utils.definitions import STRUCTURE_CHUNKS, UNIT_DIMENSION, UNIT_DISPLAY
 from ...utils.display_format import fmt, fmt_comma, DECIMAL_PLACES
@@ -217,7 +218,7 @@ class TransportDialog(QDialog):
 
     def _build_class_cards(self, layout):
         hdr = QLabel("Vehicle Type")
-        hdr.setStyleSheet("font-weight: bold;")
+        hdr.setStyleSheet(f"font-weight: {get_token('weight-bold')};")
         layout.addWidget(hdr)
 
         cards_row = QHBoxLayout()
@@ -314,7 +315,7 @@ class TransportDialog(QDialog):
 
         mat_hdr = QHBoxLayout()
         mat_title = QLabel("Materials")
-        mat_title.setStyleSheet("font-weight: bold;")
+        mat_title.setStyleSheet(f"font-weight: {get_token('weight-bold')};")
         mat_hdr.addWidget(mat_title)
         mat_hdr.addStretch()
         self.pool_materials_chk = QCheckBox("Pool same materials")
@@ -389,7 +390,7 @@ class TransportDialog(QDialog):
         rl.setSpacing(6)
 
         sum_title = QLabel("Delivery Summary")
-        sum_title.setStyleSheet("font-weight: bold;")
+        sum_title.setStyleSheet(f"font-weight: {get_token('weight-bold')};")
         rl.addWidget(sum_title)
         rl.addWidget(_divider())
 
@@ -425,7 +426,7 @@ class TransportDialog(QDialog):
         self._s_emission = QLabel("—")
         font = QFont()
         font.setPointSize(18)
-        font.setBold(True)
+        font.setWeight(QFont.Weight(FW_BOLD))
         self._s_emission.setFont(font)
         self._s_emission.setAlignment(Qt.AlignRight)
         self._s_emission.setWordWrap(True)

@@ -7,13 +7,14 @@ from PySide6.QtWidgets import (
     QPushButton,
     QWidget,
     QDoubleSpinBox,
-    QSpinBox
+    QSpinBox,
+    QMessageBox
 )
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
 
 
 from ..utils.doc_handler import make_doc_opener
@@ -221,7 +222,7 @@ MAINTENANCE_FIELDS = [
             365,
             "Replacement Duration seems unusual — expected between 1 and 365 days",
         ),
-    )
+    ),
 ]
 
 
@@ -299,6 +300,9 @@ class Maintenance(ScrollableForm):
 
     # ── Clear All ────────────────────────────────────────────────────────
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         for entry in MAINTENANCE_FIELDS:
             if isinstance(entry, Section):
                 continue
@@ -331,3 +335,5 @@ class Maintenance(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": "maintenance_data", "data": self.get_data_dict()}
+
+

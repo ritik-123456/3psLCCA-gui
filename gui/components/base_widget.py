@@ -150,22 +150,15 @@ class BaseDataWidget(QWidget):
     def load_data_dict(self, data: dict):
         """
         Populates widgets from a dict.
+        Passing an empty dict clears all fields.
         Blocks all change signals during load to prevent feedback-loop autosaves.
         """
-        if not data:
-            return
-
         self._loading = True
         try:
             for key, widget in self._field_map.items():
-                if key not in data:
-                    continue
-
-                # CRITICAL: Prevent the widget from telling the engine it "changed"
-                # while we are simply loading values from the disk.
                 widget.blockSignals(True)
                 try:
-                    self._apply_value(widget, data[key])
+                    self._apply_value(widget, data.get(key, ""))
                 finally:
                     widget.blockSignals(False)
         finally:
@@ -264,3 +257,5 @@ class ScrollableForm(BaseDataWidget):
         # anymore because BaseDataWidget no longer creates one.
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(scroll)
+
+

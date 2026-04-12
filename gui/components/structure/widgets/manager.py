@@ -254,7 +254,7 @@ class StructureManagerWidget(QWidget):
                     self,
                     "Duplicate Name",
                     f'A material named "{name}" already exists in "{comp_name}".\n'
-                    "Please use a different name.",
+                    "Use a different name.",
                 )
                 return
             self.add_material(comp_name, values)

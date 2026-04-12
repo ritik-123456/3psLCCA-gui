@@ -1,0 +1,26 @@
+name: Standard Light
+
+palette:
+  primary:         "#2563eb"   # trusted blue
+  brand:           "#1d4ed8"
+
+  window:          "#f8fafc"   # subtle gray background
+  base:            "#ffffff"
+  surface:         "#f1f5f9"
+  surface_mid:     "#e2e8f0"
+  surface_pressed: "#cbd5e1"
+
+  text:            "#0f172a"   # near-black (easy reading)
+  text_secondary:  "#475569"
+  text_disabled:   "#94a3b8"
+
+  success:         "#16a34a"
+  warning:         "#f59e0b"
+  danger:          "#dc2626"
+  info:            "#0284c7"
+
+state:
+  hover:    0.50
+  pressed:  0.10
+  focus:    0.15
+  disabled: 0.38

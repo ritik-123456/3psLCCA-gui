@@ -12,10 +12,12 @@ import json
 import shutil
 import hashlib
 import zipfile
+import getpass
 from datetime import datetime
 
 from PySide6.QtCore import Qt, QSize, QPoint, QPointF, QRect, QRectF, QTimer, Signal
-from PySide6.QtGui import QFont, QColor, QPainter, QBrush, QPen, QPalette, QPolygonF
+from PySide6.QtGui import QFont, QColor, QPainter, QBrush, QPen, QPalette, QPolygonF, QPixmap
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -68,7 +70,7 @@ from gui.theme import (
     FW_SEMIBOLD,
     FW_BOLD,
 )
-from gui.themes import get_token
+from gui.themes import get_token, theme_manager
 from gui.styles import (
     font as _f,
     btn_primary,
@@ -118,9 +120,6 @@ def _relative_time(dt_str: str) -> str:
     return dt.strftime(fmt)
 
 
-from datetime import datetime
-
-
 def _greeting() -> str:
     """Returns a time-based greeting string (no name)."""
     hour = datetime.now().hour
@@ -134,15 +133,16 @@ def _greeting() -> str:
         return "Hello"
 
 
-STATUS_CONFIG = {
-    "ok": {"label": "OK", "color": get_token("success")},
-    "crashed": {"label": "Needs recovery", "color": get_token("danger")},
-    "locked": {
-        "label": "Open",
-        "color": get_token("info"),
-    },  # blue — distinct from brand green
-    "corrupted": {"label": "Corrupted", "color": get_token("warning")},
-}
+def get_status_config(status: str) -> dict:
+    """Return dynamic status config resolved from the active theme."""
+    configs = {
+        "ok": {"label": "OK", "token": "success"},
+        "crashed": {"label": "Needs recovery", "token": "danger"},
+        "locked": {"label": "Open", "token": "info"},
+        "corrupted": {"label": "Corrupted", "token": "warning"},
+    }
+    cfg = configs.get(status, configs["ok"])
+    return {"label": cfg["label"], "color": get_token(cfg["token"])}
 
 
 # ── Sidebar icon nav button ────────────────────────────────────────────────────
@@ -168,6 +168,7 @@ class _NavButton(QWidget):
         self._hover = False
         self.setFixedHeight(60)
         self.setCursor(Qt.PointingHandCursor)
+        theme_manager().theme_changed.connect(self.update)
 
     # ── Painting ──────────────────────────────────────────────────────────────
 
@@ -179,9 +180,7 @@ class _NavButton(QWidget):
 
         # Background
         if self._selected:
-            bg = QColor(get_token("primary"))
-            bg.setAlpha(28)
-            p.fillRect(self.rect(), bg)
+            p.fillRect(self.rect(), QColor(get_token("primary", "focus")))
         elif self._hover:
             p.fillRect(self.rect(), self.palette().midlight())
 
@@ -329,18 +328,6 @@ class _NavButton(QWidget):
 class _GridCardDelegate(QStyledItemDelegate):
     RADIUS = RADIUS_LG
 
-    # Status semantic tint colors (ARGB alpha applied at paint time)
-    _STATUS_TINT = {
-        "locked": (59, 130, 246),  # blue
-        "crashed": (239, 68, 68),  # red
-        "corrupted": (249, 115, 22),  # orange
-    }
-    _STATUS_DOT = {
-        "locked": get_token("info"),
-        "crashed": get_token("danger"),
-        "corrupted": get_token("warning"),
-    }
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self._mouse_pos = QPoint(-1, -1)  # viewport-relative; set by _GridList
@@ -352,8 +339,28 @@ class _GridCardDelegate(QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         data = index.data(Qt.UserRole)
-        status = data.get("status", "ok") if isinstance(data, dict) else "ok"
-        return QSize(option.rect.width(), self._card_h(status))
+        
+        grid = self.parent()
+        if isinstance(grid, QAbstractItemView):
+            view_w = grid.viewport().width()
+            view_h = grid.viewport().height()
+            
+            # If data is not a dict, it's the empty state item
+            if not isinstance(data, dict):
+                # Return full viewport height (min 400) so nothing is cut
+                return QSize(view_w - 40, max(400, view_h - 40))
+
+            # Regular project cards
+            status = data.get("status", "ok")
+            cols = min(2, max(1, view_w // 360))
+            spacing = grid.spacing()
+            margins = grid.viewportMargins()
+            net_w = view_w - margins.left() - margins.right() - (spacing * (cols + 1))
+            
+            card_w = net_w // cols
+            return QSize(card_w, self._card_h(status))
+            
+        return QSize(340, 78)
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
         data = index.data(Qt.UserRole)
@@ -363,7 +370,9 @@ class _GridCardDelegate(QStyledItemDelegate):
 
         painter.save()
         painter.setRenderHint(QPainter.Antialiasing)
-        rect = option.rect.adjusted(6, 4, -6, -4)
+        
+        # Tighter adjustment for "full width" look
+        rect = option.rect.adjusted(2, 2, -2, -2)
         pal = option.palette
 
         is_sel = bool(option.state & QStyle.State_Selected)
@@ -384,38 +393,24 @@ class _GridCardDelegate(QStyledItemDelegate):
             and data.get("project_id") == self._loading_pid
         )
 
-        # ── Computed vertical anchors (relative to rect.top()) ─────────────
-        # Three content lines centred within the card, evenly distributed
-        cy = rect.top() + card_h // 2 - 4  # visual centre offset
-        y_title = cy - 8  # title baseline
-        y_meta = cy + 8  # meta baseline
-        y_warn = cy + 22  # warning baseline (warn cards only)
+        # ── Computed vertical anchors ──────────────────────────────────────
+        cy = rect.top() + card_h // 2 - 4
+        y_title = cy - 8
+        y_meta = cy + 8
+        y_warn = cy + 22
 
-        # ── Background ─────────────────────────────────────────────────────
-        painter.setPen(Qt.NoPen)
+        # ── Background & Border (Solid, no shadow) ──────────────────────────
+        painter.setPen(QPen(QColor(get_token("surface_mid")), 1))
         painter.setBrush(QBrush(pal.base().color()))
         painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
 
         # ── Loading state — early exit ──────────────────────────────────────
         if is_loading:
-            # Muted overlay tint
             tint = QColor(muted_col)
             tint.setAlpha(18)
             painter.setBrush(QBrush(tint))
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
 
-            # Separator
-            sep_col = pal.mid().color()
-            sep_col.setAlpha(35)
-            painter.setPen(QPen(sep_col, 1))
-            painter.drawLine(
-                rect.left() + 16,
-                option.rect.bottom(),
-                rect.right() - 16,
-                option.rect.bottom(),
-            )
-
-            # "Opening ." / ".." / "..." pill (always visible, not just hover)
             dots = "." * (self._loading_dots + 1)
             pill_label = f"Opening{dots}"
             pill_h, pill_w = 22, 72
@@ -430,7 +425,6 @@ class _GridCardDelegate(QStyledItemDelegate):
             painter.setFont(_f(FS_SM, FW_MEDIUM))
             painter.drawText(pill_rect, Qt.AlignCenter, pill_label)
 
-            # Title (dimmed)
             painter.setFont(_f(FS_LG, FW_MEDIUM))
             dim = QColor(text_col)
             dim.setAlpha(100)
@@ -441,38 +435,48 @@ class _GridCardDelegate(QStyledItemDelegate):
                 QPoint(title_x, y_title),
                 nfm.elidedText(name, Qt.ElideRight, pill_x - title_x - SP4),
             )
-
-            painter.restore()
+            painter.restore() # Balanced
             return
 
-        # Semantic surface tint for non-ok statuses
-        tint_rgb = self._STATUS_TINT.get(status)
-        if tint_rgb:
-            tint = QColor(*tint_rgb)
+        # Semantic surface tint
+        tint_token = {
+            "locked": "info",
+            "crashed": "danger",
+            "corrupted": "warning",
+        }.get(status)
+        
+        if tint_token:
+            tint = QColor(get_token(tint_token))
             tint.setAlpha(14)
             painter.setBrush(QBrush(tint))
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
 
-        # Selection / hover tint (on top of semantic tint)
+        # Selection / hover tint
         if is_sel:
             tint = QColor(get_token("primary"))
             tint.setAlpha(22)
             painter.setBrush(QBrush(tint))
+            painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
+            painter.setPen(QPen(QColor(get_token("primary")), 1.5))
+            painter.setBrush(Qt.NoBrush)
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
         elif is_hov:
             tint = QColor(get_token("primary"))
             tint.setAlpha(14)
             painter.setBrush(QBrush(tint))
             painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
+            painter.setPen(QPen(QColor(get_token("primary")), 1))
+            painter.setBrush(Qt.NoBrush)
+            painter.drawRoundedRect(rect, self.RADIUS, self.RADIUS)
 
-        # ── Pinned left accent bar (visible at rest, mirrors _NavButton) ───
+        # ── Pinned left accent bar ─────────────────────────────────────────
         if is_pinned:
             painter.setPen(Qt.NoPen)
             pin_bar = QColor(get_token("primary"))
             pin_bar.setAlpha(200)
             painter.setBrush(pin_bar)
             painter.drawRoundedRect(
-                rect.left(),
+                rect.left() + 1,
                 rect.top() + 10,
                 3,
                 rect.height() - 20,
@@ -480,31 +484,9 @@ class _GridCardDelegate(QStyledItemDelegate):
                 RADIUS_SM,
             )
 
-        # ── Locked project outline border ──────────────────────────────────
-        if status == "locked":
-            lock_col = QColor(get_token("info"))
-            lock_col.setAlpha(160)
-            painter.setPen(QPen(lock_col, 1.5))
-            painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(
-                rect.adjusted(1, 1, -1, -1), self.RADIUS, self.RADIUS
-            )
-
-        # ── Subtle card separator ──────────────────────────────────────────
-        sep_col = pal.mid().color()
-        sep_col.setAlpha(35)
-        painter.setPen(QPen(sep_col, 1))
-        painter.drawLine(
-            rect.left() + 16,
-            option.rect.bottom(),
-            rect.right() - 16,
-            option.rect.bottom(),
-        )
-
-        # Text left indent
         tx = rect.left() + SP4
 
-        # ── ⋮ menu button (always visible) ────────────────────────────────
+        # ── ⋮ menu button ─────────────────────────────────────────────────
         menu_col = QColor(get_token("primary")) if is_sel else QColor(muted_col)
         menu_col.setAlpha(200 if is_hov else 150)
         painter.setPen(menu_col)
@@ -515,19 +497,22 @@ class _GridCardDelegate(QStyledItemDelegate):
             "\u22ee",
         )
 
-        # ── Hover controls: star + Open pill ──────────────────────────────
+        # ── Hover controls ────────────────────────────────────────────────
         if is_hov:
-            # Star toggle
             star_rect = QRect(R - 58, rect.top(), 26, card_h)
-            star_col = QColor(get_token("primary")) if is_pinned else QColor(muted_col)
-            star_col.setAlpha(220 if is_pinned else 150)
+            star_hov = star_rect.contains(self._mouse_pos)
+            
+            # Logic: Fill if pinned OR if mouse is specifically over the star
+            show_filled = is_pinned or star_hov
+            star_icon = "\u2605" if show_filled else "\u2606"
+            
+            star_col = QColor(get_token("primary"))
+            star_col.setAlpha(220 if show_filled else 130)
+            
             painter.setPen(star_col)
             painter.setFont(_f(FS_MD + 1, FW_NORMAL))
-            painter.drawText(
-                star_rect, Qt.AlignCenter, "\u2605" if is_pinned else "\u2606"
-            )
+            painter.drawText(star_rect, Qt.AlignCenter, star_icon)
 
-            # Open / Return pill
             pill_label = "Return \u203a" if status == "locked" else "Open"
             pill_h, pill_w = 22, 56
             pill_x = R - 58 - SP2 - pill_w
@@ -539,7 +524,7 @@ class _GridCardDelegate(QStyledItemDelegate):
                 painter.setBrush(QBrush(prim))
                 painter.setPen(Qt.NoPen)
                 painter.drawRoundedRect(pill_rect, pill_h // 2, pill_h // 2)
-                painter.setPen(QColor("white"))
+                painter.setPen(QColor(get_token("base")))
             else:
                 painter.setPen(QPen(prim, 1))
                 painter.setBrush(Qt.NoBrush)
@@ -551,10 +536,14 @@ class _GridCardDelegate(QStyledItemDelegate):
             right_edge = pill_x - SP2
         else:
             right_edge = R - 32
-
-            # Status dot (hidden on hover — pill takes priority)
-            dot_hex = self._STATUS_DOT.get(status)
-            if dot_hex:
+            dot_token = {
+                "locked": "info",
+                "crashed": "danger",
+                "corrupted": "warning",
+            }.get(status)
+            
+            if dot_token:
+                dot_hex = get_token(dot_token)
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColor(dot_hex))
                 painter.drawEllipse(
@@ -562,16 +551,18 @@ class _GridCardDelegate(QStyledItemDelegate):
                 )
                 right_edge -= 16
 
-            # Pin dot (hidden on hover — star takes priority, bar shows at rest)
             if is_pinned:
-                painter.setPen(Qt.NoPen)
-                pin_c = QColor(get_token("primary"))
-                pin_c.setAlpha(180)
-                painter.setBrush(pin_c)
-                painter.drawEllipse(
-                    right_edge - 7, rect.top() + (card_h - 5) // 2, 5, 5
+                star_c = QColor(get_token("primary"))
+                star_c.setAlpha(220)
+                painter.setPen(star_c)
+                painter.setFont(_f(FS_MD, FW_NORMAL))
+                # Shift a bit more to accommodate the glyph width vs a 5px dot
+                painter.drawText(
+                    QRect(right_edge - 24, rect.top(), 20, card_h),
+                    Qt.AlignCenter,
+                    "\u2605"
                 )
-                right_edge -= 13
+                right_edge -= 28
 
         # ── Title ──────────────────────────────────────────────────────────
         painter.setFont(_f(FS_LG, FW_MEDIUM))
@@ -597,7 +588,7 @@ class _GridCardDelegate(QStyledItemDelegate):
             "   \u00b7   ".join(m for m in meta if m),
         )
 
-        # ── Warning line (crashed / corrupted only) ────────────────────────
+        # ── Warning line ──────────────────────────────────────────────────
         if status == "crashed":
             warn_col = QColor(get_token("danger"))
             warn_col.setAlpha(210)
@@ -615,13 +606,24 @@ class _GridCardDelegate(QStyledItemDelegate):
                 QPoint(tx, y_warn), "File may be damaged — restore from a checkpoint"
             )
 
-        painter.restore()
+        painter.restore() # Balanced
 
 
 class _GridList(QListWidget):
     menu_requested = Signal(str, QPoint)
     open_requested = Signal(str)
     pin_toggled = Signal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.verticalScrollBar().setSingleStep(10)
+        theme_manager().theme_changed.connect(self.viewport().update)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Force re-layout of items to recalculate width from sizeHint
+        self.doItemsLayout()
 
     def mouseMoveEvent(self, event):
         d = self.itemDelegate()
@@ -655,22 +657,22 @@ class _GridList(QListWidget):
                         self.menu_requested.emit(pid, gpos)
                         return
                     # left-click: check hit zones right-to-left
-                    # rect = ir.adjusted(6,4,-6,-4), R = rect.right() = ir.right()-6
+                    # rect = ir.adjusted(2,2,-2,-2), R = rect.right() = ir.right()-2
                     ir = self.visualItemRect(item)
-                    R = ir.right() - 6  # matches rect.right() in delegate
-                    # ⋮ zone: R-28 .. R (+ 6px padding) → ir.right()-34 .. ir.right()
+                    R = ir.right() - 2
+                    # ⋮ zone: R-28 .. R
                     if QRect(ir.right() - 34, ir.top(), 35, ir.height()).contains(
                         event.pos()
                     ):
                         self.menu_requested.emit(pid, gpos)
                         return
-                    # star zone: R-58 .. R-32 → ir.right()-64 .. ir.right()-38, padded ±4
+                    # star zone: R-58 .. R-32
                     if QRect(ir.right() - 68, ir.top(), 34, ir.height()).contains(
                         event.pos()
                     ):
                         self.pin_toggled.emit(pid)
                         return
-                    # open pill zone: R-118 .. R-66 → ir.right()-124 .. ir.right()-72, padded
+                    # open pill zone: R-118 .. R-66
                     if QRect(ir.right() - 130, ir.top(), 62, ir.height()).contains(
                         event.pos()
                     ):
@@ -683,11 +685,11 @@ class _GridList(QListWidget):
 
 
 class _EmptyState(QWidget):
-    """Designed empty state — icon + heading + subtext + optional CTA."""
+    """Designed empty state — logo/icon + heading + subtext + optional CTA."""
 
     def __init__(
         self,
-        heading: str,
+        heading: str | None,
         subtext: str,
         show_cta: bool = True,
         manager=None,
@@ -697,21 +699,50 @@ class _EmptyState(QWidget):
         self._manager = manager
         layout = QVBoxLayout(self)
         layout.setContentsMargins(SP10, SP10, SP10, SP10)
-        layout.setSpacing(SP3)
+        layout.setSpacing(SP4)
         layout.setAlignment(Qt.AlignCenter)
 
-        # Icon (folder glyph via unicode, drawn large)
-        icon_lbl = QLabel("🗂")
-        icon_lbl.setFont(_f(FS_DISP + 10, FW_NORMAL))
-        icon_lbl.setAlignment(Qt.AlignCenter)
-        icon_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
-        layout.addWidget(icon_lbl)
+        layout.addStretch()
 
-        # Heading
-        head_lbl = QLabel(heading)
-        head_lbl.setFont(_f(FS_LG, FW_SEMIBOLD))
-        head_lbl.setAlignment(Qt.AlignCenter)
-        layout.addWidget(head_lbl)
+        if not heading:
+            # Show Brand Logo instead of icon/heading
+            from gui.themes import is_dark
+            logo_file = "logo-3psLCCA-dark.svg" if is_dark() else "logo-3psLCCA-light.svg"
+            path = os.path.join("gui", "assets", "logo", logo_file)
+            
+            logo_lbl = QLabel()
+            logo_lbl.setAlignment(Qt.AlignCenter)
+            logo_lbl.setStyleSheet("background: transparent; border: none;")
+            
+            if os.path.exists(path):
+                renderer = QSvgRenderer(path)
+                if renderer.isValid():
+                    h = 160
+                    aspect = renderer.defaultSize().width() / max(1, renderer.defaultSize().height())
+                    w = int(h * aspect)
+                    pixmap = QPixmap(w * 2, h * 2) # High DPI
+                    pixmap.fill(Qt.GlobalColor.transparent)
+                    painter = QPainter(pixmap)
+                    renderer.render(painter)
+                    painter.end()
+                    logo_lbl.setPixmap(pixmap)
+                    logo_lbl.setFixedSize(w, h)
+                    logo_lbl.setScaledContents(True)
+            layout.addWidget(logo_lbl, 0, Qt.AlignCenter)
+            layout.addSpacing(SP4)
+        else:
+            # Icon (folder glyph via unicode, drawn large)
+            icon_lbl = QLabel("🗂")
+            icon_lbl.setFont(_f(FS_DISP + 10, FW_NORMAL))
+            icon_lbl.setAlignment(Qt.AlignCenter)
+            icon_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
+            layout.addWidget(icon_lbl)
+
+            # Heading
+            head_lbl = QLabel(heading)
+            head_lbl.setFont(_f(FS_LG, FW_SEMIBOLD))
+            head_lbl.setAlignment(Qt.AlignCenter)
+            layout.addWidget(head_lbl)
 
         # Subtext
         sub_lbl = QLabel(subtext)
@@ -725,14 +756,14 @@ class _EmptyState(QWidget):
             layout.addSpacing(SP2)
             cta = QPushButton("+ New Project")
             cta.setFixedHeight(BTN_MD)
+            cta.setFixedWidth(180)
             cta.setFont(_f(FS_BASE, FW_MEDIUM))
             cta.setStyleSheet(btn_primary())
             cta.setCursor(Qt.PointingHandCursor)
             cta.clicked.connect(lambda: manager.open_project(is_new=True))
-            cta_wrap = QHBoxLayout()
-            cta_wrap.setAlignment(Qt.AlignCenter)
-            cta_wrap.addWidget(cta)
-            layout.addLayout(cta_wrap)
+            layout.addWidget(cta, 0, Qt.AlignCenter)
+        
+        layout.addStretch()
 
 
 # ── Home page ─────────────────────────────────────────────────────────────────
@@ -827,13 +858,8 @@ class HomePage(QWidget):
         gb.addWidget(self.greeting_lbl)
         gb.addStretch()
 
-        refresh_btn = QPushButton("↻  Refresh")
-        refresh_btn.setFixedHeight(BTN_SM)
-        refresh_btn.setFont(_f(FS_SM))
-        refresh_btn.setToolTip("Refresh project list")
-        refresh_btn.setStyleSheet(btn_ghost())
-        refresh_btn.clicked.connect(self.refresh_project_list)
-        gb.addWidget(refresh_btn)
+        self.logo_lbl = QLabel()
+        gb.addWidget(self.logo_lbl)
 
         layout.addWidget(greet_bar)
         layout.addWidget(self._hline())
@@ -851,6 +877,19 @@ class HomePage(QWidget):
             f"color: {get_token('text_disabled')}; letter-spacing: 2px;"
         )
         tl.addWidget(self.grid_section_lbl)
+
+        tl.addSpacing(SP4)
+
+        from gui.components.utils.icons import make_icon
+        self.refresh_btn = QPushButton()
+        self.refresh_btn.setIcon(make_icon("autorenew"))
+        self.refresh_btn.setIconSize(QSize(12, 12))
+        self.refresh_btn.setFixedSize(28, 28)
+        self.refresh_btn.setToolTip("Refresh project list")
+        self.refresh_btn.setCursor(Qt.PointingHandCursor)
+        self.refresh_btn.clicked.connect(self.refresh_project_list)
+        tl.addWidget(self.refresh_btn, 0, Qt.AlignCenter)
+
         tl.addStretch()
 
         self._search_text = ""
@@ -861,11 +900,6 @@ class HomePage(QWidget):
         self.search_input.setMaximumWidth(280)
         self.search_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.search_input.setClearButtonEnabled(True)
-        self.search_input.setStyleSheet(
-            f"QLineEdit {{ min-height: 0; padding: 0 8px;"
-            f"  border-radius: {RADIUS_MD}px; border: 1px solid palette(mid); }}"
-            f"QLineEdit:focus {{ border: 1px solid {get_token('primary')}; padding: 0 7px; }}"
-        )
         self.search_input.textChanged.connect(self._on_search)
         tl.addWidget(self.search_input)
 
@@ -883,28 +917,32 @@ class HomePage(QWidget):
             btn.setFont(_f(FS_SM, FW_MEDIUM))
             btn.setCheckable(True)
             btn.setProperty("sort_key", key)
-            btn.setStyleSheet(btn_ghost_checkable(radius=RADIUS_MD))
             btn.clicked.connect(self._on_sort_btn)
             btn.setChecked(key == saved_sort)
             tl.addWidget(btn, alignment=Qt.AlignCenter)
             tl.addSpacing(SP2)
             self._sort_btns.append(btn)
 
-        # Ensure exactly one is checked (fallback if saved pref is stale)
         if not any(b.isChecked() for b in self._sort_btns):
             self._sort_btns[0].setChecked(True)
 
         layout.addWidget(toolbar)
         layout.addWidget(self._hline())
 
-        # ── Project grid list (fills all remaining space) ─────────────────
+        # ── Project grid list ─────────────────────────────────────────────
         self.grid_list = _GridList()
-        self.grid_list.setItemDelegate(_GridCardDelegate())
+        self.grid_list.setItemDelegate(_GridCardDelegate(self.grid_list))
         self.grid_list.setMouseTracking(True)
         self.grid_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.grid_list.setFrameShape(QFrame.NoFrame)
         self.grid_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.grid_list.setViewportMargins(SP8, SP4, SP8, SP4)
+        
+        self.grid_list.setViewMode(QListWidget.IconMode)
+        self.grid_list.setResizeMode(QListWidget.Adjust)
+        self.grid_list.setWrapping(True)
+        self.grid_list.setSpacing(SP4)
+        
         self.grid_list.setStyleSheet(
             "QListWidget { background: palette(window); border: none; }"
         )
@@ -916,9 +954,123 @@ class HomePage(QWidget):
         self.grid_list.pin_toggled.connect(self._toggle_pin_by_id)
         layout.addWidget(self.grid_list, stretch=1)
 
+        # ── Footer: Sponsors Area ──────────────────────────────────────────
+        self.footer = QWidget()
+        self.footer.setFixedHeight(120)
+        layout.addWidget(self.footer)
+        
+        fl = QHBoxLayout(self.footer)
+        fl.setContentsMargins(SP10, SP6, SP10, SP6)
+        
+        # Developed At Section
+        dev_v = QVBoxLayout()
+        dev_v.setSpacing(SP3)
+        dev_lbl = QLabel("DEVELOPED AT")
+        dev_lbl.setFont(_f(FS_XS, FW_BOLD))
+        dev_v.addWidget(dev_lbl)
+        self.iitb_logo = QLabel()
+        dev_v.addWidget(self.iitb_logo, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        fl.addLayout(dev_v)
+        
+        fl.addStretch()
+        
+        # Supported By Section
+        sup_v = QVBoxLayout()
+        sup_v.setSpacing(SP3)
+        sup_v.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        sup_lbl = QLabel("SUPPORTED BY")
+        sup_lbl.setFont(_f(FS_XS, FW_BOLD))
+        sup_lbl.setAlignment(Qt.AlignRight)
+        sup_v.addWidget(sup_lbl)
+        
+        sup_h = QHBoxLayout()
+        sup_h.setSpacing(SP8)
+        sup_h.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.cs_logo = QLabel()
+        self.mos_logo = QLabel()
+        sup_h.addWidget(self.cs_logo)
+        sup_h.addWidget(self.mos_logo)
+        sup_v.addLayout(sup_h)
+        fl.addLayout(sup_v)
+
+        self._refresh_styles()
+        theme_manager().theme_changed.connect(self._refresh_styles)
+
         return panel
 
     # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _set_svg_logo(self, label: QLabel, path: str, height: int):
+        """Helper to render a crisp SVG logo into a QLabel with no background."""
+        if not os.path.exists(path):
+            label.hide()
+            return
+        
+        label.show()
+        label.setStyleSheet("background: transparent; border: none;")
+        renderer = QSvgRenderer(path)
+        if not renderer.isValid():
+            return
+            
+        aspect = renderer.defaultSize().width() / max(1, renderer.defaultSize().height())
+        width = int(height * aspect)
+        
+        pixmap = QPixmap(width * 2, height * 2) # High DPI
+        pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+        
+        label.setPixmap(pixmap)
+        label.setFixedSize(width, height)
+        label.setScaledContents(True)
+
+    def _refresh_styles(self):
+        """Update theme-aware logos and dynamic QSS."""
+        from gui.themes import is_dark
+        is_dk = is_dark()
+        
+        # 1. Main Logo
+        main_logo = "gui/assets/logo/logo-3psLCCA.svg" if is_dk else "gui/assets/logo/logo-3psLCCA.svg"
+        self._set_svg_logo(self.logo_lbl, main_logo, 55)
+        
+        # 2. Footer: Developed At (IITB)
+        iitb = "gui/assets/logo/special/IITB_logo_dark.svg" if is_dk else "gui/assets/logo/special/IITB_logo_light.svg"
+        self._set_svg_logo(self.iitb_logo, iitb, 50)
+        
+        # 3. Footer: Supported By (ConstructSteel, MOS)
+        cs = "gui/assets/logo/special/ConstructSteel_dark.svg" if is_dk else "gui/assets/logo/special/ConstructSteel_light.svg"
+        mos = "gui/assets/logo/special/MOS_dark.svg" if is_dk else "gui/assets/logo/special/MOS_light.svg"
+        self._set_svg_logo(self.cs_logo, cs, 20)
+        self._set_svg_logo(self.mos_logo, mos, 40)
+
+        # 4. Refresh Button
+        self.refresh_btn.setStyleSheet(
+            f"QPushButton {{ border: 1px solid {get_token('surface_mid')}; border-radius: 14px; "
+            f"padding: 0; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; background: transparent; }} "
+            f"QPushButton:hover {{ border-color: {get_token('primary')}; background: {get_token('surface')}; }} "
+            f"QPushButton:pressed {{ background: {get_token('surface_pressed')}; }}"
+        )
+        
+        # 5. Text colors
+        muted = f"color: {get_token('text_disabled')}; letter-spacing: 1px;"
+        for lbl in self.footer.findChildren(QLabel):
+            if lbl.text() in ("DEVELOPED AT", "SUPPORTED BY"):
+                lbl.setStyleSheet(muted)
+        
+        self.grid_section_lbl.setStyleSheet(f"color: {get_token('text_disabled')}; letter-spacing: 2px;")
+        
+        self.search_input.setStyleSheet(
+            f"QLineEdit {{ border-radius: {RADIUS_MD}px; border: 1px solid palette(mid); padding: 0 8px; }}"
+            f"QLineEdit:focus {{ border: 1px solid {get_token('primary')}; }}"
+        )
+        
+        for btn in self._sort_btns:
+            btn.setStyleSheet(btn_ghost_checkable(radius=RADIUS_MD))
+            
+        self.footer.setStyleSheet(f"background: {get_token('surface')}; border: none;")
+        self._update_greeting()
 
     @staticmethod
     def _hline() -> QFrame:
@@ -941,20 +1093,14 @@ class HomePage(QWidget):
     def _update_greeting(self):
         profile = sm.get_profile()
         name = profile.get("display_name", "").strip()
-
-        # Fallback to system username if no name provided
         if not name:
-            # Get system username (fallback to 'User')
             try:
                 name = getpass.getuser()
             except Exception:
                 name = "User"
-
-            # Clean formatting
             name = name.strip().title() if name else "User"
 
         greet = _greeting()
-
         self.greeting_lbl.setText(
             f"<span style='font-size:{FS_MD}pt; font-weight:{FW_LIGHT};'>{greet},&nbsp;</span>"
             f"<span style='font-size:{FS_DISP}pt; font-weight:{FW_BOLD}; color:{get_token('primary')};'>{name}!</span>"
@@ -980,7 +1126,6 @@ class HomePage(QWidget):
     # ── Public API ────────────────────────────────────────────────────────────
 
     def set_card_loading(self, pid: str):
-        """Mark a project card as loading — shows animated 'Opening…' pill."""
         delegate = self.grid_list.itemDelegate()
         delegate._loading_pid = pid
         delegate._loading_dots = 0
@@ -997,7 +1142,6 @@ class HomePage(QWidget):
         self.grid_list.viewport().update()
 
     def clear_card_loading(self):
-        """Remove the loading state from any card."""
         if hasattr(self, "_loading_timer"):
             self._loading_timer.stop()
         delegate = self.grid_list.itemDelegate()
@@ -1009,48 +1153,32 @@ class HomePage(QWidget):
         self._active_project_id = project_id
 
     def refresh_project_list(self):
-        """Merge engine list + recent + pinned, then render both sidebar and grid."""
         engine_projects = SafeChunkEngine.list_all_projects()
-
-        # Build lookup by project_id
         by_id: dict[str, dict] = {p["project_id"]: dict(p) for p in engine_projects}
-
-        # Overlay open-window status
-        open_windows = {
-            win.project_id: win
-            for win in self.manager.windows
-            if win.project_id is not None
-        }
+        open_windows = {win.project_id: win for win in self.manager.windows if win.project_id is not None}
         for pid, win in open_windows.items():
             if pid in by_id:
                 by_id[pid]["status"] = "locked"
                 mem_name = win.controller.active_display_name
-                if mem_name:
-                    by_id[pid]["display_name"] = mem_name
+                if mem_name: by_id[pid]["display_name"] = mem_name
         for pid, proj in by_id.items():
-            if proj.get("status") == "locked" and pid not in open_windows:
-                proj["status"] = "ok"
-
-        # Merge recent open_count
+            if proj.get("status") == "locked" and pid not in open_windows: proj["status"] = "ok"
         recent_map = {r["project_id"]: r for r in sm.get_recent()}
         for pid, rdata in recent_map.items():
             if pid in by_id:
                 by_id[pid]["open_count"] = rdata["open_count"]
                 by_id[pid]["last_opened_at"] = rdata["last_opened_at"]
-
-        # Mark pinned
         pinned_ids = set(sm.get_pinned())
-        for pid in by_id:
-            by_id[pid]["pinned"] = pid in pinned_ids
-
+        for pid in by_id: by_id[pid]["pinned"] = pid in pinned_ids
         self._all_projects = list(by_id.values())
+        
+        # Explicitly re-apply current sort and filter
         self._render_grid()
 
     def _render_grid(self):
         self.grid_list.clear()
         sort_key = self._current_sort()
         projects = list(self._all_projects)
-
         if sort_key == "pinned":
             projects = [p for p in projects if p.get("pinned")]
             self.grid_section_lbl.setText("PINNED PROJECTS")
@@ -1058,56 +1186,67 @@ class HomePage(QWidget):
             projects.sort(key=lambda p: (p.get("display_name") or "").lower())
             self.grid_section_lbl.setText("ALL PROJECTS — A–Z")
         else:
-            recent_map = {r["project_id"]: r["last_opened_at"] for r in sm.get_recent()}
-            projects.sort(
-                key=lambda p: recent_map.get(p["project_id"])
-                or p.get("last_modified")
-                or "",
-                reverse=True,
-            )
+            # Sort by the most recent of either last_opened_at or last_modified
+            def get_latest_time(p):
+                # We want the highest (most recent) timestamp
+                t1 = p.get("last_opened_at") or ""
+                t2 = p.get("last_modified") or ""
+                return max(t1, t2)
+            
+            projects.sort(key=lambda p: (get_latest_time(p), (p.get("display_name") or "").lower()), reverse=True)
             self.grid_section_lbl.setText("RECENT PROJECTS")
-
-        # Search filter
         q = getattr(self, "_search_text", "").strip().lower()
         if q:
-            projects = [
-                p
-                for p in projects
-                if q in (p.get("display_name") or p.get("project_id", "")).lower()
-            ]
+            projects = [p for p in projects if q in (p.get("display_name") or p.get("project_id", "")).lower()]
             self.grid_section_lbl.setText(f"RESULTS FOR \u201c{q.upper()}\u201d")
-
+        # ── Handle Empty States ──────────────────────────────────────────
         if not projects:
             item = QListWidgetItem()
             item.setFlags(Qt.NoItemFlags)
-            item.setSizeHint(QSize(0, 220))
+            
+            # Use viewport dimensions for the empty state item
+            vw = self.grid_list.viewport().width()
+            vh = self.grid_list.viewport().height()
+            
+            # Use a larger minimum height (450px) to ensure no clipping
+            item.setSizeHint(QSize(max(300, vw - 40), max(450, vh - 40)))
             self.grid_list.addItem(item)
-            empty = _EmptyState(
-                "No Projects Yet" if not q else f'No results for "{q}"',
-                (
-                    "Click  + New Project  to get started."
-                    if not q
-                    else "Try a different search term."
-                ),
-                show_cta=not q,
-                manager=self.manager,
-            )
+
+            has_any = len(self._all_projects) > 0
+            
+            # Logic: Only show the center CTA if we are in 'Recent' view and have 0 projects total
+            if q:
+                head = "No matches found"
+                sub = f'We couldn\'t find any projects matching "{q}". Try adjusting your search.'
+                show_cta = False
+            elif sort_key == "pinned":
+                head = "Keep your favorites close"
+                sub = "Click the star icon \u2606 on any project card to pin it for quick access."
+                show_cta = False
+            elif sort_key == "name":
+                head = "No projects found"
+                sub = "There are no projects in your database yet."
+                show_cta = has_any == False
+            else:
+                # This is the default 'Recent' view
+                if has_any:
+                    head = "No recent projects"
+                    sub = "Your most recently opened projects will appear here."
+                    show_cta = False
+                else:
+                    head = None # Triggers Logo display in _EmptyState
+                    sub = "Start your first bridge life-cycle cost analysis by creating a new project."
+                    show_cta = True
+
+            empty = _EmptyState(head, sub, show_cta=show_cta, manager=self.manager)
             self.grid_list.setItemWidget(item, empty)
             return
 
-        delegate = self.grid_list.itemDelegate()
         for p in projects:
             item = QListWidgetItem()
             item.setData(Qt.UserRole, p)
-            h = (
-                delegate._card_h(p.get("status", "ok"))
-                if hasattr(delegate, "_card_h")
-                else CARD_H_NORM
-            )
-            item.setSizeHint(QSize(0, h))
+            item.setSizeHint(QSize(0, 78)) # Placeholder, delegate handles real size
             self.grid_list.addItem(item)
-
-    # ── Selection helpers ─────────────────────────────────────────────────────
 
     def _selected_pid_grid(self) -> str | None:
         item = self.grid_list.currentItem()
@@ -1116,10 +1255,7 @@ class HomePage(QWidget):
 
     def _open_from_grid(self):
         pid = self._selected_pid_grid()
-        if pid:
-            self.manager.open_project(project_id=pid)
-
-    # ── Context menus ─────────────────────────────────────────────────────────
+        if pid: self.manager.open_project(project_id=pid)
 
     def _show_grid_menu(self, pid: str, pos: QPoint):
         self._show_project_menu(pid, pos)
@@ -1129,274 +1265,145 @@ class HomePage(QWidget):
         proj = by_id.get(pid, {})
         display = proj.get("display_name") or pid
         is_pin = sm.is_pinned(pid)
-
         menu = QMenu(self)
         menu.addAction("Open", lambda: self.manager.open_project(project_id=pid))
         menu.addSeparator()
-
-        if is_pin:
-            menu.addAction("Unpin", lambda: self._toggle_pin(pid, False))
-        else:
-            menu.addAction("📌 Pin to top", lambda: self._toggle_pin(pid, True))
-
+        if is_pin: menu.addAction("Unpin", lambda: self._toggle_pin(pid, False))
+        else: menu.addAction("📌 Pin to top", lambda: self._toggle_pin(pid, True))
         menu.addSeparator()
         menu.addAction("Copy Name", lambda: QApplication.clipboard().setText(display))
         menu.addAction("Share / Export...", lambda: self._share_project(pid, display))
         menu.addAction("Rename", lambda: self._rename_by_pid(pid, display))
+        menu.addAction("Duplicate", lambda: self._duplicate_project(pid, display))
         menu.addAction("Info", lambda: self._show_project_info(pid))
         menu.addSeparator()
         menu.addAction("Delete", lambda: self._delete_pid(pid, display))
         menu.exec(pos)
 
     def _toggle_pin(self, pid: str, pin: bool):
-        if pin:
-            sm.pin(pid)
-        else:
-            sm.unpin(pid)
+        if pin: sm.pin(pid)
+        else: sm.unpin(pid)
         self.manager.refresh_all_home_screens()
 
     def _toggle_pin_by_id(self, pid: str):
-        if sm.is_pinned(pid):
-            sm.unpin(pid)
-        else:
-            sm.pin(pid)
+        if sm.is_pinned(pid): sm.unpin(pid)
+        else: sm.pin(pid)
         self.manager.refresh_all_home_screens()
-
-    # ── Actions ───────────────────────────────────────────────────────────────
-
-    def _open_selected(self):
-        pid = self._selected_pid_grid()
-        if pid:
-            self.manager.open_project(project_id=pid)
-
-    def _delete_selected(self):
-        pid = self._selected_pid_grid()
-        if not pid:
-            QMessageBox.information(self, "Delete", "Select a project first.")
-            return
-        by_id = {p["project_id"]: p for p in self._all_projects}
-        display = by_id.get(pid, {}).get("display_name") or pid
-        self._delete_pid(pid, display)
 
     def _delete_pid(self, pid: str, display: str):
         if self.manager.is_project_open(pid):
-            QMessageBox.warning(
-                self,
-                "Cannot Delete",
-                "This project is currently open.\nClose it first, then delete it.",
-            )
+            QMessageBox.warning(self, "Cannot Delete", "Close project first.")
             return
-        result = QMessageBox.warning(
-            self,
-            "Delete Project",
-            f"Permanently delete '{display}'?\n\nThis cannot be undone.",
-            QMessageBox.Ok | QMessageBox.Cancel,
-            QMessageBox.Cancel,
-        )
-        if result == QMessageBox.Ok:
+        if QMessageBox.warning(self, "Delete Project", f"Delete '{display}'?", QMessageBox.Ok | QMessageBox.Cancel) == QMessageBox.Ok:
             engine, _ = SafeChunkEngine.open(pid)
-            if engine:
-                engine.delete_project(confirmed=True)
+            if engine: engine.delete_project(confirmed=True)
             sm.unpin(pid)
             self.manager.refresh_all_home_screens()
 
     def _rename_by_pid(self, pid: str, current_name: str):
         if self.manager.is_project_open(pid):
-            QMessageBox.warning(
-                self,
-                "Cannot Rename",
-                "This project is currently open.\nClose it first, then rename it.",
-            )
+            QMessageBox.warning(self, "Cannot Rename", "Close project first.")
             return
-        new_name, ok = QInputDialog.getText(
-            self, "Rename Project", "New name:", text=current_name
-        )
-        new_name = new_name.strip()
-        if not ok or not new_name or new_name == current_name:
-            return
+        new_name, ok = QInputDialog.getText(self, "Rename Project", "New name:", text=current_name)
+        if not ok or not new_name.strip() or new_name == current_name: return
         engine, status = SafeChunkEngine.open(pid)
-        if status != "SUCCESS" or engine is None:
-            QMessageBox.warning(
-                self, "Rename Failed", f"Could not open project.\n\n{status}"
-            )
+        if status == "SUCCESS" and engine:
+            engine.rename(new_name.strip())
+            engine.detach()
+            self.manager.refresh_all_home_screens()
+
+    def _duplicate_project(self, pid: str, current_name: str):
+        """Create a clone of the project with ' - Copy' appended to name."""
+        if self.manager.is_project_open(pid):
+            QMessageBox.warning(self, "Cannot Duplicate", "Please close the project before duplicating.")
             return
-        engine.rename(new_name)
-        engine.detach()
-        self.manager.refresh_all_home_screens()
+            
+        new_display_name = f"{current_name} - Copy"
+        # Generate a unique ID based on the new name
+        timestamp = datetime.now().strftime("%H%M%S")
+        new_pid = re.sub(r"[^\w\-]", "_", new_display_name)[:30].strip("_") + f"_{timestamp}"
+        
+        # 1. Open source to get all data
+        src_engine, status = SafeChunkEngine.open(pid)
+        if status != "SUCCESS" or not src_engine:
+            QMessageBox.warning(self, "Duplicate Failed", "Could not read source project.")
+            return
+            
+        try:
+            # 2. Create target project
+            dest_engine, d_status = SafeChunkEngine.new(project_id=new_pid, display_name=new_display_name)
+            if d_status != "SUCCESS" or not dest_engine:
+                QMessageBox.warning(self, "Duplicate Failed", "Could not create new project entry.")
+                src_engine.detach()
+                return
+                
+            # 3. Clone all chunks and blobs
+            # We use the internal engine structures to copy files safely
+            src_dir = src_engine.project_path
+            dest_dir = dest_engine.project_path
+            
+            # Copy chunks and blobs folders
+            for sub in ["chunks", "blobs"]:
+                s = src_dir / sub
+                d = dest_dir / sub
+                if s.exists():
+                    shutil.copytree(s, d, dirs_exist_ok=True)
+            
+            # Finalize: detach both
+            src_engine.detach()
+            dest_engine.detach()
+            
+            # 4. Briefly open the NEW one to update its last_modified timestamp
+            # and register it in the recent list so it appears at the top.
+            final_engine, _ = SafeChunkEngine.open(new_pid)
+            if final_engine:
+                sm.record_open(new_pid)
+                final_engine.detach()
+            
+            self.manager.refresh_all_home_screens()
+            QMessageBox.information(self, "Success", f"Project duplicated as:\n{new_display_name}")
+            
+        except Exception as e:
+            QMessageBox.warning(self, "Duplicate Failed", f"Error during copy: {str(e)}")
+            if 'src_engine' in locals(): src_engine.detach()
 
     def _share_project(self, pid: str, display: str):
         if self.manager.is_project_open(pid):
-            QMessageBox.warning(
-                self,
-                "Cannot Export",
-                "This project is currently open.\nClose it first, then export it.",
-            )
+            QMessageBox.warning(self, "Cannot Export", "Close project first.")
             return
-        dest, _ = QFileDialog.getSaveFileName(
-            self, "Export Project", f"{display}.3psLCCA", "3psLCCA Archive (*.3psLCCA)"
-        )
-        if not dest:
-            return
+        dest, _ = QFileDialog.getSaveFileName(self, "Export Project", f"{display}.3psLCCA", "3psLCCA Archive (*.3psLCCA)")
+        if not dest: return
         engine, status = SafeChunkEngine.open(pid)
-        if status != "SUCCESS" or engine is None:
-            QMessageBox.warning(
-                self, "Export Failed", f"Could not open project.\n\n{status}"
-            )
-            return
-        zip_name = engine.create_checkpoint(
-            label="export", notes="Exported from 3psLCCA", include_blobs=True
-        )
-        if zip_name is None:
+        if status == "SUCCESS" and engine:
+            zip_name = engine.create_checkpoint(label="export", include_blobs=True)
+            if zip_name:
+                shutil.copy2(str(engine.checkpoint_manual / zip_name), dest)
+                QMessageBox.information(self, "Export Complete", f"Exported to:\n{dest}")
             engine.detach()
-            QMessageBox.warning(
-                self, "Export Failed", "Could not create export archive."
-            )
-            return
-        src = engine.checkpoint_manual / zip_name
-        engine.detach()
-        try:
-            shutil.copy2(str(src), dest)
-            QMessageBox.information(
-                self, "Export Complete", f"Project exported to:\n{dest}"
-            )
-        except Exception as e:
-            QMessageBox.warning(self, "Export Failed", str(e))
 
     def _load_shared_project(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Load Shared Project", "", "3psLCCA Archive (*.3psLCCA)"
-        )
-        if not path:
-            return
-        if not zipfile.is_zipfile(path):
-            QMessageBox.warning(self, "Invalid File", "Not a valid 3psLCCA archive.")
-            return
+        path, _ = QFileDialog.getOpenFileName(self, "Load Project", "", "3psLCCA Archive (*.3psLCCA)")
+        if not path: return
         try:
             with zipfile.ZipFile(path, "r") as zf:
-                names = zf.namelist()
-                if "checkpoint_meta.json" not in names:
-                    QMessageBox.warning(
-                        self, "Invalid Archive", "Missing checkpoint metadata."
-                    )
-                    return
                 meta = json.loads(zf.read("checkpoint_meta.json").decode("utf-8"))
-                if not meta.get("engine_ver"):
-                    QMessageBox.warning(
-                        self, "Invalid Archive", "Missing engine signature."
-                    )
-                    return
-                archive_pid = meta.get("project_id", "")
-                if not isinstance(archive_pid, str) or not archive_pid.strip():
-                    QMessageBox.warning(
-                        self, "Invalid Archive", "Invalid project ID in archive."
-                    )
-                    return
-                LCCA_MAGIC = b"\x4c\x43\x43\x41"
-                chunk_entries = [
-                    n for n in names if n.startswith("chunks/") and n.endswith(".lcca")
-                ]
-                if chunk_entries:
-                    first_chunk = zf.read(chunk_entries[0])
-                    if first_chunk[:4] != LCCA_MAGIC:
-                        QMessageBox.warning(
-                            self, "Invalid Archive", "Chunk data format mismatch."
-                        )
-                        return
-                display_name = None
-                if "version.json" in names:
-                    data = json.loads(zf.read("version.json").decode("utf-8"))
-                    if not data.get("engine_version"):
-                        QMessageBox.warning(
-                            self, "Invalid Archive", "Missing engine version."
-                        )
-                        return
-                    display_name = (
-                        data.get("display_name") or data.get("project_id") or ""
-                    ).strip()
-                if not display_name:
-                    display_name = archive_pid.strip()
-        except zipfile.BadZipFile:
-            QMessageBox.warning(
-                self, "Invalid File", "File could not be opened as a 3psLCCA archive."
-            )
-            return
+                display_name = meta.get("display_name", "Imported Project")
+                project_id = re.sub(r"[^\w\-]", "_", display_name)[:40].strip("_")
+                engine, status = SafeChunkEngine.new(project_id=project_id, display_name=display_name)
+                if engine:
+                    shutil.copy2(path, engine.checkpoint_manual / os.path.basename(path))
+                    engine.restore_checkpoint(os.path.basename(path))
+                    engine.detach()
+                    self.manager.refresh_all_home_screens()
         except Exception as e:
-            QMessageBox.warning(self, "Load Failed", f"Unexpected error:\n{e}")
-            return
-
-        display_name = display_name or "Imported Project"
-        project_id = (
-            re.sub(r"[^\w\-]", "_", display_name)[:40].strip("_") or "imported_project"
-        )
-        engine, status = SafeChunkEngine.new(
-            project_id=project_id, display_name=display_name
-        )
-        if status != "SUCCESS" or engine is None:
-            QMessageBox.warning(
-                self, "Load Failed", f"Could not create project:\n{status}"
-            )
-            return
-        pid = engine.project_id
-        zip_name = os.path.basename(path)
-        dest_zip = engine.checkpoint_manual / zip_name
-        try:
-            shutil.copy2(path, dest_zip)
-            sha = hashlib.sha256(dest_zip.read_bytes()).hexdigest()
-            (engine.checkpoint_manual / f"{zip_name}.sha256").write_text(sha)
-        except Exception as e:
-            engine.detach()
-            QMessageBox.warning(self, "Load Failed", f"Could not copy archive:\n{e}")
-            return
-        success = engine.restore_checkpoint(zip_name)
-        engine.detach()
-        if not success:
-            QMessageBox.warning(self, "Load Failed", "Archive could not be restored.")
-            return
-        self.manager.refresh_all_home_screens()
-        result = QMessageBox.question(
-            self,
-            "Project Loaded",
-            f"'{display_name}' loaded successfully.\n\nOpen it now?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes,
-        )
-        if result == QMessageBox.Yes:
-            self.manager.open_project(project_id=pid)
+            QMessageBox.warning(self, "Load Failed", str(e))
 
     def _show_project_info(self, pid: str):
         info = SafeChunkEngine.get_project_info(pid)
-        if not info:
-            QMessageBox.warning(self, "Info", "Could not read project info.")
-            return
-        dlg = QDialog(self)
-        dlg.setWindowTitle(f"Project Info — {info.get('display_name', pid)}")
-        dlg.setMinimumWidth(360)
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(12)
-        form = QFormLayout()
-        form.setSpacing(6)
-        rows = [
-            ("Project ID", info.get("project_id", "")),
-            ("Display Name", info.get("display_name", "")),
-            ("Status", info.get("status", "").capitalize()),
-            ("Created", info.get("created_at", "—")),
-            ("Last Modified", info.get("last_modified", "—")),
-            ("Chunks", str(info.get("chunk_count", 0))),
-            ("Checkpoints", str(info.get("checkpoint_count", 0))),
-            ("Last Checkpoint", info.get("last_checkpoint_date") or "—"),
-            ("Size", f"{info.get('size_kb', 0)} KB"),
-            ("Clean Close", "Yes" if info.get("clean_close") else "No"),
-            ("Engine Version", info.get("engine_version", "—")),
-        ]
-        for label, value in rows:
-            lbl = QLabel(value)
-            lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            form.addRow(f"{label}:", lbl)
-        layout.addLayout(form)
-        close_btn = QPushButton("Close")
-        close_btn.clicked.connect(dlg.accept)
-        layout.addWidget(close_btn)
-        dlg.exec()
-
-
+        if not info: return
+        dlg = QDialog(self); dlg.setWindowTitle("Project Info"); dlg.setMinimumWidth(360)
+        layout = QVBoxLayout(dlg); form = QFormLayout()
+        for k, v in [("ID", info.get("project_id")), ("Name", info.get("display_name")), ("Status", info.get("status")), 
+                     ("Created", info.get("created_at")), ("Modified", info.get("last_modified")), ("Size", f"{info.get('size_kb')} KB")]:
+            lbl = QLabel(str(v)); lbl.setTextInteractionFlags(Qt.TextSelectableByMouse); form.addRow(f"{k}:", lbl)
+        layout.addLayout(form); btn = QPushButton("Close"); btn.clicked.connect(dlg.accept); layout.addWidget(btn); dlg.exec()

@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QBrush, QColor
-from gui.themes import get_token
+from PySide6.QtGui import QBrush, QColor, QPen
+from gui.themes import get_token, theme_manager
 
 from ...base_widget import ScrollableForm
 from ...utils.form_builder.form_definitions import FieldDef
@@ -20,6 +20,8 @@ from ...utils.form_builder.form_builder import build_form
 from ...utils.remarks_editor import RemarksEditor
 from ...utils.display_format import fmt, DECIMAL_PLACES
 from ...utils.table_widgets import TableDoubleSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
+
+from ...utils.validation_helpers import confirm_clear_all
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -85,6 +87,8 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
         self._vpd_items: dict[str, QTableWidgetItem] = {}
         self._emission_items: dict[str, QTableWidgetItem] = {}
 
+        theme_manager().theme_changed.connect(self._refresh_theme)
+
         _L = Qt.AlignLeft  | Qt.AlignVCenter
         _R = Qt.AlignRight | Qt.AlignVCenter
         for col, (label, align) in enumerate([
@@ -131,6 +135,14 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
             em_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.setItem(row, _COL_EMISSIONS, em_item)
             self._emission_items[key] = em_item
+
+    def _refresh_theme(self):
+        """Force repaint of cell widgets and update dynamic property styles."""
+        for sb in self._factors.values():
+            sb.style().unpolish(sb)
+            sb.style().polish(sb)
+            sb.update()
+        self.viewport().update()
 
     def sizeHint(self):
         header_h = self.horizontalHeader().height() or 36
@@ -210,19 +222,15 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
         for col in range(self.columnCount()):
             item = self.item(row, col)
             if item:
-                if is_zero:
-                    item.setBackground(_YELLOW_BG)
-                    item.setForeground(_YELLOW_FG)
-                else:
-                    item.setBackground(QBrush())
-                    item.setForeground(QBrush())
+                # Use dynamic property for row highlighting
+                item.setData(Qt.UserRole + 1, is_zero)
+        
         sb = self._factors[key]
-        if is_zero:
-            sb.setStyleSheet(
-                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} background-color: {get_token('cell-warn-bg')}; color: {get_token('warning')}; }}"
-            )
-        else:
-            sb.setStyleSheet("")
+        # Use dynamic property so QSS handles the theme-aware colors
+        sb.setProperty("invalid", is_zero)
+        sb.style().unpolish(sb)
+        sb.style().polish(sb)
+        sb.update()
 
 
 # ── Main Widget ───────────────────────────────────────────────────────────────
@@ -237,6 +245,12 @@ class TrafficEmissions(ScrollableForm):
         # Re-run mode check whenever bridge_data or traffic_data changes
         if self.controller and hasattr(self.controller, "chunk_updated"):
             self.controller.chunk_updated.connect(self._on_chunk_updated)
+        
+        theme_manager().theme_changed.connect(self._refresh_theme)
+
+    def _refresh_theme(self):
+        self._warning_label.setStyleSheet(f"color: {get_token('danger')};")
+        self.update()
 
     def _on_chunk_updated(self, chunk_name: str):
         if chunk_name in ("bridge_data", "traffic_and_road_data"):
@@ -544,6 +558,9 @@ class TrafficEmissions(ScrollableForm):
     # ── Clear All ─────────────────────────────────────────────────────────────
 
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         self._emissions_table.load_factors({})
         if hasattr(self, "total_direct_emissions"):
             self.total_direct_emissions.blockSignals(True)

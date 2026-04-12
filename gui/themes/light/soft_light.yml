@@ -20,7 +20,7 @@ palette:
   info:            "#3b82f6"
 
 state:
-  hover:    0.06
+  hover:    0.50
   pressed:  0.12
   focus:    0.18
   disabled: 0.38

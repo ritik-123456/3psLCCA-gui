@@ -178,10 +178,7 @@ class RollbackDialog(QDialog):
         result = QMessageBox.warning(
             self,
             "Confirm Rollback",
-            f"Roll back '{chunk_name}' to:\n\n"
-            f"  {opt['label']} — {opt['saved_at']}\n\n"
-            "This will overwrite the current version of this chunk.\n"
-            "All other chunks are unaffected.",
+            f"Roll back '{chunk_name}' to '{opt['label']}' ({opt['saved_at']})?\n\nThis replaces the current version. Other chunks are not affected.",
             QMessageBox.Ok | QMessageBox.Cancel,
             QMessageBox.Cancel,
         )
@@ -193,8 +190,7 @@ class RollbackDialog(QDialog):
             QMessageBox.information(
                 self,
                 "Rollback Complete",
-                f"'{chunk_name}' has been rolled back to '{opt['label']}'.\n\n"
-                "Reload the relevant page to see the restored data.",
+                f"'{chunk_name}' rolled back to '{opt['label']}'.",
             )
             # Refresh version list to reflect new state
             self._load_chunks()
@@ -204,7 +200,7 @@ class RollbackDialog(QDialog):
             QMessageBox.critical(
                 self,
                 "Rollback Failed",
-                "Could not roll back this chunk. Check the engine logs for details.",
+                "Could not roll back this chunk.",
             )
 
     # ── Helpers ───────────────────────────────────────────────────────────────

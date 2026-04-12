@@ -51,8 +51,10 @@ from PySide6.QtWidgets import (
     QAbstractSpinBox,
     QComboBox,
     QLineEdit,
+    QMessageBox,
     QTextEdit,
     QToolTip,
+    QWidget,
 )
 
 from .form_builder.form_definitions import FieldDef
@@ -120,6 +122,21 @@ def clear_field_styles(fields: list, widget_owner, skip_keys: set = None):
         widget = getattr(widget_owner, f.key, None)
         if widget:
             _clear_border_style(widget)
+
+
+def confirm_clear_all(parent: QWidget) -> bool:
+    """Show a standardized confirmation dialog for 'Clear All' actions.
+    Returns True if the user confirmed, False otherwise.
+    """
+    reply = QMessageBox.question(
+        parent,
+        "Clear All Data",
+        "This will reset all fields on this page to their default values. "
+        "This action cannot be undone.\n\nContinue?",
+        QMessageBox.Yes | QMessageBox.No,
+        QMessageBox.No,
+    )
+    return reply == QMessageBox.Yes
 
 
 # ── Centralised form validation ───────────────────────────────────────────────

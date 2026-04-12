@@ -235,7 +235,7 @@ def parse_excel(path: str) -> dict[str, list[dict]]:
     except PermissionError:
         raise ValueError(
             "Could not open the file — it may be open in Excel or another application. "
-            "Please close it and try again."
+            "Close it and try again."
         )
     except Exception as exc:
         raise ValueError(f"Could not open file: {exc}") from exc
@@ -1667,7 +1667,7 @@ class ImportPreviewWindow(QDialog):
     def _show_import_result(self, imported: int, skipped: int, failures: list[str]):
         if not failures:
             QMessageBox.information(
-                self, "Import Complete", f"{imported} row(s) imported successfully."
+                self, "Import Complete", f"{imported} row(s) imported."
             )
             return
 

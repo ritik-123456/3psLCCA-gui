@@ -18,71 +18,17 @@ from PySide6.QtGui import QFontDatabase, QIcon
 # Custom UI Components and Managers
 from gui.components.splash_screen import SplashScreen
 from gui.project_manager import ProjectManager
-from gui.themes import get_light_theme, get_dark_theme, resolve_is_dark, track_mode
+from gui.themes import reapply as _reapply
 import ctypes
 from gui.components.utils.unit_resolver import load_custom_units
 
-_QSS_PATH = os.path.join("gui", "assets", "themes", "main.qss")
-
-
-def _is_dark(scheme=None) -> bool:
-    """Return True if the OS is in dark mode."""
-    try:
-        if scheme == Qt.ColorScheme.Dark:
-            return True
-        if scheme == Qt.ColorScheme.Light:
-            return False
-    except AttributeError:
-        pass
-
-    # Windows registry fallback
-    try:
-        import winreg
-        key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
-        )
-        val, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
-        winreg.CloseKey(key)
-        return val == 0
-    except Exception:
-        pass
-
-    return False
-
-
-def _apply_theme(scheme=None, app: QApplication = None) -> None:
-    if app is None:
-        app = QApplication.instance()
-    raw_dark = _is_dark(scheme)
-    is_dark = resolve_is_dark(raw_dark)
-
-    # Update global tracking
-    track_mode(is_dark)
-    palette, tokens, _ = get_dark_theme() if is_dark else get_light_theme()
-    app.setPalette(palette)
-
-    if os.path.exists(_QSS_PATH):
-        try:
-            with open(_QSS_PATH, encoding="utf-8") as f:
-                qss = f.read()
-
-            # Sort tokens by length (longest first) to avoid partial replacements
-            # (e.g., substituting 'primary' shouldn't break '$primary-hover')
-            sorted_tokens = sorted(tokens.items(), key=lambda x: len(x[0]), reverse=True)
-            for token, value in sorted_tokens:
-                qss = qss.replace(f"${token}", value)
-
-            app.setStyleSheet(qss)
-        except Exception as e:
-            print(f"Warning: Could not reload stylesheet: {e}")
 
 
 # ── Global UI Behavior Overrides ──────────────────────────────────────────────
 
 
 class _ComboItemStyle(QProxyStyle):
-    """Enforces minimum item height in combo popups for Windows."""
+    """Enforces minimum item height in combo popups and removes the harsh OS drop shadow."""
 
     _MIN_H = 36
 
@@ -91,6 +37,25 @@ class _ComboItemStyle(QProxyStyle):
         if ct == QStyle.ContentsType.CT_ItemViewItem and size.height() < self._MIN_H:
             size.setHeight(self._MIN_H)
         return size
+
+    def styleHint(self, hint, opt=None, widget=None, returnData=None):
+        if hint == QStyle.SH_ComboBox_Popup:
+            return 0  # keep combobox-popup: 0 behaviour
+        return super().styleHint(hint, opt, widget, returnData)
+
+    def drawComplexControl(self, cc, opt, p, widget=None):
+        super().drawComplexControl(cc, opt, p, widget)
+        # Remove OS drop shadow from the popup view after it is shown
+        if cc == QStyle.CC_ComboBox and widget is not None:
+            view = getattr(widget, "view", None)
+            if callable(view):
+                v = view()
+                if v and v.window():
+                    w = v.window()
+                    flags = w.windowFlags()
+                    if not (flags & Qt.NoDropShadowWindowHint):
+                        w.setWindowFlags(flags | Qt.NoDropShadowWindowHint)
+                        w.show()
 
 
 class _TableRowSelectFilter(QObject):
@@ -163,7 +128,7 @@ def main():
 
     # Initialize Style and Theme before showing Splash
     app.setStyle(_ComboItemStyle("Fusion"))
-    _apply_theme(app.styleHints().colorScheme(), app)
+    _reapply(app)
 
     # Show Custom Splash Screen
     splash = SplashScreen()
@@ -206,7 +171,7 @@ def main():
 
     # Runtime Theme Switching (Qt 6.5+)
     try:
-        app.styleHints().colorSchemeChanged.connect(lambda s: _apply_theme(s, app))
+        app.styleHints().colorSchemeChanged.connect(lambda s: _reapply(app))
     except AttributeError:
         pass
 

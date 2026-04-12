@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, Signal
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
 
 from ..utils.doc_handler import make_doc_opener
 _DOC_OPENER = make_doc_opener("demolition")
@@ -117,6 +117,9 @@ class Demolition(ScrollableForm):
         self._on_field_changed()
 
     def clear_all(self):
+        if not confirm_clear_all(self):
+            return
+
         for entry in DEMOLITION_FIELDS:
             if isinstance(entry, Section):
                 continue
@@ -127,6 +130,8 @@ class Demolition(ScrollableForm):
                 widget.setValue(widget.minimum())
             elif isinstance(widget, QComboBox):
                 widget.setCurrentIndex(0)
+            elif hasattr(widget, "clear"):
+                widget.clear()
             widget.setStyleSheet("")
         self._on_field_changed()
 
@@ -146,3 +151,5 @@ class Demolition(ScrollableForm):
     def _on_field_changed(self):
         super()._on_field_changed()
         self.created.emit()
+
+

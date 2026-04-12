@@ -723,7 +723,7 @@ class _SaveToCustomDBDialog(QDialog):
 
     def _on_save(self):
         if not self.selected_name():
-            QMessageBox.warning(self, "Missing Name", "Please enter a database name.")
+            QMessageBox.warning(self, "Missing Name", "Enter a database name to continue.")
             return
         self.accept()
 
@@ -1649,7 +1649,7 @@ class MaterialDialog(QDialog):
             QMessageBox.warning(
                 self,
                 "Missing Name",
-                "Please enter a material name before saving to a custom database.",
+                "A material name is required before saving.",
             )
             return
 
@@ -2080,7 +2080,7 @@ class MaterialDialog(QDialog):
                 reply = QMessageBox.warning(
                     self,
                     "Emission Factor",
-                    "Emission factor is zero or empty — carbon calculation will be excluded.\n\nContinue?",
+                    "Emission factor is 0 — carbon cost will be skipped.\n\nContinue?",
                     QMessageBox.Yes | QMessageBox.No,
                 )
                 if reply == QMessageBox.No:
@@ -2090,7 +2090,7 @@ class MaterialDialog(QDialog):
                 reply = QMessageBox.warning(
                     self,
                     "Conversion Factor",
-                    "Conversion factor is zero — carbon calculation will be excluded.\n\nContinue?",
+                    "Conversion factor is 0 — carbon cost will be skipped.\n\nContinue?",
                     QMessageBox.Yes | QMessageBox.No,
                 )
                 if reply == QMessageBox.No:
@@ -2105,8 +2105,7 @@ class MaterialDialog(QDialog):
                     res = QMessageBox.warning(
                         self,
                         "Check Conversion Factor",
-                        f"Material dimension ({mat_dim}) and carbon unit dimension ({denom_dim}) differ.\n"
-                        f"Conversion factor is 1.0 — this is likely incorrect.\n\nContinue anyway?",
+                        f"Unit mismatch: material is {mat_dim}, carbon unit is {denom_dim}.\nConversion factor is 1.0 — is this correct?\n\nContinue?",
                         QMessageBox.Yes | QMessageBox.No,
                     )
                     if res == QMessageBox.No:
