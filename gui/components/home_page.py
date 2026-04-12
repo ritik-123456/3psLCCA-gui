@@ -876,7 +876,7 @@ class HomePage(QWidget):
         self.grid_section_lbl.setStyleSheet(
             f"color: {get_token('text_disabled')}; letter-spacing: 2px;"
         )
-        tl.addWidget(self.grid_section_lbl)
+        tl.addWidget(self.grid_section_lbl, 0, Qt.AlignVCenter)
 
         tl.addSpacing(SP4)
 
@@ -888,7 +888,7 @@ class HomePage(QWidget):
         self.refresh_btn.setToolTip("Refresh project list")
         self.refresh_btn.setCursor(Qt.PointingHandCursor)
         self.refresh_btn.clicked.connect(self.refresh_project_list)
-        tl.addWidget(self.refresh_btn, 0, Qt.AlignCenter)
+        tl.addWidget(self.refresh_btn, 0, Qt.AlignVCenter)
 
         tl.addStretch()
 
@@ -901,7 +901,7 @@ class HomePage(QWidget):
         self.search_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self._on_search)
-        tl.addWidget(self.search_input)
+        tl.addWidget(self.search_input, 0, Qt.AlignVCenter)
 
         tl.addSpacing(SP4)
 
@@ -919,7 +919,7 @@ class HomePage(QWidget):
             btn.setProperty("sort_key", key)
             btn.clicked.connect(self._on_sort_btn)
             btn.setChecked(key == saved_sort)
-            tl.addWidget(btn, alignment=Qt.AlignCenter)
+            tl.addWidget(btn, 0, Qt.AlignVCenter)
             tl.addSpacing(SP2)
             self._sort_btns.append(btn)
 

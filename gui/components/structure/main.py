@@ -180,13 +180,12 @@ class StructureTabView(QWidget):
             # Entering Trash View
             self.trash_view.on_refresh()
             self.content_stack.setCurrentIndex(1)
-            self.update_trash_count()
-            self.trash_btn.setStyleSheet(f"font-weight: {get_token('weight-bold')}; color: {get_token('success')};")
         else:
             # Returning to Work View
             self.content_stack.setCurrentIndex(0)
-            self.trash_btn.setStyleSheet("")
             self.on_refresh()
+        
+        self.update_trash_count()
 
     def update_trash_count(self):
         """Calculates total trashed items and updates the button text."""
@@ -196,7 +195,10 @@ class StructureTabView(QWidget):
         # Change button text if we are currently inside the trash view
         if self.content_stack.currentIndex() == 1:
             self.trash_btn.setText("Back to Work")
+            self.trash_btn.setStyleSheet(f"color: {get_token('success')};")
             return
+        
+        self.trash_btn.setStyleSheet("")
 
         total_count = 0
         chunks = [

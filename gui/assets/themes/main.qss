@@ -33,9 +33,9 @@ QTextEdit,
 QPlainTextEdit {
     background-color: $base;
     border: 1px solid $surface_mid;
-    border-radius: 6px;
-    padding: 5px 10px;
-    min-height: 32px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    min-height: 36px;
     color: $text;
     selection-background-color: $primary;
     selection-color: $text-on-primary;
@@ -50,7 +50,7 @@ QLineEdit:focus,
 QTextEdit:focus,
 QPlainTextEdit:focus {
     border: 2px solid $primary;
-    padding: 5px 11px;
+    padding: 6px 13px;
 }
 
 QLineEdit:read-only,
@@ -72,9 +72,9 @@ QSpinBox,
 QDoubleSpinBox {
     background-color: $base;
     border: 1px solid $surface_mid;
-    border-radius: 6px;
-    padding: 5px 10px;
-    min-height: 32px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    min-height: 36px;
     color: $text;
 }
 
@@ -86,7 +86,7 @@ QDoubleSpinBox:hover {
 QSpinBox:focus,
 QDoubleSpinBox:focus {
     border: 2px solid $primary;
-    padding: 5px 11px;
+    padding: 6px 13px;
 }
 
 QSpinBox:disabled,
@@ -219,9 +219,9 @@ TableLineEdit:disabled {
 QComboBox {
     background-color: $base;
     border: 1px solid $surface_mid;
-    border-radius: 6px;
-    padding: 5px 32px 5px 10px;
-    min-height: 32px;
+    border-radius: 8px;
+    padding: 6px 36px 6px 12px;
+    min-height: 36px;
     color: $text;
     combobox-popup: 0;
 }
@@ -232,7 +232,7 @@ QComboBox:hover {
 
 QComboBox:focus {
     border: 2px solid $primary;
-    padding: 5px 35px 5px 11px;
+    padding: 6px 37px 6px 13px;
 }
 
 QComboBox:disabled {
@@ -274,7 +274,7 @@ QComboBox::down-arrow:disabled {
 QComboBox QAbstractItemView {
     background-color: $base;
     border: 1px solid $surface;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 6px 0;
     outline: none;
     selection-background-color: transparent;
@@ -282,7 +282,7 @@ QComboBox QAbstractItemView {
 }
 
 QComboBox QAbstractItemView::item {
-    padding: 10px 16px;
+    padding: 8px 16px;
     color: $text;
     border: none;
     border-radius: 4px;
@@ -304,7 +304,7 @@ QComboBox QAbstractItemView::item:selected {
 
 /* ── Form controls — check box ──────────────────────────────────────────── */
 QCheckBox {
-    spacing: 8px;
+    spacing: 12px;
     color: $text;
 }
 
@@ -341,7 +341,7 @@ QCheckBox:disabled {
 
 /* ── Form controls — radio button ───────────────────────────────────────── */
 QRadioButton {
-    spacing: 8px;
+    spacing: 12px;
     color: $text;
 }
 
@@ -380,9 +380,9 @@ QRadioButton:disabled {
 QPushButton {
     background-color: $base;
     border: 1px solid $surface_mid;
-    border-radius: 6px;
-    padding: 5px 12px;
-    min-height: 32px;
+    border-radius: 8px;
+    padding: 6px 16px;
+    min-height: 36px;
     color: $text;
     font-weight: $weight-medium;
 }
@@ -439,7 +439,7 @@ QTabBar::tab {
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 8px 14px;
+    padding: 10px 18px;
     margin-right: 4px;
     color: $text;
     font-weight: $weight-medium;
@@ -455,7 +455,7 @@ QTabBar::tab:selected {
 QTabBar::tab:hover:!selected {
     color: $text;
     background-color: $surface;
-    border-radius: 6px 6px 0 0;
+    border-radius: 8px 8px 0 0;
 }
 
 /* ── Tree / sidebar ─────────────────────────────────────────────────────── */
@@ -475,11 +475,11 @@ QTableView {
     alternate-background-color: $window;
     gridline-color: $surface_mid;
     border: 1px solid $surface_mid;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 QTableView::item {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: none;
     color: $text;
 }
@@ -515,7 +515,7 @@ QHeaderView::section {
     border: none;
     border-bottom: 2px solid $surface_mid;
     border-right: 1px solid $surface_mid;
-    padding: 6px 10px;
+    padding: 8px 12px;
     font-weight: $weight-semibold;
     font-size: 11px;
     text-transform: uppercase;
@@ -585,8 +585,8 @@ QMenuBar {
 }
 
 QMenuBar::item {
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
     background: transparent;
 }
 
@@ -599,13 +599,13 @@ QMenuBar::item:selected {
 QMenu {
     background-color: $base;
     border: 1px solid $surface_mid;
-    border-radius: 8px;
-    padding: 6px;
+    border-radius: 10px;
+    padding: 8px;
 }
 
 QMenu::item {
-    border-radius: 4px;
-    padding: 6px 24px;
+    border-radius: 6px;
+    padding: 8px 24px;
     color: $text;
     background: transparent;
 }
@@ -634,8 +634,8 @@ QToolTip {
     background-color: $text;
     color: $base;
     border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
+    border-radius: 6px;
+    padding: 8px 12px;
     font-size: 12px;
 }
 
