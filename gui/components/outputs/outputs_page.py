@@ -14,9 +14,23 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtCore import Qt, QObject, QThread, QTimer, Signal
+from PySide6.QtCore import Qt, QObject, QThread, QTimer, Signal, QSize
 from PySide6.QtGui import QFont
 from gui.themes import get_token
+
+from gui.styles import (
+    font as _f,
+    btn_primary,
+    btn_outline,
+    btn_ghost,
+)
+from gui.theme import (
+    SP1, SP2, SP3, SP4, SP6, SP8, SP10,
+    RADIUS_SM, RADIUS_MD, RADIUS_LG,
+    FS_XS, FS_SM, FS_BASE, FS_MD, FS_LG, FS_XL,
+    FW_MEDIUM, FW_SEMIBOLD, FW_BOLD,
+    BTN_MD, BTN_SM
+)
 
 from gui.components.base_widget import ScrollableForm
 from gui.components.utils.form_builder.form_definitions import (
@@ -191,10 +205,8 @@ class OutputsPage(ScrollableForm):
     def _build_ui(self):
         f = self.form
         header = QLabel("Outputs")
-        bold = QFont()
-        bold.setBold(True)
-        bold.setPointSize(13)
-        header.setFont(bold)
+        header.setFont(_f(FS_XL, FW_BOLD))
+        header.setStyleSheet(f"color: {get_token('primary')}; margin-bottom: {SP2}px;")
         f.addRow(header)
 
         # ── Analysis Period ───────────────────────────────────────────────
@@ -202,12 +214,16 @@ class OutputsPage(ScrollableForm):
 
         btn_row = QWidget()
         btn_layout = QHBoxLayout(btn_row)
-        btn_layout.setContentsMargins(0, 8, 0, 8)
+        btn_layout.setContentsMargins(0, SP2, 0, SP4)
 
         self.btn_calculate = QPushButton("Validate  ▶")
-        self.btn_calculate.setMinimumHeight(38)
-        self.btn_calculate.setFixedWidth(160)
+        self.btn_calculate.setFixedHeight(BTN_MD)
+        self.btn_calculate.setFixedWidth(180)
+        self.btn_calculate.setFont(_f(FS_BASE, FW_MEDIUM))
+        self.btn_calculate.setCursor(Qt.PointingHandCursor)
+        self.btn_calculate.setStyleSheet(btn_primary())
         self.btn_calculate.clicked.connect(self.validate_requested.emit)
+        
         btn_layout.addWidget(self.btn_calculate)
         btn_layout.addStretch()
         f.addRow(btn_row)
@@ -215,6 +231,7 @@ class OutputsPage(ScrollableForm):
         self._status_widget = QWidget()
         self._status_layout = QVBoxLayout(self._status_widget)
         self._status_layout.setContentsMargins(0, 0, 0, 0)
+        self._status_layout.setSpacing(SP4)
         f.addRow(self._status_widget)
 
         self._show_idle()
@@ -231,8 +248,9 @@ class OutputsPage(ScrollableForm):
 
     def _show_idle(self):
         self._clear_status()
-        note = QLabel("Press Calculate to validate all pages.")
-        note.setStyleSheet("color: gray; font-style: italic;")
+        note = QLabel("Press Validate to check all pages for consistency before calculation.")
+        note.setFont(_f(FS_BASE))
+        note.setStyleSheet(f"color: {get_token('text_secondary')}; font-style: italic;")
         self._status_layout.addWidget(note)
 
     # ── Calculation timeout constant ──────────────────────────────────────────
@@ -245,22 +263,25 @@ class OutputsPage(ScrollableForm):
 
         # ── Container ──────────────────────────────────────────────────────
         container = QWidget()
+        container.setStyleSheet(f"border-radius: {RADIUS_MD}px; border: 1px solid {get_token('surface_mid')};")
         v = QVBoxLayout(container)
-        v.setContentsMargins(0, 4, 0, 4)
-        v.setSpacing(6)
+        v.setContentsMargins(SP4, SP4, SP4, SP4)
+        v.setSpacing(SP2)
 
         # ── Header row: spinner label + elapsed counter ────────────────────
         h_row = QWidget()
         h = QHBoxLayout(h_row)
         h.setContentsMargins(0, 0, 0, 0)
 
-        spin_lbl = QLabel("⏳  Calculating…")
-        spin_lbl.setStyleSheet("color: #555; font-style: italic;")
+        spin_lbl = QLabel("⏳  Performing Analysis…")
+        spin_lbl.setFont(_f(FS_BASE, FW_MEDIUM))
+        spin_lbl.setStyleSheet(f"color: {get_token('text')};")
         h.addWidget(spin_lbl)
         h.addStretch()
 
         self._elapsed_label = QLabel("0s / 30s")
-        self._elapsed_label.setStyleSheet("color: #888; font-size: 11px;")
+        self._elapsed_label.setFont(_f(FS_SM))
+        self._elapsed_label.setStyleSheet(f"color: {get_token('text_secondary')};")
         h.addWidget(self._elapsed_label)
         v.addWidget(h_row)
 
@@ -270,20 +291,17 @@ class OutputsPage(ScrollableForm):
         bar.setTextVisible(False)
         bar.setFixedHeight(8)
         bar.setStyleSheet(
-            """
-            QProgressBar {
+            f"""
+            QProgressBar {{
                 border: none;
                 border-radius: 4px;
-                background: #e9ecef;
-            }
-            QProgressBar::chunk {
+                background: {get_token('surface_mid')};
+            }}
+            QProgressBar::chunk {{
                 border-radius: 4px;
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #4dabf7, stop:1 #228be6
-                );
-            }
-        """
+                background: {get_token('primary')};
+            }}
+            """
         )
         v.addWidget(bar)
 
@@ -294,28 +312,28 @@ class OutputsPage(ScrollableForm):
         self._countdown_bar.setTextVisible(False)
         self._countdown_bar.setFixedHeight(4)
         self._countdown_bar.setStyleSheet(
-            """
-            QProgressBar {
+            f"""
+            QProgressBar {{
                 border: none;
                 border-radius: 2px;
-                background: #e9ecef;
-            }
-            QProgressBar::chunk {
+                background: {get_token('surface_mid')};
+            }}
+            QProgressBar::chunk {{
                 border-radius: 2px;
-                background: #fab005;
-            }
-        """
+                background: {get_token('warning')};
+            }}
+            """
         )
         v.addWidget(self._countdown_bar)
 
         timeout_lbl = QLabel(
-            f"Timeout in {self.CALC_TIMEOUT_MS // 1000}s if not complete."
+            f"Analysis will timeout in {self.CALC_TIMEOUT_MS // 1000}s if not complete."
         )
-        timeout_lbl.setStyleSheet("color: #aaa; font-size: 10px;")
+        timeout_lbl.setFont(_f(FS_XS))
+        timeout_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
         v.addWidget(timeout_lbl)
 
         self._status_layout.addWidget(container)
-        self._status_layout.addStretch()
 
         # ── Elapsed-time ticker (every 1 s) ───────────────────────────────
         self._elapsed_secs = 0
@@ -366,9 +384,9 @@ class OutputsPage(ScrollableForm):
 
         self.btn_calculate.setEnabled(True)
         timeout_exc = TimeoutError(
-            f"Calculation did not complete within {self.CALC_TIMEOUT_MS // 1000} seconds.\n"
-            "The thread was forcefully terminated.\n"
-            "Check your input data for unusually large values, or contact support."
+            f"Analysis did not complete within {self.CALC_TIMEOUT_MS // 1000} seconds.\n"
+            "The processing thread was terminated to prevent system hang.\n"
+            "This usually happens with extremely complex scenarios or invalid data ranges."
         )
         self._show_calculation_error(timeout_exc, "")
 
@@ -379,24 +397,27 @@ class OutputsPage(ScrollableForm):
         if all_errors:
             banner = QGroupBox()
             banner.setStyleSheet(
-                f"QGroupBox {{ border: 2px solid {get_token("danger")}; padding: 8px; }}"
+                f"QGroupBox {{ border: 1px solid {get_token('danger')}; "
+                f"border-radius: {RADIUS_MD}px; padding: {SP3}px; }}"
             )
             layout = QVBoxLayout(banner)
-            title = QLabel("🛑  Calculation Blocked — Fix the errors below to continue.")
-            title.setStyleSheet(f"color: {get_token('danger')}; font-weight: {get_token('weight-bold')};")
+            title = QLabel("🛑  Calculation Blocked — Please fix the following errors")
+            title.setFont(_f(FS_MD, FW_BOLD))
+            title.setStyleSheet(f"color: {get_token('danger')};")
             layout.addWidget(title)
             self._status_layout.addWidget(banner)
-            self._status_layout.addSpacing(10)
+            self._status_layout.addSpacing(SP2)
 
             for page, issues in all_errors.items():
-                self._status_layout.addWidget(self._create_card(page, issues, "❌"))
+                self._status_layout.addWidget(self._create_card(page, issues, "❌", is_error=True))
 
         if all_warnings:
             if all_errors:
-                self._status_layout.addSpacing(12)
+                self._status_layout.addSpacing(SP4)
             banner = QGroupBox()
             banner.setStyleSheet(
-                f"QGroupBox {{ border: 2px solid {get_token('warning')}; padding: 8px; }}"
+                f"QGroupBox {{ border: 1px solid {get_token('warning')}; "
+                f"border-radius: {RADIUS_MD}px; padding: {SP3}px; }}"
             )
             layout = QVBoxLayout(banner)
             label = (
@@ -405,19 +426,32 @@ class OutputsPage(ScrollableForm):
                 else "⚠️  Warnings — Data looks unusual but you can proceed."
             )
             title = QLabel(label)
-            title.setStyleSheet(f"color: {get_token('warning')}; font-weight: {get_token('weight-bold')};")
+            title.setFont(_f(FS_MD, FW_BOLD))
+            title.setStyleSheet(f"color: {get_token('warning')};")
             layout.addWidget(title)
             self._status_layout.addWidget(banner)
-            self._status_layout.addSpacing(10)
+            self._status_layout.addSpacing(SP2)
 
             for page, issues in all_warnings.items():
-                self._status_layout.addWidget(self._create_card(page, issues, "🟡"))
+                self._status_layout.addWidget(self._create_card(page, issues, "🟡", is_error=False))
 
-        if not all_errors and all_warnings:
+        if not all_errors and (all_warnings or self._pages):
+            btn_container = QWidget()
+            btn_lay = QHBoxLayout(btn_container)
+            btn_lay.setContentsMargins(0, SP4, 0, 0)
+            
             run_btn = QPushButton("Proceed with Calculation ▶")
-            run_btn.setMinimumHeight(35)
+            run_btn.setFixedHeight(BTN_MD)
+            run_btn.setMinimumWidth(240)
+            run_btn.setFont(_f(FS_BASE, FW_SEMIBOLD))
+            run_btn.setStyleSheet(btn_primary())
+            run_btn.setCursor(Qt.PointingHandCursor)
             run_btn.clicked.connect(self._on_proceed)
-            self._status_layout.addWidget(run_btn)
+            
+            btn_lay.addStretch()
+            btn_lay.addWidget(run_btn)
+            btn_lay.addStretch()
+            self._status_layout.addWidget(btn_container)
 
         self._status_layout.addStretch()
         self._save_state("issues", {"errors": all_errors, "warnings": all_warnings})
@@ -425,9 +459,15 @@ class OutputsPage(ScrollableForm):
     def show_success(self):
         self._clear_status()
         banner = QGroupBox()
-        banner.setStyleSheet("QGroupBox { border: 2px solid #198754; padding: 8px; }")
+        banner.setStyleSheet(
+            f"QGroupBox {{ border: 1px solid {get_token('success')}; "
+            f"border-radius: {RADIUS_MD}px; padding: {SP3}px; }}"
+        )
         layout = QVBoxLayout(banner)
-        layout.addWidget(QLabel("✅  All checks passed — Ready to calculate."))
+        title = QLabel("✅  All checks passed — Ready to calculate.")
+        title.setFont(_f(FS_MD, FW_BOLD))
+        title.setStyleSheet(f"color: {get_token('success')};")
+        layout.addWidget(title)
         self._status_layout.addWidget(banner)
         self._status_layout.addStretch()
         self._save_state("success", {"errors": {}, "warnings": {}})
@@ -451,7 +491,7 @@ class OutputsPage(ScrollableForm):
         ap = self.analysis_period.value()
         if ap <= 0:
             self.analysis_period.setStyleSheet(
-                f"border: 1.5px solid {get_token("danger")};"
+                f"border: 1.5px solid {get_token('danger')};"
             )
             all_errors["Analysis Period"] = [
                 "Analysis Period is required — please enter a value greater than zero."
@@ -547,37 +587,46 @@ class OutputsPage(ScrollableForm):
         self._clear_status()
         banner = QGroupBox()
         banner.setStyleSheet(
-            f"QGroupBox {{ border: 2px solid {get_token("danger")}; padding: 8px; }}"
+            f"QGroupBox {{ border: 1px solid {get_token('danger')}; "
+            f"border-radius: {RADIUS_MD}px; padding: {SP4}px; }}"
         )
         layout = QVBoxLayout(banner)
 
         # ── Short summary ──────────────────────────────────────────────────
-        title = QLabel(f"🛑  {type(error).__name__}")
-        title.setStyleSheet(f"color: {get_token('danger')}; font-weight: {get_token('weight-bold')}; font-size: 13px;")
+        title = QLabel(f"🛑  Analysis Failed: {type(error).__name__}")
+        title.setFont(_f(FS_LG, FW_BOLD))
+        title.setStyleSheet(f"color: {get_token('danger')};")
         layout.addWidget(title)
 
         # Show only the first line of the error message
-        first_line = str(error).splitlines()[0] if str(error) else str(error)
+        first_line = str(error).splitlines()[0] if str(error) else "An unexpected error occurred during calculation."
         msg = QLabel(first_line)
         msg.setWordWrap(True)
-        msg.setStyleSheet("color: #b02a37;")
+        msg.setFont(_f(FS_BASE))
+        msg.setStyleSheet(f"color: {get_token('text')}; margin-top: {SP2}px;")
         layout.addWidget(msg)
 
         if tb:
+            layout.addSpacing(SP4)
             # ── Toggle + copy row ──────────────────────────────────────────
             btn_row = QHBoxLayout()
+            btn_row.setContentsMargins(0, 0, 0, 0)
 
-            toggle_btn = QPushButton("▸  Show full traceback")
+            toggle_btn = QPushButton("▸  Show details")
             toggle_btn.setFlat(True)
             toggle_btn.setCursor(Qt.PointingHandCursor)
-            toggle_btn.setStyleSheet("text-align: left; color: #555; padding: 2px 0;")
+            toggle_btn.setFont(_f(FS_SM, FW_MEDIUM))
+            toggle_btn.setStyleSheet(f"text-align: left; color: {get_token('text_secondary')}; border: none;")
             btn_row.addWidget(toggle_btn)
             btn_row.addStretch()
 
-            copy_btn = QPushButton("Copy to clipboard")
-            copy_btn.setFixedWidth(130)
+            copy_btn = QPushButton("Copy Error")
+            copy_btn.setFixedHeight(BTN_SM)
+            copy_btn.setFixedWidth(100)
+            copy_btn.setFont(_f(FS_SM))
+            copy_btn.setStyleSheet(btn_ghost())
             copy_btn.clicked.connect(
-                lambda: QApplication.clipboard().setText(tb.strip())
+                lambda: QApplication.clipboard().setText(f"{error}\n\n{tb.strip()}")
             )
             btn_row.addWidget(copy_btn)
             layout.addLayout(btn_row)
@@ -586,7 +635,11 @@ class OutputsPage(ScrollableForm):
             tb_box = QTextEdit()
             tb_box.setReadOnly(True)
             tb_box.setPlainText(tb.strip())
-            tb_box.setStyleSheet("font-family: monospace; font-size: 11px;")
+            tb_box.setFont(_f(FS_SM))
+            tb_box.setStyleSheet(
+                f"border: 1px solid {get_token('surface_mid')}; "
+                f"border-radius: {RADIUS_SM}px; color: {get_token('text_secondary')};"
+            )
             tb_box.setFixedHeight(200)
             tb_box.setVisible(False)
             layout.addWidget(tb_box)
@@ -595,7 +648,7 @@ class OutputsPage(ScrollableForm):
                 visible = not tb_box.isVisible()
                 tb_box.setVisible(visible)
                 toggle_btn.setText(
-                    "▾  Hide full traceback" if visible else "▸  Show full traceback"
+                    "▾  Hide details" if visible else "▸  Show details"
                 )
 
             toggle_btn.clicked.connect(_toggle)
@@ -608,38 +661,65 @@ class OutputsPage(ScrollableForm):
         self._last_results = results
         self._clear_status()
 
-        # ── Success banner + Download button ───────────────────────────────
+        # ── Success banner + Action buttons ───────────────────────────────
         banner = QGroupBox()
-        banner.setStyleSheet("QGroupBox { border: 2px solid #198754; padding: 8px; }")
-        banner_row = QHBoxLayout(banner)
-        banner_row.addWidget(
-            QLabel("✅  Calculation completed successfully."), stretch=1
+        banner.setStyleSheet(
+            f"QGroupBox {{ border: 1px solid {get_token('success')}; "
+            f"border-radius: {RADIUS_MD}px; padding: {SP3}px; }}"
         )
-
-        dl_btn = QPushButton("⬇  Export Report (.3psLCCAFile)")
-        dl_btn.setFixedHeight(30)
-        dl_btn.setFixedWidth(210)
-        dl_btn.setToolTip("Export all inputs and LCC results as a .3psLCCAFile file")
+        banner_lay = QVBoxLayout(banner)
+        
+        top_row = QHBoxLayout()
+        title = QLabel("✅  Analysis completed successfully.")
+        title.setFont(_f(FS_MD, FW_BOLD))
+        title.setStyleSheet(f"color: {get_token('success')};")
+        top_row.addWidget(title, stretch=1)
+        
+        banner_lay.addLayout(top_row)
+        
+        actions_row = QHBoxLayout()
+        actions_row.setSpacing(SP3)
+        
+        dl_btn = QPushButton("⬇  Export Data")
+        dl_btn.setFixedHeight(34)
+        dl_btn.setMinimumWidth(150)
+        dl_btn.setFont(_f(FS_SM, FW_MEDIUM))
+        dl_btn.setStyleSheet(btn_outline())
+        dl_btn.setToolTip("Export raw analysis data as .3psLCCAFile")
         dl_btn.clicked.connect(self._download_report)
-        banner_row.addWidget(dl_btn)
+        actions_row.addWidget(dl_btn)
 
         pdf_btn = QPushButton("📄  Generate PDF Report")
-        pdf_btn.setFixedHeight(30)
-        pdf_btn.setFixedWidth(180)
-        pdf_btn.setToolTip("Generate a customizable PDF report")
+        pdf_btn.setFixedHeight(34)
+        pdf_btn.setMinimumWidth(180)
+        pdf_btn.setFont(_f(FS_SM, FW_MEDIUM))
+        pdf_btn.setStyleSheet(btn_primary())
+        pdf_btn.setToolTip("Create a formatted PDF document with charts and tables")
         pdf_btn.clicked.connect(self._generate_pdf_report)
-        banner_row.addWidget(pdf_btn)
+        actions_row.addWidget(pdf_btn)
+        
+        actions_row.addStretch()
+        banner_lay.addLayout(actions_row)
 
         self._status_layout.addWidget(banner)
 
-        # ── Warnings ───────────────────────────────────────────────────────
-        for w in results.get("warnings", []):
-            lbl = QLabel(f"⚠ {w}")
-            lbl.setStyleSheet("color: #856404;")
-            lbl.setWordWrap(True)
-            self._status_layout.addWidget(lbl)
+        # ── Warnings from Core ─────────────────────────────────────────────
+        core_warnings = results.get("warnings", [])
+        if core_warnings:
+            self._status_layout.addSpacing(SP2)
+            warn_container = QWidget()
+            wv = QVBoxLayout(warn_container)
+            wv.setContentsMargins(SP2, 0, 0, 0)
+            wv.setSpacing(SP1)
+            for w in core_warnings:
+                lbl = QLabel(f"⚠️  {w}")
+                lbl.setFont(_f(FS_SM))
+                lbl.setStyleSheet(f"color: {get_token('warning')};")
+                lbl.setWordWrap(True)
+                wv.addWidget(lbl)
+            self._status_layout.addWidget(warn_container)
 
-        # ── Chart ──────────────────────────────────────────────────────────
+        # ── Visuals (Charts/Tables) ────────────────────────────────────────
         try:
 
             chart = LCCChartWidget(results)
@@ -1262,34 +1342,6 @@ class OutputsPage(ScrollableForm):
     def _on_proceed(self):
         self.run_calculation()
 
-    # ── Card widget ───────────────────────────────────────────────────────────
-
-    def _create_card(self, page_name, issues, icon):
-        card = QGroupBox()
-        card.setStyleSheet(
-            "QGroupBox { border: 1px solid #dee2e6; border-radius: 4px; }"
-        )
-        layout = QVBoxLayout(card)
-
-        h_row = QWidget()
-        h_lay = QHBoxLayout(h_row)
-        h_lay.setContentsMargins(0, 0, 0, 0)
-        h_lay.addWidget(QLabel(f"<b>{page_name}</b>"))
-        h_lay.addStretch()
-
-        go_btn = QPushButton("Go →")
-        go_btn.clicked.connect(
-            lambda checked=False, p=page_name: self.navigate_requested.emit(p)
-        )
-        h_lay.addWidget(go_btn)
-
-        layout.addWidget(h_row)
-        for msg in issues:
-            lbl = QLabel(f"{icon} {msg}")
-            lbl.setWordWrap(True)
-            layout.addWidget(lbl)
-        return card
-
     # ── Persistence ───────────────────────────────────────────────────────────
 
     def _save_state(self, status: str, data: dict):
@@ -1318,4 +1370,54 @@ class OutputsPage(ScrollableForm):
         else:
             self._show_idle()
 
+    # ── Card widget ───────────────────────────────────────────────────────────
 
+    def _create_card(self, page_name, issues, icon, is_error: bool = True):
+        card = QGroupBox()
+        card.setStyleSheet(
+            f"QGroupBox {{ border: 1px solid {get_token('surface_mid')}; "
+            f"border-radius: {RADIUS_MD}px; padding: {SP3}px; }}"
+        )
+        layout = QVBoxLayout(card)
+        layout.setSpacing(SP2)
+
+        h_row = QWidget()
+        h_lay = QHBoxLayout(h_row)
+        h_lay.setContentsMargins(0, 0, 0, 0)
+        
+        name_lbl = QLabel(page_name.upper())
+        name_lbl.setFont(_f(FS_XS, FW_BOLD))
+        name_lbl.setStyleSheet(f"color: {get_token('text_disabled')}; letter-spacing: 1px;")
+        h_lay.addWidget(name_lbl, 0, Qt.AlignVCenter)
+        
+        h_lay.addStretch()
+
+        go_btn = QPushButton("Fix Issues →")
+        go_btn.setFixedHeight(26)
+        go_btn.setFont(_f(FS_XS, FW_SEMIBOLD))
+        go_btn.setStyleSheet(btn_ghost())
+        go_btn.setCursor(Qt.PointingHandCursor)
+        go_btn.clicked.connect(
+            lambda checked=False, p=page_name: self.navigate_requested.emit(p)
+        )
+        h_lay.addWidget(go_btn, 0, Qt.AlignVCenter)
+
+        layout.addWidget(h_row)
+        
+        for msg in issues:
+            issue_row = QHBoxLayout()
+            issue_row.setSpacing(SP2)
+            
+            icon_lbl = QLabel(icon)
+            icon_lbl.setFont(_f(FS_SM))
+            issue_row.addWidget(icon_lbl, 0, Qt.AlignTop)
+            
+            txt_lbl = QLabel(msg)
+            txt_lbl.setFont(_f(FS_BASE))
+            txt_lbl.setStyleSheet(f"color: {get_token('text')};")
+            txt_lbl.setWordWrap(True)
+            issue_row.addWidget(txt_lbl, 1)
+            
+            layout.addLayout(issue_row)
+            
+        return card
