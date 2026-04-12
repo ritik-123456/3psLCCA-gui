@@ -169,11 +169,11 @@ LUMPSUM_ELEC_FIELDS = [
 ]
 
 LUMPSUM_FUEL_FIELDS = [
-    Section("Fuel (Diesel) Consumption"),
+    Section("Fuel Consumption"),
     FieldDef(
         "fuel_consumption_per_day",
         "Fuel Consumption per Day",
-        "Total diesel/fuel consumed per working day across all equipment.",
+        "Total fuel consumed per working day across all equipment.",
         "float",
         options=(0.0, 1e12, DECIMAL_PLACES),
         unit="litres/day",
@@ -189,7 +189,7 @@ LUMPSUM_FUEL_FIELDS = [
     FieldDef(
         "fuel_ef",
         "Emission Factor",
-        "Diesel emission factor (kg CO₂e per litre).",
+        "Emission factor (kg CO₂e per litre).",
         "float",
         options=(0.0, 999.0, DECIMAL_PLACES),
         unit="kg CO₂e/litre",
@@ -202,7 +202,7 @@ _LUMPSUM_KEYS = [
     ("elec_ef", 0.71),
     ("fuel_consumption_per_day", 0.0),
     ("fuel_days", 0),
-    ("fuel_ef", 2.69),
+    # ("fuel_ef", 2.69),
 ]
 
 DETAILED_FIELDS = [
@@ -894,8 +894,8 @@ class MachineryEmissions(ScrollableForm):
         # Set default EF values
         if hasattr(self, "elec_ef"):
             self.elec_ef.setValue(0.71)
-        if hasattr(self, "fuel_ef"):
-            self.fuel_ef.setValue(2.69)
+        # if hasattr(self, "fuel_ef"):
+        #     self.fuel_ef.setValue(2.69)
 
         # Lump sum subtotal
         ls_total_row = QWidget()

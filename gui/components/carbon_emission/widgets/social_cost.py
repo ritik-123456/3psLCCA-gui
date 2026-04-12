@@ -25,7 +25,9 @@ _DOC_OPENER = make_doc_opener("carbon/social-cost")
 _MODE_NITI = "NITI Aayog"
 _MODE_RICKE = "K. Ricke et al. (Country-Level)"
 _MODE_CUSTOM = "Custom / Manual Override"
-_SOURCES = [_MODE_NITI, _MODE_RICKE, _MODE_CUSTOM]
+# _SOURCES = [_MODE_NITI, _MODE_RICKE, _MODE_CUSTOM]
+_SOURCES = [_MODE_RICKE, _MODE_CUSTOM]
+
 
 _SSP_OPTIONS = [
     "SSP1 (Sustainability)",
@@ -116,6 +118,13 @@ CUSTOM_FIELDS = [
 
 
 class SocialCost(ScrollableForm):
+    """
+    Economic valuation of carbon emissions using government or scientific models.
+    
+    References:
+    - Ricke, K., Drouet, L., Caldeira, K. et al. Country-level social cost of carbon. 
+      Nature Clim Change 8, 895–900 (2018). https://doi.org/10.1038/s41558-018-0282-y
+    """
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name=CHUNK)
         self.__suppress = 0
@@ -254,6 +263,17 @@ class SocialCost(ScrollableForm):
     def _build_ricke_panel(self):
         w = QWidget()
         layout = self._make_panel_layout(w)
+
+        # Scientific Paper Reference
+        _ref_c, _ref_lbl = self._padded_label(
+            "<b>Reference:</b> Ricke, K., Drouet, L., Caldeira, K. et al. <i>Country-level social cost of carbon.</i> "
+            "Nature Clim Change 8, 895–900 (2018). <a href='https://doi.org/10.1038/s41558-018-0282-y' style='color: palette(highlight);'>"
+            "doi:10.1038/s41558-018-0282-y</a>",
+            top=0,
+            bottom=10,
+        )
+        _ref_lbl.setOpenExternalLinks(True)
+        layout.addRow(_ref_c)
 
         self.form, _saved = layout, self.form
         try:

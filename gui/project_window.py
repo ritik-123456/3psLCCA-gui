@@ -257,12 +257,12 @@ class _HoverHandle(QSplitterHandle):
     """
     Splitter handle that draws a 2px green accent line on hover/drag -
     identical visual language to VS Code's panel resize handles.
-    No QSS used; painting is done entirely via QPainter + QPalette.
     """
 
     def __init__(self, orientation, parent):
         super().__init__(orientation, parent)
         self.setMouseTracking(True)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self._hovered = False
 
     def enterEvent(self, event):
@@ -276,26 +276,22 @@ class _HoverHandle(QSplitterHandle):
         super().leaveEvent(event)
 
     def paintEvent(self, event):
+        if not self._hovered:
+            return
+
         painter = QPainter(self)
         r = self.rect()
-        # Clear background to match window
-        painter.fillRect(r, self.palette().window())
 
+        # Theme-consistent background + highlight: only on hover
+        painter.fillRect(r, self.palette().window())
         painter.setPen(Qt.NoPen)
-        if self._hovered:
-            # Theme-consistent highlight: 2px primary @ 'focus' alpha (18%)
-            painter.setBrush(QColor(get_token("primary", "focus")))
-            if self.orientation() == Qt.Horizontal:
-                painter.drawRect((r.width() - 2) // 2, 0, 2, r.height())
-            else:
-                painter.drawRect(0, (r.height() - 2) // 2, r.width(), 2)
+        painter.setBrush(QColor(get_token("primary")))
+
+        if self.orientation() == Qt.Horizontal:
+            painter.drawRect((r.width() - 2) // 2, 0, 2, r.height())
         else:
-            # Very dim idle line: 1px divider @ 'hover' alpha (6%)
-            painter.setBrush(QColor(get_token("primary", "hover")))
-            if self.orientation() == Qt.Horizontal:
-                painter.drawRect(r.width() // 2, 0, 1, r.height())
-            else:
-                painter.drawRect(0, r.height() // 2, r.width(), 1)
+            painter.drawRect(0, (r.height() - 2) // 2, r.width(), 2)
+
         painter.end()
 
 

@@ -33,7 +33,7 @@ except ImportError:
     from matplotlib.backends.backend_qt import FigureCanvasQTAgg, NavigationToolbar2QT
 
 
-def _create_figure(values, labels, stage_info, text_color, bg_color):
+def _create_figure(values, labels, stage_info, text_color, bg_color, currency: str = "INR"):
     """Build and return (fig, bars) from pre-computed chart data."""
     _N = len(labels)
     x = np.arange(_N)
@@ -111,7 +111,7 @@ def _create_figure(values, labels, stage_info, text_color, bg_color):
     # Wrap labels for x-axis (two lines)
     wrapped = [lbl.replace(" (", "\n(") if len(lbl) > 22 else lbl for lbl in labels]
     ax.set_xticklabels(wrapped, rotation=90, fontsize=6, color=text_color)
-    ax.set_ylabel("Cost (Million INR)", fontsize=8, color=text_color)
+    ax.set_ylabel(f"Cost (Million {currency})", fontsize=8, color=text_color)
     ax.tick_params(axis='y', labelsize=7, colors=text_color)
     ax.tick_params(axis='x', colors=text_color)
     # Only one axhline(0) is needed, and we already drew one in black earlier.
@@ -131,11 +131,11 @@ def _create_figure(values, labels, stage_info, text_color, bg_color):
 class LCCDetailsTable(QWidget):
     """Stage × category summary of LCC costs."""
 
-    def __init__(self, results: dict, parent=None):
+    def __init__(self, results: dict, currency: str = "INR", parent=None):
         super().__init__(parent)
-        self._build(results)
+        self._build(results, currency)
 
-    def _build(self, results: dict):
+    def _build(self, results: dict, currency: str = "INR"):
         # Compute per-stage totals
         stage_rows = []
         for stage_label, result_key, cat_keys in STAGE_DEFS:
@@ -152,8 +152,8 @@ class LCCDetailsTable(QWidget):
 
         table = QTableWidget(n_rows, 5, self)
         table.setHorizontalHeaderLabels([
-            "Stage", "Economic\n(M INR)", "Environmental\n(M INR)",
-            "Social\n(M INR)", "Stage Total\n(M INR)",
+            "Stage", f"Economic\n(M {currency})", f"Environmental\n(M {currency})",
+            f"Social\n(M {currency})", f"Stage Total\n(M {currency})",
         ])
         table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         for col in range(1, 5):
@@ -213,8 +213,8 @@ class LCCDetailsTable(QWidget):
         table.setHorizontalHeader(colored_header)
         # Re-apply labels and resize modes after replacing header
         table.setHorizontalHeaderLabels([
-            "Stage", "Economic\n(M INR)", "Environmental\n(M INR)",
-            "Social\n(M INR)", "Stage Total\n(M INR)",
+            "Stage", f"Economic\n(M {currency})", f"Environmental\n(M {currency})",
+            f"Social\n(M {currency})", f"Stage Total\n(M {currency})",
         ])
         table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         for col in range(1, 5):
@@ -375,11 +375,11 @@ class _ColorDelegate(QStyledItemDelegate):
 class LCCBreakdownTable(QWidget):
     """Detailed row-by-row LCC cost breakdown with stage-coloured groups."""
 
-    def __init__(self, results: dict, parent=None):
+    def __init__(self, results: dict, currency: str = "INR", parent=None):
         super().__init__(parent)
-        self._build(results)
+        self._build(results, currency)
 
-    def _build(self, results: dict):
+    def _build(self, results: dict, currency: str = "INR"):
         # Collect applicable stages - keep cat for row colouring
         active_stages = []
         for stage_def in BREAKDOWN_STAGES:
@@ -398,7 +398,7 @@ class LCCBreakdownTable(QWidget):
 
         table = QTableWidget(total_rows, 3, self)
         table.setStyleSheet("QTableWidget { gridline-color: #aaaaaa; }")
-        table.setHorizontalHeaderLabels(["", "Costs", "Cost in Present Time"])
+        table.setHorizontalHeaderLabels(["", "Costs", f"Cost in Present Time ({currency})"])
         table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
         table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
@@ -442,7 +442,7 @@ class LCCBreakdownTable(QWidget):
         breakdown_header = _BreakdownHeader(Qt.Horizontal, table)
         table.setHorizontalHeader(breakdown_header)
         # Re-apply labels and column widths after replacing header
-        table.setHorizontalHeaderLabels(["", "Costs", "Cost in Present Time"])
+        table.setHorizontalHeaderLabels(["", "Costs", f"Cost in Present Time ({currency})"])
         table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
         table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
@@ -531,7 +531,7 @@ class LCCBreakdownTable(QWidget):
                 # --- column 2: white background ─────────────────────────────────────────
                 # change - white background for uniform "Cost in Present Time" col
                 cost_item = _cell(
-                    f"INR \u20b9{val:,.2f}", QColor("#FFFFFF"),
+                    f"{val:,.2f}", QColor("#FFFFFF"),
                     align=Qt.AlignRight | Qt.AlignVCenter,
                 )
                 if val < 0:
@@ -580,8 +580,9 @@ class LCCChartWidget(QWidget):
     Includes a navigation toolbar (zoom / pan / save) and hover tooltips.
     """
 
-    def __init__(self, results: dict, parent=None):
+    def __init__(self, results: dict, currency: str = "INR", parent=None):
         super().__init__(parent)
+        self._currency = currency
 
         # Force white background and dark text for the graph
         text_color = "#000000"
@@ -589,7 +590,7 @@ class LCCChartWidget(QWidget):
 
         self._values, self._labels, stage_info = build_chart_data(results)
         fig, self._bars = _create_figure(
-            self._values, self._labels, stage_info, text_color, bg_color
+            self._values, self._labels, stage_info, text_color, bg_color, currency=currency
         )
 
         self._canvas = FigureCanvasQTAgg(fig)
@@ -649,8 +650,8 @@ class LCCChartWidget(QWidget):
                 sign = "−" if val < 0 else ""
                 self._annot.set_text(
                     f"{label}\n"
-                    f"₹ {sign}{abs(inr):,.0f}\n"
-                    f"({sign}{abs(val):.4f} M INR)"
+                    f"{self._currency} {sign}{abs(inr):,.0f}\n"
+                    f"({sign}{abs(val):.4f} M {self._currency})"
                 )
                 self._set_annot_visible(True)
                 return

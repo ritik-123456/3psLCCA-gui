@@ -30,6 +30,7 @@ FINANCIAL_FIELDS = [
         doc_slug="discount-rate",
         default=0.0,
     ),
+    FieldDef("discount_rate_source", "Source: Discount Rate", "", "text"),
     FieldDef(
         "inflation_rate",
         "Inflation Rate",
@@ -41,6 +42,7 @@ FINANCIAL_FIELDS = [
         doc_slug="inflation-rate",
         default=0.0,
     ),
+    FieldDef("inflation_rate_source", "Source: Inflation Rate", "", "text"),
     FieldDef(
         "interest_rate",
         "Interest Rate",
@@ -52,20 +54,17 @@ FINANCIAL_FIELDS = [
         doc_slug="interest-rate",
         default=0.0,
     ),
+    FieldDef("interest_rate_source", "Source: Interest Rate", "", "text"),
     FieldDef(
         "investment_ratio",
         "Investment Ratio",
-        "Proportion of total cost financed through investment (0–1).",
+        "Proportion of total cost financed through investment (0 to 1).",
         "float",
         options=(0.0, 1.0, 4),
         required=True,
         doc_slug="investment-ratio",
         default=0.0,
     ),
-    Section("Data Sources"),
-    FieldDef("discount_rate_source", "Source: Discount Rate", "", "text"),
-    FieldDef("inflation_rate_source", "Source: Inflation Rate", "", "text"),
-    FieldDef("interest_rate_source", "Source: Interest Rate", "", "text"),
     FieldDef("investment_ratio_source", "Source: Investment Ratio", "", "text"),
 ]
 

@@ -143,7 +143,7 @@ def _pv(pos, neg=0.0):
 
 
 def _M(x):
-    """Raw INR → Million INR."""
+    """Raw Currency → Million Units."""
     return float(x) / 1_000_000
 
 
@@ -158,7 +158,7 @@ def _sum_M(stage_data: dict, cat: str, keys: list) -> float:
 def _build_pie_data(results: dict) -> dict:
     """
     Build {stage_label: {pillar: {"positive": float, "negative": float}}}
-    in M INR from a run_full_lcc_analysis results dict.
+    in M units from a run_full_lcc_analysis results dict.
     """
     data = {}
 
@@ -315,7 +315,7 @@ def _label_arrow(ax, theta1, theta2, text):
     )
 
 
-def _build_pie_figure(data: dict):
+def _build_pie_figure(data: dict, currency: str = "INR"):
     """Build and return an interactive matplotlib Figure from LCC data."""
     stages_list = list(data.keys())
 
@@ -328,7 +328,7 @@ def _build_pie_figure(data: dict):
     }
 
     # Shared mutable hover state - rebuilt on every _draw()
-    _hover = {"annot": None, "items": []}  # items: [(wedge, title, value_M_INR)]
+    _hover = {"annot": None, "items": []}  # items: [(wedge, title, value_M_unit)]
 
     # Force white background and dark text for the graph
     bg = "#FFFFFF"
@@ -425,14 +425,14 @@ def _build_pie_figure(data: dict):
         ax.text(
             0,
             0,
-            f"Net Total\n{total:.2f} M INR",
+            f"Net Total\n{total:.2f} M {currency}",
             ha="center",
             va="center",
             fontsize=FS_LG,     # change - use FS_LG token instead of hardcoded 11
             fontweight="bold",
             color=fg,
         )
-        ax.set_title("LCC Cost Distribution (M INR)", fontsize=FS_XL, color=fg)  # change - use FS_XL token instead of hardcoded 12
+        ax.set_title(f"LCC Cost Distribution (M {currency})", fontsize=FS_XL, color=fg)  # change - use FS_XL token instead of hardcoded 12
         ax.axis("off")
 
         # Recreate annotation - ax.clear() destroys it
@@ -462,7 +462,7 @@ def _build_pie_figure(data: dict):
                 r = 0.55 if wedge.r <= 0.65 else 0.85  # inner vs outer ring
                 _hover["annot"].xy = (r * np.cos(ang), r * np.sin(ang))
                 _hover["annot"].set_text(
-                    f"{title}\n{value:.4f} M INR\n(₹ {value * 1e6:,.0f})"
+                    f"{title}\n{value:.4f} M {currency}\n({currency} {value * 1e6:,.0f})"
                 )
                 _set_annot_visible(True)
                 return
@@ -569,7 +569,7 @@ class _WheelForwarder(QObject):
 class LCCPieWidget(QWidget):
     """Interactive nested pie chart - inner ring = stage, outer ring = pillar."""
 
-    def __init__(self, results: dict, parent=None):
+    def __init__(self, results: dict, currency: str = "INR", parent=None):
         super().__init__(parent)
         data = _build_pie_data(results)
         if not data:
@@ -588,7 +588,7 @@ class LCCPieWidget(QWidget):
             for stage, pillar, net in negative_items:
                 print(
                     f"[LCCPieWidget] skipping pie chart: "
-                    f"stage='{stage}' pillar='{pillar}' net={net:.4f} M INR is negative"
+                    f"stage='{stage}' pillar='{pillar}' net={net:.4f} M {currency} is negative"
                 )
             layout = QVBoxLayout(self)
             layout.addWidget(
@@ -599,7 +599,7 @@ class LCCPieWidget(QWidget):
             )
             return
 
-        fig = _build_pie_figure(data)
+        fig = _build_pie_figure(data, currency=currency)
         canvas = FigureCanvasQTAgg(fig)
         canvas.setMinimumHeight(520)
         canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)

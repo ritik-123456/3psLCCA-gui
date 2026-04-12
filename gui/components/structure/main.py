@@ -317,9 +317,9 @@ class StructureTabView(QWidget):
         warnings = []
 
         if grand_total == 0.0:
-            breakdown = "  |  ".join(f"{name}: ₹0" for name, _ in _PAGES)
+            breakdown = "  |  ".join(f"{name}: 0" for name, _ in _PAGES)
             warnings.append(
-                f"Total construction cost is ₹0 - no materials have been entered "
+                f"Total construction cost is 0 - no materials have been entered "
                 f"or all are in Trash. ({breakdown})"
             )
         else:
@@ -327,7 +327,7 @@ class StructureTabView(QWidget):
             zero_pages = [name for name, total in page_totals.items() if total == 0.0]
             if zero_pages:
                 warnings.append(
-                    "The following tabs have no materials (₹0): "
+                    "The following tabs have no materials (0): "
                     + ", ".join(zero_pages)
                 )
 

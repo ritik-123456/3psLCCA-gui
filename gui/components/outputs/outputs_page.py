@@ -169,6 +169,7 @@ class OutputsPage(ScrollableForm):
             None  # QTimer - ticks every second to update elapsed label
         )
         self._elapsed_secs = 0  # seconds since calculation started
+        self._currency = "INR"  # default project currency
         self._build_ui()
 
     def _build_ui(self):
@@ -517,6 +518,8 @@ class OutputsPage(ScrollableForm):
                 all_data[chunk_key] = result["data"]
 
         _dbg(f"all_data keys collected: {list(all_data.keys())}")
+        self._currency = all_data.get('general_info', {}).get('project_currency', "INR")
+        print(f"Project Currency: {self._currency}")
 
         # Show "calculating" state and disable the button immediately
         self._show_calculating()
@@ -710,10 +713,10 @@ class OutputsPage(ScrollableForm):
         # responsive. The order matches the visual top-to-bottom layout.
         self._pending_results = results
         self._result_build_steps = [
-            lambda r: LCCChartWidget(r),
-            lambda r: LCCPieWidget(r),
-            lambda r: LCCBreakdownTable(r),
-            lambda r: LCCDetailsTable(r),
+            lambda r: LCCChartWidget(r, currency=self._currency),
+            lambda r: LCCPieWidget(r, currency=self._currency),
+            lambda r: LCCBreakdownTable(r, currency=self._currency),
+            lambda r: LCCDetailsTable(r, currency=self._currency),
         ]
         QTimer.singleShot(0, self._build_next_result_widget)
 
@@ -922,6 +925,10 @@ class OutputsPage(ScrollableForm):
         _dbg(
             f"on_refresh: status='{status}'  data_keys={list(data.keys()) if isinstance(data, dict) else type(data).__name__}"
         )
+        
+        # Try to restore currency if we have all_data in state (though unlikely)
+        # or just wait for run_calculation to set it.
+        
         if status == "issues":
             self.show_results(data.get("errors", {}), data.get("warnings", {}))
         elif status == "success":

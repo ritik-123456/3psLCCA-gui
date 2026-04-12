@@ -8,16 +8,23 @@ from PySide6.QtWidgets import (
     QWidget,
     QDoubleSpinBox,
     QSpinBox,
-    QMessageBox
+    QMessageBox,
 )
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form, confirm_clear_all
+from ..utils.validation_helpers import (
+    clear_field_styles,
+    freeze_form,
+    freeze_widgets,
+    validate_form,
+    confirm_clear_all,
+)
 
 
 from ..utils.doc_handler import make_doc_opener
+
 _DOC_OPENER = make_doc_opener("maintenance")
 
 MAINTENANCE_FIELDS = [
@@ -26,10 +33,10 @@ MAINTENANCE_FIELDS = [
     FieldDef(
         "routine_inspection_cost",
         "Routine Inspection Cost",
-        "Cost of routine inspection expressed as a percentage of initial construction cost per year.",
+        "Annual cost of routine inspection expressed as a percentage of the initial construction cost. For example, if the initial cost is 100 and the rate is 0.5%, then the inspection cost will be 0.5 per year.",
         "float",
         options=(0.0, 100.0, 2),
-        unit="(%/yr)",
+        unit="% of initial cost per year",
         required=True,
         default=0.0,
         warn=(0.01, 100.0, "Routine Inspection Cost is 0 - cost will not be included"),
@@ -54,10 +61,10 @@ MAINTENANCE_FIELDS = [
     FieldDef(
         "periodic_maintenance_cost",
         "Periodic Maintenance Cost",
-        "Cost of periodic maintenance expressed as a percentage of initial construction cost per year.",
+        "Annual cost of periodic maintenance expressed as a percentage of the initial construction cost. For example, if the initial cost is 100 and the rate is 0.01%, then the maintenance cost will be 0.01 per year.",
         "float",
         options=(0.0, 100.0, 1),
-        unit="(%/yr)",
+        unit="% of initial cost per year",
         required=True,
         default=0.0,
         warn=(
@@ -335,5 +342,3 @@ class Maintenance(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": "maintenance_data", "data": self.get_data_dict()}
-
-

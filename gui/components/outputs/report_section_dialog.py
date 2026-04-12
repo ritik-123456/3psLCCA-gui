@@ -34,8 +34,20 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QApplication,
     QFileDialog,
+    QSizePolicy,
+    QWidget,
+    QStyle,
 )
-from PySide6.QtCore import Qt, Signal, QThread
+from PySide6.QtCore import Qt, Signal, QThread, QSize, QRect
+from PySide6.QtGui import QPainter, QColor, QPalette
+
+from gui.themes import get_token, theme_manager
+from gui.theme import (
+    FS_DISP, FS_MD, FS_BASE, FS_SM,
+    FW_BOLD, FW_SEMIBOLD, FW_MEDIUM, FW_NORMAL,
+    SP4, RADIUS_MD, BTN_LG
+)
+from gui.styles import font as _f, btn_primary, btn_outline
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Config keys
@@ -125,15 +137,112 @@ KEY_SHOW_LCCA_RESULTS = "show_lcca_results"
 
 
 class SectionTreeWidget(QTreeWidget):
-    """Custom tree widget for selecting report sections and subsections."""
+    """
+    Professional tree widget for selecting report sections.
+    Uses custom drawRow for polished hover/select effects matching the sidebar.
+    """
 
     selectionChanged = Signal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.setObjectName("tree_sections")
         self.setHeaderLabel("Report Sections")
         self.itemChanged.connect(self.on_item_changed)
+        
+        self.setIndentation(20)
+        self.setAnimated(True)
+        self.setMouseTracking(True)
+        self.viewport().setMouseTracking(True)
+        
+        # Style the header and basic properties
+        self._apply_theme_style()
+        theme_manager().theme_changed.connect(self._apply_theme_style)
+
+    def _apply_theme_style(self):
+        """Apply theme-consistent styling to the tree widget."""
+        # Sync Base/AlternateBase so viewport background matches window
+        p = self.palette()
+        p.setColor(QPalette.Base, p.color(QPalette.Window))
+        self.setPalette(p)
+
+        self.setStyleSheet(f"""
+            QTreeWidget {{
+                background-color: transparent;
+                border: none;
+                font-family: 'Ubuntu';
+                font-size: {FS_BASE}pt;
+                color: {get_token("text")};
+                outline: none;
+            }}
+            QTreeWidget::item {{
+                padding: 8px 0;
+                border: none;
+                color: {get_token("text")};
+            }}
+            QTreeWidget::indicator {{
+                width: 16px;
+                height: 16px;
+                border: 1px solid {get_token("surface_mid")};
+                border-radius: 4px;
+                background-color: {get_token("base")};
+            }}
+            QTreeWidget::indicator:checked {{
+                background-color: {get_token("primary")};
+                border-color: {get_token("primary")};
+                /* Complete fill checkmark */
+                image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z' fill='white'/%3E%3C/svg%3E");
+            }}
+            QTreeWidget::indicator:unchecked:hover {{
+                border-color: {get_token("primary")};
+            }}
+            QHeaderView::section {{
+                background-color: {get_token("surface")};
+                color: {get_token("text")};
+                font-weight: {FW_SEMIBOLD};
+                padding: 8px 12px;
+                border: none;
+                border-bottom: 2px solid {get_token("surface_mid")};
+                font-size: 11px;
+                text-transform: uppercase;
+            }}
+        """)
+
+    def _row_state(self, index):
+        """Return (is_selected, is_hovered) for a model index."""
+        item = self.itemFromIndex(index)
+        is_sel = item in self.selectedItems()
+        is_hovered = index == self.indexAt(
+            self.viewport().mapFromGlobal(self.cursor().pos())
+        )
+        return is_sel, is_hovered
+
+    def drawRow(self, painter: QPainter, option, index):
+        """Pre-paint full-width background for professional hover/selection."""
+        is_sel, is_hovered = self._row_state(index)
+        full = option.rect
+
+        painter.save()
+        painter.setPen(Qt.NoPen)
+        # Background fill
+        painter.setBrush(self.palette().window())
+        painter.drawRect(full)
+        
+        # Hover tint
+        if is_hovered and not is_sel:
+            tint = QColor(get_token("primary")); tint.setAlpha(11)
+            painter.setBrush(tint); painter.drawRect(full)
+        
+        # Selection tint
+        if is_sel:
+            tint = QColor(get_token("primary")); tint.setAlpha(22)
+            painter.setBrush(tint); painter.drawRect(full)
+        
+        painter.restore()
+
+        # Strip standard selection states so Qt doesn't paint its own (often harsh) highlight
+        option.state &= ~(QStyle.State_Selected | QStyle.State_MouseOver | QStyle.State_HasFocus)
+        super().drawRow(painter, option, index)
 
     def build_from_sections(self, section_map, table_map):
         """Populate tree widget from SECTION_MAP and SUBSECTION_TABLE_MAP."""
@@ -309,9 +418,9 @@ class ReportSectionDialog(QDialog):
 
     def __init__(self, build_export_dict, all_data, lcc_breakdown, results, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("3psLCCA Report Customization")
+        self.setWindowTitle("Customize Report")
         self.setObjectName("report_section_dialog")
-        self.resize(650, 750)
+        self.resize(600, 700)
         self._build_export_dict = build_export_dict
         self._all_data = all_data
         self._lcc_breakdown = lcc_breakdown
@@ -322,128 +431,83 @@ class ReportSectionDialog(QDialog):
     def _init_ui(self):
         """Build the user interface."""
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(10)
+        main_layout.setContentsMargins(32, 32, 32, 32)
+        main_layout.setSpacing(16)
 
         # Title
-        self.lbl_title = QLabel("Select Report Sections to Include")
-        self.lbl_title.setObjectName("lbl_title")
-        self.lbl_title.setStyleSheet(
-            "font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #285A23;"
-        )
-        self.lbl_title.setAlignment(Qt.AlignCenter)
+        self.lbl_title = QLabel("Report Customization")
+        self.lbl_title.setFont(_f(FS_DISP, FW_BOLD))
+        self.lbl_title.setStyleSheet(f"color: {get_token('primary')};")
+        self.lbl_title.setAlignment(Qt.AlignLeft)
         main_layout.addWidget(self.lbl_title)
 
-        # Scroll area for tree
-        scroll_area = QScrollArea()
-        scroll_area.setObjectName("scroll_sections")
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(
-            "QScrollArea { border: 1px solid #E0E0E0; border-radius: 5px; "
-            "background-color: #FAFAFA; }"
-        )
+        self.lbl_subtitle = QLabel("Select the sections and data tables to include in your final LCCA PDF report.")
+        self.lbl_subtitle.setFont(_f(FS_BASE, FW_NORMAL))
+        self.lbl_subtitle.setStyleSheet(f"color: {get_token('text_secondary')};")
+        self.lbl_subtitle.setWordWrap(True)
+        main_layout.addWidget(self.lbl_subtitle)
+
+        # Separator-like gap
+        main_layout.addSpacing(8)
+
+        # Tree widget container
+        tree_container = QWidget()
+        tree_container.setObjectName("tree_container")
+        tree_container.setStyleSheet(f"""
+            QWidget#tree_container {{
+                background-color: {get_token("base")};
+                border: 1px solid {get_token("surface_mid")};
+                border-radius: {RADIUS_MD}px;
+            }}
+        """)
+        tree_layout = QVBoxLayout(tree_container)
+        tree_layout.setContentsMargins(0, 0, 0, 0)
 
         # Tree widget
         self.tree_sections = SectionTreeWidget()
-        self.tree_sections.setStyleSheet("""
-            QTreeWidget {
-                font-size: 13px;
-                border: none;
-                background-color: #FAFAFA;
-                color: #333333;
-            }
-            QTreeWidget::item {
-                padding: 4px 0;
-                color: #333333;
-            }
-            QTreeWidget::item:selected {
-                background-color: #E8EFC4;
-                color: #333333;
-            }
-            QHeaderView::section {
-                background-color: #99A924;
-                color: white;
-                font-weight: bold;
-                padding: 6px;
-                border: none;
-            }
-        """)
         self.tree_sections.build_from_sections(SECTION_MAP, SUBSECTION_TABLE_MAP)
         self.tree_sections.selectionChanged.connect(self.on_selection_changed)
+        tree_layout.addWidget(self.tree_sections)
 
-        scroll_area.setWidget(self.tree_sections)
-        main_layout.addWidget(scroll_area)
+        main_layout.addWidget(tree_container, stretch=1)
 
+        # Status and Buttons bottom area
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(0, 8, 0, 0)
+        
         # Status label
         self.lbl_status = QLabel("")
-        self.lbl_status.setObjectName("lbl_status")
-        self.lbl_status.setAlignment(Qt.AlignCenter)
-        self.lbl_status.setStyleSheet("font-size: 12px; color: #555555;")
-        main_layout.addWidget(self.lbl_status)
-        self.on_selection_changed()
+        self.lbl_status.setFont(_f(FS_SM, FW_MEDIUM))
+        self.lbl_status.setStyleSheet(f"color: {get_token('text_secondary')};")
+        bottom_layout.addWidget(self.lbl_status)
+        
+        bottom_layout.addStretch()
 
         # Buttons
-        btn_layout = QHBoxLayout()
-
-        self.btn_save_as = QPushButton("Save PDF As...")
-        self.btn_save_as.setObjectName("btn_save_as")
-        self.btn_save_as.clicked.connect(self.generate_report_with_path)
-        self.btn_save_as.setMinimumHeight(45)
-        self.btn_save_as.setStyleSheet("""
-            QPushButton#btn_save_as {
-                background-color: #99A924;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 5px;
-                padding: 10px 20px;
-            }
-            QPushButton#btn_save_as:hover {
-                background-color: #88951F;
-            }
-            QPushButton#btn_save_as:pressed {
-                background-color: #285A23;
-            }
-            QPushButton#btn_save_as:disabled {
-                background-color: #d0d0d0;
-                color: #888888;
-            }
-        """)
-
         self.btn_cancel = QPushButton("Cancel")
-        self.btn_cancel.setObjectName("btn_cancel")
+        self.btn_cancel.setFixedWidth(110)
+        self.btn_cancel.setMinimumHeight(BTN_LG)
+        self.btn_cancel.setStyleSheet(btn_outline())
         self.btn_cancel.clicked.connect(self.reject)
-        self.btn_cancel.setMinimumHeight(45)
-        self.btn_cancel.setStyleSheet("""
-            QPushButton#btn_cancel {
-                background-color: #d0d0d0;
-                color: #333333;
-                font-size: 14px;
-                border-radius: 5px;
-                padding: 10px 30px;
-            }
-            QPushButton#btn_cancel:hover {
-                background-color: #c0c0c0;
-            }
-            QPushButton#btn_cancel:disabled {
-                background-color: #e0e0e0;
-                color: #aaa;
-            }
-        """)
+        bottom_layout.addWidget(self.btn_cancel)
 
-        btn_layout.addWidget(self.btn_cancel)
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.btn_save_as)
-        btn_layout.addStretch()
+        self.btn_save_as = QPushButton("Generate PDF")
+        self.btn_save_as.setFixedWidth(170)
+        self.btn_save_as.setMinimumHeight(BTN_LG)
+        self.btn_save_as.setStyleSheet(btn_primary())
+        self.btn_save_as.clicked.connect(self.generate_report_with_path)
+        bottom_layout.addWidget(self.btn_save_as)
 
-        main_layout.addLayout(btn_layout)
+        main_layout.addLayout(bottom_layout)
+        
+        self.on_selection_changed()
 
     def on_selection_changed(self):
         """Update status label when tree selection changes."""
         config = self.tree_sections.get_config()
         selected_count = sum(1 for v in config.values() if v)
         total_count = len(config)
-        self.lbl_status.setText(f"{selected_count} of {total_count} tables selected")
+        self.lbl_status.setText(f"{selected_count} of {total_count} sections selected")
 
     def _set_ui_enabled(self, enabled):
         """Enable/disable UI controls during generation."""
@@ -451,7 +515,7 @@ class ReportSectionDialog(QDialog):
         self.btn_cancel.setEnabled(enabled)
         self.tree_sections.setEnabled(enabled)
         if enabled:
-            self.btn_save_as.setText("Save PDF As...")
+            self.btn_save_as.setText("Generate PDF")
         else:
             self.btn_save_as.setText("Generating...")
 
@@ -504,5 +568,3 @@ class ReportSectionDialog(QDialog):
         """Handle PDF generation error."""
         self._set_ui_enabled(True)
         QMessageBox.critical(self, "Error", error_msg)
-
-

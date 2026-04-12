@@ -260,38 +260,38 @@ class MaterialSearchEngine:
                 print(f"  {sheet:<25} {types_str}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  CLI demo  – python search_engine.py
-# ─────────────────────────────────────────────────────────────────────────────
+# # ─────────────────────────────────────────────────────────────────────────────
+# #  CLI demo  – python search_engine.py
+# # ─────────────────────────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
-    engine = MaterialSearchEngine()
-    engine.summary()
+# if __name__ == "__main__":
+#     engine = MaterialSearchEngine()
+#     engine.summary()
 
-    print("\n" + "═" * 64)
-    print("  CATEGORY LISTING – Foundation (all regions)")
-    print("═" * 64)
-    items = engine.list_by_category("Foundation")
-    for it in items:
-        print(f"  [{it['db_key']:12}] {it['type']:15} | "
-              f"{it['name']:<40} {it['unit']:6} ₹{it['rate']}")
+#     print("\n" + "═" * 64)
+#     print("  CATEGORY LISTING – Foundation (all regions)")
+#     print("═" * 64)
+#     items = engine.list_by_category("Foundation")
+#     for it in items:
+#         print(f"  [{it['db_key']:12}] {it['type']:15} | "
+#               f"{it['name']:<40} {it['unit']:6} {it['rate']}")
 
-    print("\n" + "═" * 64)
-    print("  SEARCH – 'steel rebar'")
-    print("═" * 64)
-    results = engine.search("steel rebar")
-    for r in results:
-        print(f"  [{r['db_key']:12}] {r['category']:15} › {r['type']:15} | "
-              f"{r['name']:<35} ₹{r['rate']}")
+#     print("\n" + "═" * 64)
+#     print("  SEARCH – 'steel rebar'")
+#     print("═" * 64)
+#     results = engine.search("steel rebar")
+#     for r in results:
+#         print(f"  [{r['db_key']:12}] {r['category']:15} › {r['type']:15} | "
+#               f"{r['name']:<35} {r['rate']}")
 
-    print("\n" + "═" * 64)
-    print("  SEARCH – 'PVC' in Maharashtra only")
-    print("═" * 64)
-    results = engine.search("PVC", region="Maharashtra")
-    if results:
-        for r in results:
-            print(f"  [{r['db_key']:12}] {r['name']:<40} ₹{r['rate']}")
-    else:
-        print("  No results.")
+#     print("\n" + "═" * 64)
+#     print("  SEARCH – 'PVC' in Maharashtra only")
+#     print("═" * 64)
+#     results = engine.search("PVC", region="Maharashtra")
+#     if results:
+#         for r in results:
+#             print(f"  [{r['db_key']:12}] {r['name']:<40} {r['rate']}")
+#     else:
+#         print("  No results.")
 
 
