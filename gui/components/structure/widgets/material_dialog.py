@@ -235,7 +235,7 @@ class CustomUnitDialog(QDialog):
             "its equivalent in the SI base unit."
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("font-size: 11px; color: #555;")
+        desc.setStyleSheet(f"font-size: 11px; color: {get_token('text_secondary')};")
         layout.addWidget(desc)
 
         # ── Symbol + Name ─────────────────────────────────────────────────────
@@ -276,7 +276,7 @@ class CustomUnitDialog(QDialog):
         conv_row = QHBoxLayout()
         conv_row.setSpacing(8)
         self.conv_prefix_lbl = QLabel("1 unit  =")
-        self.conv_prefix_lbl.setStyleSheet("color: #555; font-size: 12px;")
+        self.conv_prefix_lbl.setStyleSheet(f"color: {get_token('text_secondary')}; font-size: 12px;")
         conv_row.addWidget(self.conv_prefix_lbl)
         self.conv_in = QLineEdit()
         self.conv_in.setMinimumHeight(32)
@@ -284,8 +284,8 @@ class CustomUnitDialog(QDialog):
         conv_row.addWidget(self.conv_in, stretch=1)
         self.si_sym_lbl = QLabel("kg")
         self.si_sym_lbl.setStyleSheet(
-            "background: #f5f5f5; color: #595959; padding: 4px 8px; "
-            "border: 1px solid #ccc; border-radius: 4px; font-size: 12px;"
+            f"background: {get_token('surface')}; color: {get_token('text_secondary')}; padding: 4px 8px; "
+            f"border: 1px solid {get_token('surface_mid')}; border-radius: 4px; font-size: 12px;"
         )
         self.si_sym_lbl.setMinimumHeight(32)
         self.si_sym_lbl.setMinimumWidth(48)
@@ -296,8 +296,8 @@ class CustomUnitDialog(QDialog):
         # ── Live preview ──────────────────────────────────────────────────────
         self.preview_lbl = QLabel("")
         self.preview_lbl.setStyleSheet(
-            "font-size: 12px; color: #1a6b3c; background: #eaf7ef; "
-            "padding: 6px 10px; border-radius: 4px;"
+            f"font-size: 12px; color: {get_token('success')}; background: {get_token('success', 'pressed')}; "
+            f"padding: 6px 10px; border-radius: 4px;"
         )
         self.preview_lbl.setWordWrap(True)
         self.preview_lbl.setVisible(False)
@@ -305,7 +305,7 @@ class CustomUnitDialog(QDialog):
 
         # ── Note ──────────────────────────────────────────────────────────────
         self._note_lbl = QLabel("")
-        self._note_lbl.setStyleSheet("font-size: 10px; color: #888;")
+        self._note_lbl.setStyleSheet(f"font-size: 10px; color: {get_token('text_disabled')};")
         self._note_lbl.setWordWrap(True)
         layout.addWidget(self._note_lbl)
 
@@ -792,6 +792,7 @@ class MaterialDialog(QDialog):
         self._sor_filled_name = None  # name that triggered the last autofill
         self._sor_filling = False
         self._is_modified_by_user = False
+        self._is_customized = False
         self._pre_allow_edit_source = None  # saved when "Allow editing" is checked
         self._sor_carbon_available = True  # False when SOR has no carbon data
         self._db_original = {}  # immutable snapshot of DB values at suggestion time
@@ -812,10 +813,11 @@ class MaterialDialog(QDialog):
 
         v = data.get("values", {}) if self.is_edit else {}
         s = data.get("state", {}) if self.is_edit else {}
-        # Restore the immutable DB snapshot saved when this material was first added
-        self._db_original = (data.get("meta", {}) if data else {}).get(
-            "db_original", {}
-        )
+        # Restore the immutable DB snapshot saved when this material was first added.
+        # "db_original" is the canonical meta key; "db_snapshot" is accepted as a
+        # legacy alias so old project files still load correctly.
+        _meta = data.get("meta", {}) if data else {}
+        self._db_original = _meta.get("db_original") or _meta.get("db_snapshot") or {}
 
         # Migrate any custom units embedded in old project data → global DB
         _migrate_embedded_custom_units(v)
@@ -856,7 +858,7 @@ class MaterialDialog(QDialog):
             )
             sor_val_lbl = QLabel(_sor_val)
             sor_val_lbl.setStyleSheet(
-                "font-size: 11px; color: #555; font-style: italic;"
+                f"font-size: 11px; color: {get_token('text_secondary')}; font-style: italic;"
             )
             sor_info_row.addWidget(sor_val_lbl, stretch=1)
             root.addLayout(sor_info_row)
@@ -868,7 +870,7 @@ class MaterialDialog(QDialog):
             sub_row.setContentsMargins(0, 0, 0, 0)
             sub_row.setSpacing(8)
             sub_lbl = QLabel("Sub-category:")
-            sub_lbl.setStyleSheet("font-size: 11px; color: #555;")
+            sub_lbl.setStyleSheet(f"font-size: 11px; color: {get_token('text_secondary')};")
             sub_row.addWidget(sub_lbl)
             self.type_filter_cb = QComboBox()
             self.type_filter_cb.setMinimumHeight(26)
@@ -1054,7 +1056,7 @@ class MaterialDialog(QDialog):
         cf_input_row = QHBoxLayout()
         cf_input_row.setSpacing(6)
         self.cf_prefix_lbl = QLabel("1 unit =")
-        self.cf_prefix_lbl.setStyleSheet("color: #555; font-size: 12px;")
+        self.cf_prefix_lbl.setStyleSheet(f"color: {get_token('text_secondary')}; font-size: 12px;")
         cf_input_row.addWidget(self.cf_prefix_lbl)
 
         cf_val = v.get("conversion_factor", "")
@@ -1066,11 +1068,11 @@ class MaterialDialog(QDialog):
         cf_input_row.addWidget(self.conv_factor_in)
 
         self.cf_suffix_lbl = QLabel("unit")
-        self.cf_suffix_lbl.setStyleSheet("color: #555; font-size: 12px;")
+        self.cf_suffix_lbl.setStyleSheet(f"color: {get_token('text_secondary')}; font-size: 12px;")
         cf_input_row.addWidget(self.cf_suffix_lbl)
 
         self.cf_status_lbl = QLabel("")
-        self.cf_status_lbl.setStyleSheet("font-size: 11px; color: #888;")
+        self.cf_status_lbl.setStyleSheet(f"font-size: 11px; color: {get_token('text_disabled')};")
         cf_input_row.addWidget(self.cf_status_lbl)
         cf_input_row.addStretch()
         cf_inner.addLayout(cf_input_row)
@@ -1079,7 +1081,7 @@ class MaterialDialog(QDialog):
 
         self.formula_lbl = QLabel("")
         self.formula_lbl.setWordWrap(True)
-        self.formula_lbl.setStyleSheet("font-size: 11px; color: #555;")
+        self.formula_lbl.setStyleSheet(f"font-size: 11px; color: {get_token('text_secondary')};")
         self.formula_lbl.setVisible(False)
         cl.addWidget(self.formula_lbl)
 
@@ -1181,7 +1183,7 @@ class MaterialDialog(QDialog):
         btn_bar = QWidget()
         btn_bar.setObjectName("btn_bar")
         btn_bar.setStyleSheet(
-            f"#btn_bar {{ border-top: 1px solid {get_token('$border', '#dee2e6')}; }}"
+            f"#btn_bar {{ border-top: 1px solid {get_token('surface_mid')}; }}"
         )
         btn_layout = QHBoxLayout(btn_bar)
         btn_layout.setContentsMargins(20, 10, 20, 10)
@@ -1328,7 +1330,7 @@ class MaterialDialog(QDialog):
 
         # ── Re-apply DB lock when editing a previously SOR-filled material ──
         _src = (data.get("meta", {}).get("source", "") if data else "") or (
-            data.get("meta", {}).get("db_original", {}) if data else {}
+            self._db_original  # already decoded above
         ).get("action", "user_added")
         if self.is_edit and _src in (
             "internal_db",
@@ -1376,7 +1378,33 @@ class MaterialDialog(QDialog):
                 )
                 self._active_completer.setCaseSensitivity(Qt.CaseInsensitive)
                 self._active_completer.setMaxVisibleItems(10)
-                
+
+                popup = self._active_completer.popup()
+                popup.setStyleSheet(
+                    f"QListView {{"
+                    f"  background: {get_token('base')};"
+                    f"  border: 1px solid {get_token('surface_mid')};"
+                    f"  border-radius: 8px;"
+                    f"  padding: 4px 0;"
+                    f"  outline: none;"
+                    f"}}"
+                    f"QListView::item {{"
+                    f"  padding: 6px 12px;"
+                    f"  color: {get_token('text')};"
+                    f"  border: none;"
+                    f"  border-radius: 4px;"
+                    f"  margin: 1px 6px;"
+                    f"  min-height: 22px;"
+                    f"}}"
+                    f"QListView::item:hover {{"
+                    f"  background: {get_token('surface')};"
+                    f"}}"
+                    f"QListView::item:selected {{"
+                    f"  background: {get_token('surface_pressed')};"
+                    f"  color: {get_token('text')};"
+                    f"}}"
+                )
+
                 self._active_completer.activated.connect(self._on_suggestion_selected)
                 self.name_in.setCompleter(self._active_completer)
             # Re-filter with current text whenever suggestions are reloaded
@@ -1748,23 +1776,16 @@ class MaterialDialog(QDialog):
             self._sor_filled_name = name
             self._is_customized = False
 
-            # Snapshot original DB values (written once; never overwritten on re-open)
+            # Snapshot original DB values (written once; never overwritten on re-open).
+            # Store the full item so every field is available for modification detection.
             if not self._db_original:
                 _db_key = item.get("db_key", "") or self._sor_db_key
                 _action = (
                     "custom_db" if _db_key.startswith("custom::") else "internal_db"
                 )
                 self._db_original = {
+                    **item,
                     "action": _action,
-                    "unit": item.get("unit", ""),
-                    "rate": item.get("rate", ""),
-                    "rate_src": item.get("rate_src", ""),
-                    "carbon_emission": item.get("carbon_emission", ""),
-                    "carbon_emission_units_den": item.get(
-                        "carbon_emission_units_den", ""
-                    ),
-                    "carbon_emission_src": item.get("carbon_emission_src", ""),
-                    "conversion_factor": item.get("conversion_factor", ""),
                     "db_key": _db_key,
                 }
 
@@ -2145,11 +2166,33 @@ class MaterialDialog(QDialog):
         return "user_added"
 
     def get_values(self) -> dict:
-        """Returns a clean dictionary of material data for the OsBridgeLCCA database."""
+        """Returns a clean dictionary of material data for the OsBridgeLCCA database.
+
+        Private keys (prefixed with _) are consumed by add_material() /
+        open_edit_dialog() in manager.py and are never stored inside item["values"].
+
+        Key contract (must stay in sync with manager.py):
+          _included_in_carbon_emission  → item["state"]
+          _included_in_recyclability    → item["state"]
+          _allow_edit_checked           → item["state"]
+          _from_sor                     → drives source / source_db_key in item["meta"]
+          _sor_db_key                   → same
+          _is_excel_import              → same
+          _is_customized                → metadata flag (popped, not stored)
+          _db_original                  → encoded snapshot → item["meta"]["db_original"]
+        """
         actual_unit = self.unit_in.currentData() or ""
         unit_to_si, _ = self._get_unit_info(actual_unit)
 
+        carbon_on = self.carbon_chk.isChecked()
+        recycle_on = self.recycle_chk.isChecked()
+
+        action = self._compute_action()
+        is_from_sor = action in ("internal_db", "custom_db")
+        is_excel = action == "excel"
+
         return {
+            # ── field values (stored in item["values"]) ───────────────────
             "id": self.id_in.text().strip(),
             "material_name": self.name_in.text().strip(),
             "quantity": float(self.qty_in.text() or 0),
@@ -2157,18 +2200,27 @@ class MaterialDialog(QDialog):
             "unit_to_si": unit_to_si or 1.0,
             "rate": float(self.rate_in.text() or 0),
             "rate_source": self.src_in.text().strip(),
-            "carbon_emission": float(self.carbon_em_in.text() or 0),
+            # Zero-out carbon / recycle fields when the checkbox is off so
+            # downstream code sees a clean 0 rather than a stale DB value.
+            "carbon_emission": float(self.carbon_em_in.text() or 0) if carbon_on else 0.0,
             "carbon_unit": f"kgCO₂e/{self.carbon_denom_cb.currentData() or ''}",
             "conversion_factor": float(self.conv_factor_in.text() or 0),
-            "scrap_rate": float(self.scrap_in.text() or 0),
+            "scrap_rate": float(self.scrap_in.text() or 0) if recycle_on else 0.0,
             "post_demolition_recovery_percentage": float(
                 self.recycling_perc_in.text() or 0
-            ),
+            ) if recycle_on else 0.0,
             "grade": self.grade_in.text().strip(),
             "type": self.type_in.currentText().strip(),
-            "_action": self._compute_action(),
-            "_db_original": self._db_original,
+            # ── private keys consumed by manager (never reach item["values"]) ─
+            "_included_in_carbon_emission": carbon_on,
+            "_included_in_recyclability": recycle_on,
             "_allow_edit_checked": self._allow_edit_chk.isChecked(),
+            "_from_sor": is_from_sor,
+            "_sor_db_key": self._db_original.get("db_key", "") if is_from_sor else "",
+            "_is_excel_import": is_excel,
+            "_is_customized": self._is_customized,
+            # snapshot stored as plain dict in item["meta"]["db_original"]
+            "_db_original": self._db_original,
         }
 
     # ── Window close / Escape ─────────────────────────────────────────────

@@ -528,11 +528,8 @@ def record_to_material_dict(record: dict) -> dict:
         "post_demolition_recovery_percentage": recovery,
         "is_recyclable": has_recycle,
         # ── Metadata Tags ─────────────────────────────────────────────────
-        "_action": "excel",  # Added: Standardizes source tracking
-        "_db_original": build_excel_snapshot(
-            record
-        ),  # Added: For modification detection
-        # ── Existing State flags ──────────────────────────────────────────
+        # ── Private flags consumed by add_material() ──────────────────────
+        "_db_original": build_excel_snapshot(record),
         "_included_in_carbon_emission": has_carbon,
         "_included_in_recyclability": has_recycle,
         "_is_excel_import": True,
@@ -574,7 +571,7 @@ def _validate_for_engine(
 
     CLEANUP (handled by add_material itself):
       add_material pops all private keys: _included_in_carbon_emission,
-      _included_in_recyclability, _db_snapshot, _from_sor,
+      _included_in_recyclability, _db_original, _from_sor,
       _sor_db_key, _is_customized, _is_excel_import.
     """
     reasons: list[str] = []
@@ -1810,7 +1807,6 @@ def _emit_result(
                     # --- Write to engine -------------------------------------
                     if force_overwrite:
                         # Update the existing entry in-place (overwrite)
-                        from .material_dialog import build_excel_snapshot
 
                         included_carbon = values_dict.pop(
                             "_included_in_carbon_emission", True
@@ -1823,7 +1819,7 @@ def _emit_result(
                         for _k in (
                             "_from_sor",
                             "_sor_db_key",
-                            "_db_snapshot",
+                            "_db_original",   # canonical key (was _db_snapshot)
                             "_is_excel_import",
                             "_is_customized",
                             "_allow_edit_checked",

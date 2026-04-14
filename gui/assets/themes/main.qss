@@ -96,6 +96,16 @@ QDoubleSpinBox:disabled {
     border-color: $surface_mid;
 }
 
+QSpinBox[validationState="error"],
+QDoubleSpinBox[validationState="error"] {
+    border: 1px solid $danger;
+}
+
+QSpinBox[validationState="warning"],
+QDoubleSpinBox[validationState="warning"] {
+    border: 1px solid $warning;
+}
+
 QSpinBox::up-button,
 QSpinBox::down-button,
 QDoubleSpinBox::up-button,
@@ -142,7 +152,9 @@ TableDoubleSpinBox {
 }
 
 TableSpinBox[frozen="true"],
-TableDoubleSpinBox[frozen="true"] {
+TableDoubleSpinBox[frozen="true"],
+TableSpinBox[isZero="true"],
+TableDoubleSpinBox[isZero="true"] {
     color: $text_disabled;
 }
 
@@ -241,12 +253,12 @@ QComboBox:disabled {
     border-color: $surface_mid;
 }
 
-QComboBox[validationState="#dc3545"] {
-    border: 1px solid #dc3545;
+QComboBox[validationState="error"] {
+    border: 1px solid $danger;
 }
 
-QComboBox[validationState="orange"] {
-    border: 1px solid orange;
+QComboBox[validationState="warning"] {
+    border: 1px solid $warning;
 }
 
 /* Dropdown button */
@@ -478,6 +490,14 @@ QTableView {
     border-radius: 8px;
 }
 
+QTableView[validationState="error"] {
+    border: 1px solid $danger;
+}
+
+QTableView[validationState="warning"] {
+    border: 1px solid $warning;
+}
+
 QTableView::item {
     padding: 8px 12px;
     border: none;
@@ -518,7 +538,6 @@ QHeaderView::section {
     padding: 8px 12px;
     font-weight: $weight-semibold;
     font-size: 11px;
-    text-transform: uppercase;
 }
 
 QHeaderView::section:last {

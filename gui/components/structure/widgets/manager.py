@@ -163,13 +163,13 @@ class StructureManagerWidget(QWidget):
         from_sor = values_dict.pop("_from_sor", False)
         sor_db_key = values_dict.pop("_sor_db_key", "")
         is_excel = values_dict.pop("_is_excel_import", False)
-        db_snapshot = values_dict.pop("_db_snapshot", {})
         values_dict.pop("_is_customized", None)
+        db_original = values_dict.pop("_db_original", {})
         # `id` may come from an Excel CID#ID column - store it as a reference, not a value field
         _excel_ref_id = values_dict.pop("id", None)
-        if _excel_ref_id and "sor_ref_id" not in db_snapshot:
-            db_snapshot = dict(db_snapshot)
-            db_snapshot["sor_ref_id"] = str(_excel_ref_id)
+        if _excel_ref_id and "sor_ref_id" not in db_original:
+            db_original = dict(db_original)
+            db_original["sor_ref_id"] = str(_excel_ref_id)
 
         # Compute source + source_db_key
         if is_excel:
@@ -192,7 +192,7 @@ class StructureManagerWidget(QWidget):
                 "modified_on": now,
                 "source": source,
                 "source_db_key": source_db_key,
-                "db_snapshot": db_snapshot,
+                "db_original": db_original,
             },
             "state": {
                 "in_trash": is_trash,
@@ -295,15 +295,17 @@ class StructureManagerWidget(QWidget):
                     new_values.pop("_sor_db_key", None)
                     new_values.pop("_is_customized", None)
                     new_values.pop("_is_excel_import", None)
-                    new_db_snapshot = new_values.pop("_db_snapshot", None)
+                    # _db_original is the encoded snapshot from get_values()
+                    new_db_original = new_values.pop("_db_original", None)
 
                     item_to_edit["values"] = new_values
-                    item_to_edit["meta"][
-                        "modified_on"
-                    ] = datetime.datetime.now().isoformat()
-                    # Always overwrite snapshot - dialog rebuilds it fresh on each suggestion
-                    if new_db_snapshot is not None:
-                        item_to_edit["meta"]["db_snapshot"] = new_db_snapshot
+                    now = datetime.datetime.now().isoformat()
+                    item_to_edit["meta"]["modified_on"] = now
+                    # Always overwrite snapshot — dialog rebuilds it fresh on each suggestion.
+                    # Keep the existing encoded value when nothing changed (empty string
+                    # means no DB source was involved this edit).
+                    if new_db_original is not None:
+                        item_to_edit["meta"]["db_original"] = new_db_original
                     item_to_edit["state"][
                         "included_in_carbon_emission"
                     ] = included_carbon

@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtCore import Qt, QSize
-from gui.themes import get_token
+from gui.themes import get_token, theme_manager
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section, ValidationStatus
@@ -384,6 +384,12 @@ class _VehicleTrafficTable(TooltipTableMixin, QTableWidget):
 
         self.updateGeometry()
 
+    def set_validation_state(self, state: str):
+        self.setProperty("validationState", state)
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
     def sizeHint(self):
         header_h = self.horizontalHeader().height() or 35
         rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
@@ -553,9 +559,11 @@ class TrafficData(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name=CHUNK)
         self._suppress_lane_signal = False
+        self._last_validate_result: dict | None = None  # stored for theme re-render
         # Load WPI manager - DB profiles loaded once at startup
         self._wpi_manager = WPIManager(_WPI_DB_PATH)
         self._build_ui()
+        theme_manager().theme_changed.connect(self._refresh_styles)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -761,6 +769,19 @@ class TrafficData(ScrollableForm):
         self._val_result_label.setVisible(False)
         self._val_result_label.setContentsMargins(0, 4, 0, 4)
         main_form.addRow(self._val_result_label)
+
+    # ── Theme refresh ─────────────────────────────────────────────────────────
+
+    def _refresh_styles(self):
+        """Reapply all token-based styles. Called on every theme change."""
+        self._wpi_warning.setStyleSheet(f"color: {get_token('danger')};")
+        if self._val_result_label.isVisible():
+            self._on_validate_clicked()
+        
+        # Ensure form labels and other elements repaint with the new palette
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
 
     # ── Slot handlers ─────────────────────────────────────────────────────────
 
@@ -1091,16 +1112,21 @@ class TrafficData(ScrollableForm):
             if hasattr(self, "alternate_road_carriageway"):
                 if self.alternate_road_carriageway.currentText() == _NONE_LANE:
                     errors.append("Alternate Road Carriageway must be selected")
-                    self.alternate_road_carriageway.setProperty("validationState", get_token("danger"))
-                    self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
-                    self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
+                    self.alternate_road_carriageway.setProperty("validationState", "error")
                 else:
                     self.alternate_road_carriageway.setProperty("validationState", "")
-                    self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
-                    self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
+                
+                self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
+                self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
+
                 if hasattr(self, "carriage_width_in_m") and self.carriage_width_in_m.value() == 0.0:
                     errors.append("Carriageway Width cannot be 0")
-                    self.carriage_width_in_m.setStyleSheet(f"border: 1px solid {get_token("danger")};")
+                    self.carriage_width_in_m.setProperty("validationState", "error")
+                else:
+                    self.carriage_width_in_m.setProperty("validationState", "")
+                
+                self.carriage_width_in_m.style().unpolish(self.carriage_width_in_m)
+                self.carriage_width_in_m.style().polish(self.carriage_width_in_m)
 
             vehicle_data = self._vehicle_table.collect_to_dict()
             total_vpd = sum(v["vehicles_per_day"] for v in vehicle_data.values())
@@ -1110,6 +1136,7 @@ class TrafficData(ScrollableForm):
                 warnings.append(
                     "No vehicle traffic data - all vehicles per day are 0"
                 )
+                self._vehicle_table.set_validation_state("")
             else:
                 # Per-vehicle accident % must sum to 100 (±0.1)
                 total_acc = sum(v["accident_percentage"] for v in vehicle_data.values())
@@ -1117,6 +1144,9 @@ class TrafficData(ScrollableForm):
                     errors.append(
                         f"Vehicle accident percentages must sum to 100% - currently {total_acc:.1f}%"
                     )
+                    self._vehicle_table.set_validation_state("error")
+                else:
+                    self._vehicle_table.set_validation_state("")
 
                 # Accident severity distribution must sum to 100%
                 total_sev = (
@@ -1141,7 +1171,12 @@ class TrafficData(ScrollableForm):
                 # Hourly capacity must be > 0
                 if hasattr(self, "hourly_capacity") and self.hourly_capacity.value() == 0:
                     errors.append("Hourly Capacity cannot be 0")
-                    self.hourly_capacity.setStyleSheet(f"border: 1px solid {get_token("danger")};")
+                    self.hourly_capacity.setProperty("validationState", "error")
+                else:
+                    self.hourly_capacity.setProperty("validationState", "")
+                
+                self.hourly_capacity.style().unpolish(self.hourly_capacity)
+                self.hourly_capacity.style().polish(self.hourly_capacity)
 
                 # Peak hour validation
                 n_peak = self.num_peak_hours.value() if hasattr(self, "num_peak_hours") else 0
@@ -1170,7 +1205,12 @@ class TrafficData(ScrollableForm):
                 warnings.append(
                     "Road User Cost per Day is 0 - road user cost will not be included"
                 )
-                self.road_user_cost_per_day.setStyleSheet(f"border: 1px solid {get_token('warning')};")
+                self.road_user_cost_per_day.setProperty("validationState", "warning")
+            else:
+                self.road_user_cost_per_day.setProperty("validationState", "")
+            
+            self.road_user_cost_per_day.style().unpolish(self.road_user_cost_per_day)
+            self.road_user_cost_per_day.style().polish(self.road_user_cost_per_day)
 
         return {"errors": errors, "warnings": warnings}
 

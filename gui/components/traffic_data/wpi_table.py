@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from PySide6.QtCore import Qt, QSize, Signal, QEvent
-from PySide6.QtGui import QFont, QPalette
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QCheckBox,
     QHeaderView,
@@ -39,6 +39,7 @@ _VEHICLES = [
     ("mcv", "MCV"),
 ]
 from ..utils.wpi_manager import WPIManager, WPIProfile, empty_data
+from gui.themes import theme_manager, get_token
 
 # ── Column definitions ────────────────────────────────────────────────────────
 
@@ -127,6 +128,7 @@ class _WPITable(QTableWidget):
         for sb in self._spinboxes.values():
             self._apply_spinbox_opacity(sb, False)
         self.updateGeometry()
+        theme_manager().theme_changed.connect(self._refresh_styles)
 
     # ── Setup ─────────────────────────────────────────────────────────────────
 
@@ -284,6 +286,13 @@ class _WPITable(QTableWidget):
             return True
         return super().viewportEvent(event)
 
+    # ── Theme refresh ─────────────────────────────────────────────────────────
+
+    def _refresh_styles(self):
+        """Re-bake spinbox opacity colors using the current palette/theme."""
+        for sb in self._spinboxes.values():
+            self._apply_spinbox_opacity(sb, not sb.isReadOnly())
+
     # ── Mode ──────────────────────────────────────────────────────────────────
 
     def freeze(self, frozen: bool = True):
@@ -344,19 +353,15 @@ class _WPITable(QTableWidget):
 
     def _apply_spinbox_opacity(self, sb: QDoubleSpinBox, active: bool):
         """
-        Set spinbox text colour by deriving it from the current palette's
-        WindowText role and applying alpha - works in both light and dark mode.
+        Set spinbox text colour using theme tokens.
         active=True  → full opacity (palette default)
-        active=False → 40% opacity (dimmed, read-only)
+        active=False → text_disabled token (read-only)
         """
         if active:
             sb.setStyleSheet("")
         else:
-            base = sb.palette().color(QPalette.WindowText)
-            base.setAlpha(102)  # ~40% of 255
-            r, g, b, a = base.red(), base.green(), base.blue(), base.alpha()
             sb.setStyleSheet(
-                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: rgba({r},{g},{b},{a}); }}"
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: {get_token('text_disabled')}; }}"
             )
 
     def _apply_common_style(self, col: int, is_common: bool):

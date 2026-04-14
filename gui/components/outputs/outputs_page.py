@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QObject, QThread, QTimer, Signal
 
-from gui.themes import get_token
+from gui.themes import get_token, theme_manager
 from gui.styles import (
     font as _f,
     btn_primary,
@@ -113,7 +113,9 @@ def _make_issue_card(page_name: str, issues: list, icon: str, navigate_cb) -> QG
 
     layout.addWidget(h_row)
 
-    for msg in issues:
+    for issue in issues:
+        msg = issue if isinstance(issue, str) else issue.get("msg", str(issue))
+        
         issue_row = QHBoxLayout()
         issue_row.setSpacing(SP2)
 
@@ -214,14 +216,18 @@ class OutputsPage(ScrollableForm):
         )
         self._elapsed_secs = 0  # seconds since calculation started
         self._currency = "INR"  # default project currency
+        # State tracking for theme-change re-render
+        self._current_status = "idle"   # idle | calculating | issues | success | calc_error | calc_success
+        self._status_args: dict = {}    # args needed to re-render current status
         self._build_ui()
+        theme_manager().theme_changed.connect(self._refresh_styles)
 
     def _build_ui(self):
         f = self.form
-        header = QLabel("Outputs")
-        header.setFont(_f(FS_XL, FW_BOLD))
-        header.setStyleSheet(f"color: {get_token('primary')}; margin-bottom: {SP2}px;")
-        f.addRow(header)
+        self._header = QLabel("Outputs")
+        self._header.setFont(_f(FS_XL, FW_BOLD))
+        self._header.setStyleSheet(f"color: {get_token('primary')}; margin-bottom: {SP2}px;")
+        f.addRow(self._header)
 
         # ── Analysis Period ───────────────────────────────────────────────
         self.required_keys = build_form(self, OUTPUTS_FIELDS, None)
@@ -250,6 +256,30 @@ class OutputsPage(ScrollableForm):
 
         self._show_idle()
 
+    # ── Theme refresh ─────────────────────────────────────────────────────────
+
+    def _refresh_styles(self):
+        """Reapply all token-based styles. Called on every theme change."""
+        # Persistent widgets
+        self._header.setStyleSheet(f"color: {get_token('primary')}; margin-bottom: {SP2}px;")
+        self.btn_calculate.setStyleSheet(btn_primary())
+
+        # Re-render the status area using the saved state + args.
+        # Skip "calculating" — the calculation is in flight; it will finish and
+        # call its own _show_* which will pick up fresh tokens at that point.
+        status = self._current_status
+        args = self._status_args
+        if status == "idle":
+            self._show_idle()
+        elif status == "issues":
+            self.show_results(args["errors"], args["warnings"])
+        elif status == "success":
+            self.show_success()
+        elif status == "calc_error":
+            self._show_calculation_error(args["error"], args.get("tb", ""))
+        elif status == "calc_success" and hasattr(self, "_last_results"):
+            self._show_calculation_success(self._last_results)
+
     # ── Status area ───────────────────────────────────────────────────────────
 
     def _clear_status(self):
@@ -261,6 +291,8 @@ class OutputsPage(ScrollableForm):
                 w.setParent(None)
 
     def _show_idle(self):
+        self._current_status = "idle"
+        self._status_args = {}
         self._clear_status()
         note = QLabel("Press Validate to check all pages for consistency before calculation.")
         note.setFont(_f(FS_BASE))
@@ -272,12 +304,14 @@ class OutputsPage(ScrollableForm):
 
     def _show_calculating(self):
         """Show an animated progress bar, elapsed-time counter, and disable the button."""
+        self._current_status = "calculating"
+        self._status_args = {}
         self._clear_status()
         self.btn_calculate.setEnabled(False)
 
         # ── Container ──────────────────────────────────────────────────────
         container = QWidget()
-        container.setStyleSheet(f"background: transparent; border-radius: {RADIUS_MD}px; border: 1px solid {get_token('surface_mid')};")
+        container.setStyleSheet("background: transparent;")
         v = QVBoxLayout(container)
         v.setContentsMargins(SP4, SP4, SP4, SP4)
         v.setSpacing(SP2)
@@ -405,6 +439,8 @@ class OutputsPage(ScrollableForm):
 
     def show_results(self, all_errors: dict, all_warnings: dict):
         """Show errors and warnings together. Proceed button only when no errors."""
+        self._current_status = "issues"
+        self._status_args = {"errors": all_errors, "warnings": all_warnings}
         self._clear_status()
 
         if all_errors:
@@ -470,6 +506,8 @@ class OutputsPage(ScrollableForm):
         self._save_state("issues", {"errors": all_errors, "warnings": all_warnings})
 
     def show_success(self):
+        self._current_status = "success"
+        self._status_args = {}
         self._clear_status()
         banner = QGroupBox()
         banner.setStyleSheet(
@@ -604,6 +642,8 @@ class OutputsPage(ScrollableForm):
         self._show_calculation_error(exc, tb)
 
     def _show_calculation_error(self, error: Exception, tb: str = ""):
+        self._current_status = "calc_error"
+        self._status_args = {"error": error, "tb": tb}
         self.btn_calculate.setEnabled(True)
         self._clear_status()
         banner = QGroupBox()
@@ -678,6 +718,8 @@ class OutputsPage(ScrollableForm):
         self._status_layout.addStretch()
 
     def _show_calculation_success(self, results):
+        self._current_status = "calc_success"
+        self._status_args = {}   # results already in self._last_results
         self.btn_calculate.setEnabled(True)
         self._last_results = results
         self._clear_status()

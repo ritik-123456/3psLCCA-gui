@@ -901,7 +901,7 @@ class MaterialEmissions(QWidget):
             )
         elif result["total_carbon"] == 0.0:
             warnings.append(
-                f"Total material carbon is 0 kgCO₂e - "
+                f"Total material carbon is 0 kgCO\u2082e - "
                 f"{result['included_count']} of {result['total_count']} items are included."
             )
 

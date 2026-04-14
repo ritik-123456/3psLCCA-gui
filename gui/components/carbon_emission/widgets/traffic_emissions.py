@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QBrush, QColor, QPen
+from PySide6.QtGui import QBrush, QColor
 from gui.themes import get_token, theme_manager
 
 from ...base_widget import ScrollableForm
@@ -22,6 +22,7 @@ from ...utils.display_format import fmt, DECIMAL_PLACES
 from ...utils.table_widgets import TableDoubleSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
 
 from ...utils.validation_helpers import confirm_clear_all
+from PySide6.QtWidgets import QStyledItemDelegate
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -73,9 +74,19 @@ _COL_VEH_DAY = 1
 _COL_FACTOR = 2
 _COL_EMISSIONS = 3
 
-_YELLOW_BG = QColor(255, 255, 180)
-_YELLOW_FG = QColor(100, 80, 0)
+_ROW_ZERO_ROLE = Qt.UserRole + 1
 
+class _EmissionsRowDelegate(QStyledItemDelegate):
+    """Paints a full-cell background if the item has the zero-row role set."""
+    def paint(self, painter, option, index):
+        is_zero = index.data(_ROW_ZERO_ROLE)
+        if is_zero:
+            painter.save()
+            bg = QColor(get_token("cell-warn-bg"))
+            if bg.isValid():
+                painter.fillRect(option.rect, bg)
+            painter.restore()
+        super().paint(painter, option, index)
 
 class _EmissionsTable(TooltipTableMixin, QTableWidget):
     def __init__(self, on_change, on_total_changed=None, parent=None):
@@ -87,6 +98,8 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
         self._vpd_items: dict[str, QTableWidgetItem] = {}
         self._emission_items: dict[str, QTableWidgetItem] = {}
 
+        self._zero_state: dict[str, bool] = {}
+        self.setItemDelegate(_EmissionsRowDelegate(self))
         theme_manager().theme_changed.connect(self._refresh_theme)
 
         _L = Qt.AlignLeft  | Qt.AlignVCenter
@@ -137,7 +150,9 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
             self._emission_items[key] = em_item
 
     def _refresh_theme(self):
-        """Force repaint of cell widgets and update dynamic property styles."""
+        """Re-apply zero-state colors with fresh tokens, repaint cell widgets."""
+        for row, (key, _) in enumerate(_VEHICLES):
+            self._set_row_zero_state(row, key, self._zero_state.get(key, False))
         for sb in self._factors.values():
             sb.style().unpolish(sb)
             sb.style().polish(sb)
@@ -219,18 +234,17 @@ class _EmissionsTable(TooltipTableMixin, QTableWidget):
             sb.setEnabled(not frozen)
 
     def _set_row_zero_state(self, row: int, key: str, is_zero: bool):
-        for col in range(self.columnCount()):
-            item = self.item(row, col)
-            if item:
-                # Use dynamic property for row highlighting
-                item.setData(Qt.UserRole + 1, is_zero)
-        
-        sb = self._factors[key]
-        # Use dynamic property so QSS handles the theme-aware colors
-        sb.setProperty("invalid", is_zero)
-        sb.style().unpolish(sb)
-        sb.style().polish(sb)
-        sb.update()
+        self._zero_state[key] = is_zero
+
+        item = self._vpd_items[key]
+        item.setData(_ROW_ZERO_ROLE, is_zero)
+        item.setForeground(
+            QBrush(QColor(get_token("warning"))) if is_zero else QBrush()
+        )
+
+        # Ensure other cells in row don't have warning background if they share role
+        # but in this case _vpd_items[key] is a specific QTableWidgetItem.
+        # So we are already targeting just one cell.
 
 
 # ── Main Widget ───────────────────────────────────────────────────────────────
@@ -286,7 +300,7 @@ class TrafficEmissions(ScrollableForm):
 
         # Warning label
         self._warning_label = QLabel()
-        self._warning_label.setStyleSheet("color: red;")
+        self._warning_label.setStyleSheet(f"color: {get_token('danger')};")
         self._warning_label.setVisible(False)
         self._warning_label.setWordWrap(True)
         main_form.addRow(self._warning_label)

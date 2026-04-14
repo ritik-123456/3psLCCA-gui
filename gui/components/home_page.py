@@ -19,6 +19,7 @@ from gui.version import VERSION
 from PySide6.QtCore import Qt, QSize, QPoint, QPointF, QRect, QRectF, QTimer, Signal
 from PySide6.QtGui import QFont, QColor, QPainter, QBrush, QPen, QPalette, QPolygonF, QPixmap
 from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -698,6 +699,11 @@ class _EmptyState(QWidget):
     ):
         super().__init__(parent)
         self._manager = manager
+        self._logo_widget = None  # QSvgWidget — swapped on theme change
+        self._icon_lbl = None
+        self._sub_lbl = None
+        self._cta = None
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(SP10, SP10, SP10, SP10)
         layout.setSpacing(SP4)
@@ -706,65 +712,69 @@ class _EmptyState(QWidget):
         layout.addStretch()
 
         if not heading:
-            # Show Brand Logo instead of icon/heading
+            # Brand logo — _refresh() swaps the SVG file when dark/light flips
             from gui.themes import is_dark
             logo_file = "logo-3psLCCA-dark.svg" if is_dark() else "logo-3psLCCA-light.svg"
             path = os.path.join("gui", "assets", "logo", logo_file)
-            
-            logo_lbl = QLabel()
-            logo_lbl.setAlignment(Qt.AlignCenter)
-            logo_lbl.setStyleSheet("background: transparent; border: none;")
-            
+
             if os.path.exists(path):
                 renderer = QSvgRenderer(path)
                 if renderer.isValid():
                     h = 160
                     aspect = renderer.defaultSize().width() / max(1, renderer.defaultSize().height())
                     w = int(h * aspect)
-                    pixmap = QPixmap(w * 2, h * 2) # High DPI
-                    pixmap.fill(Qt.GlobalColor.transparent)
-                    painter = QPainter(pixmap)
-                    renderer.render(painter)
-                    painter.end()
-                    logo_lbl.setPixmap(pixmap)
-                    logo_lbl.setFixedSize(w, h)
-                    logo_lbl.setScaledContents(True)
-            layout.addWidget(logo_lbl, 0, Qt.AlignCenter)
-            layout.addSpacing(SP4)
+                    self._logo_widget = QSvgWidget(path)
+                    self._logo_widget.setFixedSize(w, h)
+                    self._logo_widget.setStyleSheet("background: transparent; border: none;")
+                    layout.addWidget(self._logo_widget, 0, Qt.AlignCenter)
+                    layout.addSpacing(SP4)
         else:
-            # Icon (folder glyph via unicode, drawn large)
-            icon_lbl = QLabel("🗂")
-            icon_lbl.setFont(_f(FS_DISP + 10, FW_NORMAL))
-            icon_lbl.setAlignment(Qt.AlignCenter)
-            icon_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
-            layout.addWidget(icon_lbl)
+            self._icon_lbl = QLabel("🗂")
+            self._icon_lbl.setFont(_f(FS_DISP + 10, FW_NORMAL))
+            self._icon_lbl.setAlignment(Qt.AlignCenter)
+            layout.addWidget(self._icon_lbl)
 
-            # Heading
             head_lbl = QLabel(heading)
             head_lbl.setFont(_f(FS_LG, FW_SEMIBOLD))
             head_lbl.setAlignment(Qt.AlignCenter)
             layout.addWidget(head_lbl)
 
-        # Subtext
-        sub_lbl = QLabel(subtext)
-        sub_lbl.setFont(_f(FS_BASE))
-        sub_lbl.setAlignment(Qt.AlignCenter)
-        sub_lbl.setStyleSheet(f"color: {get_token('text_disabled')};")
-        layout.addWidget(sub_lbl)
+        self._sub_lbl = QLabel(subtext)
+        self._sub_lbl.setFont(_f(FS_BASE))
+        self._sub_lbl.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self._sub_lbl)
 
-        # CTA button
         if show_cta and manager:
             layout.addSpacing(SP2)
-            cta = QPushButton("+ New Project")
-            cta.setFixedHeight(BTN_MD)
-            cta.setFixedWidth(180)
-            cta.setFont(_f(FS_BASE, FW_MEDIUM))
-            cta.setStyleSheet(btn_primary())
-            cta.setCursor(Qt.PointingHandCursor)
-            cta.clicked.connect(lambda: manager.open_project(is_new=True))
-            layout.addWidget(cta, 0, Qt.AlignCenter)
-        
+            self._cta = QPushButton("+ New Project")
+            self._cta.setFixedHeight(BTN_MD)
+            self._cta.setFixedWidth(180)
+            self._cta.setFont(_f(FS_BASE, FW_MEDIUM))
+            self._cta.setCursor(Qt.PointingHandCursor)
+            self._cta.clicked.connect(lambda: manager.open_project(is_new=True))
+            layout.addWidget(self._cta, 0, Qt.AlignCenter)
+
         layout.addStretch()
+
+        self._refresh()
+        theme_manager().theme_changed.connect(self._refresh)
+
+    def _refresh(self):
+        """Reapply all token-based styles. Called on init and on every theme change."""
+        from gui.themes import is_dark
+        disabled = get_token("text_disabled")
+
+        if self._icon_lbl is not None:
+            self._icon_lbl.setStyleSheet(f"color: {disabled};")
+        if self._sub_lbl is not None:
+            self._sub_lbl.setStyleSheet(f"color: {disabled};")
+        if self._cta is not None:
+            self._cta.setStyleSheet(btn_primary())
+        if self._logo_widget is not None:
+            logo_file = "logo-3psLCCA-dark.svg" if is_dark() else "logo-3psLCCA-light.svg"
+            path = os.path.join("gui", "assets", "logo", logo_file)
+            if os.path.exists(path):
+                self._logo_widget.load(path)
 
 
 # ── Home page ─────────────────────────────────────────────────────────────────

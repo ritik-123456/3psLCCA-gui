@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from gui.themes import get_token
+from gui.themes import get_token, theme_manager
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import (
@@ -44,11 +44,12 @@ from ..utils.wpi_manager import (
 
 
 # ── Integrity badge ───────────────────────────────────────────────────────────
+# Store token keys, not resolved colors — colors are fetched live in _update_badge
 
 _BADGE = {
-    IntegrityState.OK:       ("✅", get_token("success"), "Integrity verified"),
-    IntegrityState.MISMATCH: ("⚠",  get_token("danger"), "Hash mismatch - data may be tampered"),
-    IntegrityState.MISSING:  ("❓", get_token("warning"), "No hash - unverified profile"),
+    IntegrityState.OK:       ("✅", "success", "Integrity verified"),
+    IntegrityState.MISMATCH: ("⚠",  "danger",  "Hash mismatch - data may be tampered"),
+    IntegrityState.MISSING:  ("❓", "warning", "No hash - unverified profile"),
 }
 
 
@@ -207,6 +208,7 @@ class _WPISelector(QWidget):
         self._build_ui()
         self._populate_combo()
         self._select_first()
+        theme_manager().theme_changed.connect(self._refresh_styles)
 
     # ── UI construction ───────────────────────────────────────────────────────
 
@@ -323,10 +325,10 @@ class _WPISelector(QWidget):
     # ── Badge + button state ──────────────────────────────────────────────────
 
     def _update_badge(self, profile: WPIProfile):
-        icon, color, tip = _BADGE[profile.integrity]
+        icon, token_key, tip = _BADGE[profile.integrity]
         self._badge.setText(icon)
         self._badge.setToolTip(f"{tip}\n({'DB' if not profile.is_custom else 'Custom'})")
-        self._badge.setStyleSheet(f"color: {color}; font-size: 14px;")
+        self._badge.setStyleSheet(f"color: {get_token(token_key)}; font-size: 14px;")
 
     def _update_buttons(self, profile: WPIProfile):
         # Save As - always available (copies current into new custom)
@@ -545,6 +547,12 @@ class _WPISelector(QWidget):
             "Imported",
             f"'{name}' imported as a custom profile.",
         )
+
+    # ── Theme refresh ─────────────────────────────────────────────────────────
+
+    def _refresh_styles(self):
+        if self._current:
+            self._update_badge(self._current)
 
     # ── Public API ────────────────────────────────────────────────────────────
 

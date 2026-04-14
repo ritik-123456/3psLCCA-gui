@@ -45,7 +45,7 @@ def font(size: int, weight: int = FW_NORMAL, italic: bool = False) -> QFont:
 def btn_primary(radius: int = RADIUS_MD) -> str:
     """Filled PRIMARY button - main CTA."""
     return (
-        f"QPushButton {{ background: {get_token('primary')}; color: {get_token('text-on-primary')}; border: none;"
+        f"QPushButton {{ background: {get_token('primary')}; color: {get_token('base')}; border: none;"
         f"  border-radius: {radius}px; padding: 0 16px; font-weight: {get_token('weight-semibold')}; }}"
         f"QPushButton:hover   {{ background: {get_token('primary', 'hover')}; }}"
         f"QPushButton:pressed {{ background: {get_token('primary', 'pressed')}; }}"
@@ -67,8 +67,8 @@ def btn_outline_primary(radius: int = RADIUS_MD) -> str:
     return (
         f"QPushButton {{ border: 1px solid {get_token('primary')}; color: {get_token('primary')};"
         f"  border-radius: {radius}px; padding: 0 20px; background: transparent; }}"
-        f"QPushButton:hover   {{ background: {get_token('primary')}; color: {get_token('text-on-primary')}; }}"
-        f"QPushButton:pressed {{ background: {get_token('primary', 'pressed')}; color: {get_token('text-on-primary')};"
+        f"QPushButton:hover   {{ background: {get_token('primary')}; color: {get_token('base')}; }}"
+        f"QPushButton:pressed {{ background: {get_token('primary', 'pressed')}; color: {get_token('base')};"
         f"  border-color: {get_token('primary', 'pressed')}; }}"
     )
 
