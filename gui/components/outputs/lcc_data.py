@@ -5,7 +5,7 @@ Pure data-preparation helpers for LCC chart and tables.
 No Qt or matplotlib imports - safe to use from any context.
 """
 
-from .Pie import COLORS
+from .plots_helper.Pie import COLORS
 
 
 # ---------------------------------------------------------------------------

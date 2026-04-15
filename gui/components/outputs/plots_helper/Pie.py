@@ -1,5 +1,5 @@
 """
-gui/components/outputs/Pie.py
+gui/components/outputs/plots_helper/Pie.py
 
 Interactive nested pie chart - LCC cost distribution by stage (inner ring)
 and pillar (outer ring).  Embeds as a Qt widget via LCCPieWidget(results).
@@ -56,7 +56,7 @@ matplotlib.rcParams["font.family"] = FONT_FAMILY
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-# ── Centralized Color System ───────────────────────────────────── 
+# ── Centralized Color System ─────────────────────────────────────
 # changes made here for cetralized color management across the app.
 COLORS = {
     "stages": {
@@ -92,30 +92,6 @@ COLORS = {
 
 _NEG_COLOR = "#333333"  # negative offset overlay color
 _PILLARS = list(COLORS["pillars"].keys())
-
-# _PILLARS = ["Economic", "Environmental", "Social"]
-
-# _PANEL_COLORS = {
-#     "view": "#DBEAFE",          # match Economic (light blue)
-#     "stages": "#82E0AA",        # match Use stage color
-#     "pillars": "#FEF3C7",       # match Social (light yellow)
-#     "button": "#F5B041",        # match Reconstruction / accent
-# }
-
-# _STAGE_COLORS = {
-#     "Initial": "#F9C74F",
-#     "Use": "#82E0AA",
-#     "Reconstruction": "#F5B041",
-#     "End-of-Life": "#E59866",
-# }
-
-# _PILLAR_COLORS = {
-#     "Economic": "#DBEAFE",
-#     "Environmental": "#DCFCE7",
-#     "Social": "#FEF3C7",
-# }
-
-# _NEG_COLOR = "#333333"
 
 
 # ── Accessors for centralized color system ───────────────────────
@@ -322,7 +298,6 @@ def _build_pie_figure(data: dict, currency: str = "INR"):
     state = {
         "view": "Combined",
         "active_stages": set(stages_list),
-        # "active_pillars": set(_PILLARS),
         "active_pillars": set(get_pillars()),
         "show_negative": False,
     }
@@ -356,7 +331,6 @@ def _build_pie_figure(data: dict, currency: str = "INR"):
             if s not in state["active_stages"]:
                 continue
             stage_net = 0.0
-            # for p in _PILLARS:
             for p in get_pillars():
                 if p not in state["active_pillars"]:
                     continue
@@ -369,7 +343,6 @@ def _build_pie_figure(data: dict, currency: str = "INR"):
 
                 if state["view"] != "Only Internal" and display_val > 0:
                     outer_vals.append(display_val)
-                    # outer_cols.append(_PILLAR_COLORS[p])
                     outer_cols.append(get_pillar_color(p))
                     active_outer.append((s, p, actual_net))
                     if state["show_negative"] and neg > 0:
@@ -377,8 +350,6 @@ def _build_pie_figure(data: dict, currency: str = "INR"):
 
             if stage_net != 0 and state["view"] != "Only External":
                 inner_vals.append(stage_net)
-                # inner_cols.append(_STAGE_COLORS.get(s, "#AAAAAA"))
-                # inner_cols.append(COLORS["stages"].get(s, "#AAAAAA"))
                 inner_cols.append(get_stage_color(s))
                 active_inner.append((s, stage_net))
 
@@ -492,16 +463,10 @@ def _build_pie_figure(data: dict, currency: str = "INR"):
 
     radio_view = RadioButtons(ax_view, ["Combined", "Only Internal", "Only External"])
     check_stage = CheckButtons(ax_stage, stages_list, [True] * len(stages_list))
-    # check_pillar = CheckButtons(ax_pillar, _PILLARS, [True] * len(_PILLARS))
     pillars = get_pillars()
     check_pillar = CheckButtons(ax_pillar, pillars, [True] * len(pillars))
     btn_neg = Button(ax_neg, "Show Negative Offset")
 
-    # ── Apply panel colors ─────────────────────────────
-    # ax_view.set_facecolor(_PANEL_COLORS["view"])
-    # ax_stage.set_facecolor(_PANEL_COLORS["stages"])
-    # ax_pillar.set_facecolor(_PANEL_COLORS["pillars"])
-    # ax_neg.set_facecolor(_PANEL_COLORS["button"])
     ax_view.set_facecolor(COLORS["ui"]["view"])
     ax_stage.set_facecolor(COLORS["stages"]["Use"])
     ax_pillar.set_facecolor(COLORS["pillars"]["Environmental"])

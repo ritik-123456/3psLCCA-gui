@@ -49,7 +49,7 @@ from gui.components.utils.validation_helpers import (
 from three_ps_lcca_core.core.main import run_full_lcc_analysis
 
 from .lcc_plot import LCCBreakdownTable, LCCChartWidget, LCCDetailsTable
-from .Pie import LCCPieWidget
+from .plots_helper.Pie import LCCPieWidget
 from .data_preparer import DataPreparer
 from .report_section_dialog import ReportSectionDialog
 

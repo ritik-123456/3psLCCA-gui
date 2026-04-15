@@ -5,7 +5,7 @@ Creates an interactive matplotlib chart from LCC analysis results.
 Use LCCChartWidget(results) to get a QWidget ready to embed in Qt.
 """
 
-from .Pie import COLORS
+from .plots_helper.Pie import COLORS
 from .lcc_data import (
     M, sci_label, _get,
     build_chart_data,
@@ -13,11 +13,10 @@ from .lcc_data import (
     BREAKDOWN_STAGES,
     CATEGORY_COLORS,
 )
+from .plots_helper.bar_chart import create_bar_chart
 
-import numpy as np
 import matplotlib
 matplotlib.use("QtAgg")
-import matplotlib.pyplot as plt
 
 from PySide6.QtCore import QEvent, QObject, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QFont
@@ -32,100 +31,6 @@ try:
 except ImportError:
     from matplotlib.backends.backend_qt import FigureCanvasQTAgg, NavigationToolbar2QT
 
-
-def _create_figure(values, labels, stage_info, text_color, bg_color, currency: str = "INR"):
-    """Build and return (fig, bars) from pre-computed chart data."""
-    _N = len(labels)
-    x = np.arange(_N)
-
-    fig_width = max(14, _N * 0.65)
-    fig, ax = plt.subplots(figsize=(fig_width, 6))
-    fig.patch.set_facecolor(bg_color)
-    ax.set_facecolor(bg_color)
-    ax.tick_params(colors=text_color)
-    ax.yaxis.label.set_color(text_color)
-    for spine in ax.spines.values():
-        spine.set_edgecolor(text_color)
-
-    # Stage panels
-    for stage in stage_info:
-        ax.axvspan(stage["start"] - 0.5, stage["end"] + 0.5,
-                   color=stage["color"], alpha=0.9)
-
-    # Bars
-    bar_colors = ["#8b1a1a" if v >= 0 else "#2e7d32" for v in values]
-    bars = ax.bar(x, values, 0.50, color=bar_colors)
-
-    # Stage dividers and titles
-    for stage in stage_info[1:]:
-        ax.axvline(stage["start"] - 0.5, color="black", linewidth=1.5)
-    ax.axhline(0, color="black", linewidth=0.8)
-
-    for stage in stage_info:
-        center = (stage["start"] + stage["end"]) / 2
-        ax.text(center, 1.02, stage["title"],
-                transform=ax.get_xaxis_transform(),
-                ha="center", va="bottom", fontsize=8, fontweight="bold",
-                color=text_color)
-
-    # Y limits and bar value labels
-    max_val = float(max(values))
-    min_val = float(min(values))
-    
-    # We want enough space for the vertical labels above/below bars.
-    # Calculate a generous range with at least 30% padding.
-    v_range = max_val - min_val
-    if v_range == 0:
-        v_range = abs(max_val) if max_val != 0 else 1.0
-    
-    padding = v_range * 0.35
-    ylim_top = max_val + padding
-    ylim_bot = min_val - padding
-    
-    # Ensure minimum visibility even if all values are zero or positive
-    if ylim_top < 1.0: ylim_top = 1.0
-    if ylim_bot > -1.0: ylim_bot = -1.0
-    
-    ax.set_ylim(ylim_bot, ylim_top)
-
-    # Label offset
-    offset = v_range * 0.02
-
-    for bar, val in zip(bars, values):
-        lbl = sci_label(val) if 0 < abs(val) < 0.1 else f"{val:.2f}"
-        if abs(val) < 1e-9: lbl = "0"
-        
-        y_pos = val + offset if val >= 0 else val - offset
-        ax.text(
-            bar.get_x() + bar.get_width() / 2, y_pos, lbl,
-            ha="center", va="bottom" if val >= 0 else "top",
-            rotation=90, fontsize=7, color=bar.get_facecolor(),
-            fontweight="bold"
-        )
-
-    # Axes styling
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.set_xticks(x)
-
-    # Wrap labels for x-axis (two lines)
-    wrapped = [lbl.replace(" (", "\n(") if len(lbl) > 22 else lbl for lbl in labels]
-    ax.set_xticklabels(wrapped, rotation=90, fontsize=6, color=text_color)
-    ax.set_ylabel(f"Cost (Million {currency})", fontsize=8, color=text_color)
-    ax.tick_params(axis='y', labelsize=7, colors=text_color)
-    ax.tick_params(axis='x', colors=text_color)
-    # Only one axhline(0) is needed, and we already drew one in black earlier.
-    # However, let's make sure it stands out.
-    ax.grid(axis="y", linestyle="--", alpha=0.35)
-    ax.set_xlim(-0.5, _N - 0.5)
-
-    tick_color_map = {i: s["tick_color"] for s in stage_info for i in range(s["start"], s["end"] + 1)}
-    for i, lbl in enumerate(ax.get_xticklabels()):
-        lbl.set_color(tick_color_map.get(i, text_color))
-
-    plt.tight_layout()
-    plt.subplots_adjust(bottom=0.40, top=0.88)
-    return fig, bars
 
 
 class LCCDetailsTable(QWidget):
@@ -589,7 +494,7 @@ class LCCChartWidget(QWidget):
         bg_color   = "#FFFFFF"
 
         self._values, self._labels, stage_info = build_chart_data(results)
-        fig, self._bars = _create_figure(
+        fig, self._bars = create_bar_chart(
             self._values, self._labels, stage_info, text_color, bg_color, currency=currency
         )
 
@@ -673,5 +578,5 @@ def create_lcc_figure(results: dict):
     text_color = palette.windowText().color().name()
     bg_color   = palette.window().color().name()
     values, labels, stage_info = build_chart_data(results)
-    fig, _ = _create_figure(values, labels, stage_info, text_color, bg_color)
+    fig, _ = create_bar_chart(values, labels, stage_info, text_color, bg_color)
     return fig
