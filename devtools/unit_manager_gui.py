@@ -681,7 +681,7 @@ class CustomUnitsTab(QWidget):
 
     def _load_db(self):
         try:
-            from gui.components.structure.registry.custom_material_db import CustomMaterialDB
+            from three_ps_lcca_gui.gui.components.structure.registry.custom_material_db import CustomMaterialDB
             return CustomMaterialDB()
         except Exception as e:
             print(f"[UnitManager] Could not load CustomMaterialDB: {e}")
