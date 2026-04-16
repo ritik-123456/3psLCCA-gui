@@ -18,6 +18,8 @@ build:
   number: 0
   noarch: python
   script:  "{{ PYTHON }} -m pip install --no-deps --force-reinstall . -vv"
+  entry_points:
+    - threePSLCCA = three_ps_lcca_gui.gui.main:main
 
 channel:
   - conda-forge
@@ -46,7 +48,7 @@ requirements:
     - PyYAML
     - pylatex
     - three-ps-lcca-core
-    - osdag_latex_env
+    - osdag::osdag_latex_env
 
 about:
   summary: >-

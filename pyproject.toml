@@ -11,6 +11,14 @@ include-package-data = true
 [tool.setuptools.package-data]
 three_ps_lcca_gui = [
     "gui/components/utils/units.json",
+    "gui/assets/*",
+    "data/wpi_db.json",
+    "gui/components/structure/registry/material_catalog.json",
+    "gui/components/structure/registry/material_database/*",
+    "gui/components/utils/doc_handler/assets/*",
+    "gui/components/utils/doc_handler/site/*",
+    "gui/themes/*"
+
 ]
 
 [tool.setuptools.packages.find]
