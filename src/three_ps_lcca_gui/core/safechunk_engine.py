@@ -1111,6 +1111,7 @@ class SafeChunkEngine:
                             "notes": notes,
                             "timestamp": timestamp,
                             "project_id": self.project_id,
+                            "display_name": self.display_name,
                             "engine_ver": self.VERSION,
                             "app_ver": self.app_version,
                             "readable": self.readable,

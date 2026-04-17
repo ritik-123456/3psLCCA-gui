@@ -1473,13 +1473,37 @@ class HomePage(QWidget):
             return
         try:
             with zipfile.ZipFile(path, "r") as zf:
-                meta = json.loads(
-                    zf.read("checkpoint_meta.json").decode("utf-8"))
-                display_name = meta.get("display_name", "Imported Project")
+                # 1. Try to find the original display name
+                original_name = "Imported Project"
+
+                # Check version.json (best source for existing archives)
+                if "version.json" in zf.namelist():
+                    try:
+                        ver_data = json.loads(
+                            zf.read("version.json").decode("utf-8"))
+                        if ver_data.get("display_name"):
+                            original_name = ver_data["display_name"]
+                    except:
+                        pass
+
+                # Fallback to checkpoint_meta.json
+                if original_name == "Imported Project":
+                    try:
+                        meta = json.loads(
+                            zf.read("checkpoint_meta.json").decode("utf-8"))
+                        original_name = meta.get(
+                            "display_name", meta.get("project_id", original_name))
+                    except:
+                        pass
+
+                # 2. Prepare new identity
+                final_display_name = f"{original_name} (imported)"
                 project_id = re.sub(
-                    r"[^\w\-]", "_", display_name)[:40].strip("_")
+                    r"[^\w\-]", "_", final_display_name)[:40].strip("_")
+
+                # 3. Create and restore
                 engine, status = SafeChunkEngine.new(
-                    project_id=project_id, display_name=display_name)
+                    project_id=project_id, display_name=final_display_name)
                 if engine:
                     shutil.copy2(path, engine.checkpoint_manual /
                                  os.path.basename(path))
